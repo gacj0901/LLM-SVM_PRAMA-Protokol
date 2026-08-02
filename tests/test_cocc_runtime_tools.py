@@ -1,7 +1,10 @@
 import json
 
-from scripts._cocc_verify_worker import evaluate
+import pytest
+
+from scripts._cocc_verify_worker import evaluate, exception_result
 from scripts.calibrate_cocc_projector import build
+from scripts.cocc_external_verifier import audit_worker_exception
 from scripts.normalize_cocc_break_chain import natural_task_prompt, split_for
 from scripts.project_cocc_prama import normalized_surprisal
 
@@ -89,6 +92,36 @@ def test_worker_distinguishes_correct_and_incorrect_functional_code():
     )
     assert correct["passed"] is True
     assert incorrect["passed"] is False
+
+
+def test_missing_callable_requires_attribute_error_and_exact_message():
+    result = exception_result(AttributeError("callable 'add' not found"), 2)
+    audited = audit_worker_exception(result)
+    assert audited["failure_kind"] == "missing_callable"
+    assert audited["exception_type"] == "AttributeError"
+    assert audited["exception_audit"]["missing_callable_message_match"] is True
+
+
+def test_internal_attribute_error_is_not_missing_callable():
+    result = exception_result(
+        AttributeError("'dict' object has no attribute 'value'"), 2
+    )
+    audited = audit_worker_exception(result)
+    assert audited["failure_kind"] == "AttributeError"
+    assert audited["exception_audit"]["missing_callable_message_match"] is False
+
+
+def test_parent_rejects_forged_missing_callable_label():
+    with pytest.raises(ValueError, match="disagrees with exception message"):
+        audit_worker_exception(
+            {
+                "passed": False,
+                "status": "failed",
+                "failure_kind": "missing_callable",
+                "exception_type": "AttributeError",
+                "exception_message": "'dict' object has no attribute 'value'",
+            }
+        )
 
 
 def test_frozen_surprisal_normalization_is_bounded():

@@ -15,6 +15,33 @@ from typing import Any
 import zlib
 
 FENCE = re.compile(r"```(?:python|py)?\s*(.*?)```", re.IGNORECASE | re.DOTALL)
+MISSING_CALLABLE_MESSAGE = re.compile(
+    r"^callable '[A-Za-z_][A-Za-z0-9_]*' not found$"
+)
+
+
+def audit_worker_exception(result: dict[str, Any]) -> dict[str, Any]:
+    """Fail closed when worker exception class and message do not support its label."""
+    exception_type = result.get("exception_type")
+    exception_message = result.get("exception_message")
+    failure_kind = result.get("failure_kind")
+    if exception_type is None and exception_message is None:
+        if failure_kind == "missing_callable":
+            raise ValueError("missing_callable lacks exception audit evidence")
+        return result
+    if not isinstance(exception_type, str) or not isinstance(exception_message, str):
+        raise ValueError("worker exception audit requires string type and message")
+    message_matches = bool(MISSING_CALLABLE_MESSAGE.fullmatch(exception_message))
+    supported = exception_type == "AttributeError" and message_matches
+    if (failure_kind == "missing_callable") != supported:
+        raise ValueError(
+            "worker missing_callable classification disagrees with exception message"
+        )
+    result["exception_audit"] = {
+        "class_and_message_consistent": True,
+        "missing_callable_message_match": message_matches,
+    }
+    return result
 
 
 def load_dataset(path: Path) -> dict[str, dict[str, Any]]:
@@ -102,7 +129,7 @@ def verify(
             "tests_passed": 0,
             "tests_total": len(tests),
         }
-    result = json.loads(completed.stdout)
+    result = audit_worker_exception(json.loads(completed.stdout))
     result["scope"] = "public_and_private_tests"
     result["tests_total"] = len(tests)
     result["verifier_is_external_to_model"] = True

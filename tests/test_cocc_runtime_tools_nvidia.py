@@ -160,7 +160,10 @@ def test_nvidia_backend_uses_explicit_key_endpoint_and_logprobs(monkeypatch):
     assert captured["request"]["logprobs"] is True
     assert captured["request"]["top_logprobs"] == 5
     assert captured["request"]["extra_body"] == {
-        "chat_template_kwargs": {"enable_thinking": False}
+        "chat_template_kwargs": {
+            "enable_thinking": False,
+            "force_nonempty_content": True,
+        }
     }
     assert resolved == NVIDIA_MODEL
     assert turn["token_count"] == 1

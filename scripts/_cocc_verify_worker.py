@@ -9,6 +9,7 @@ import contextlib
 import io
 import json
 import math
+import re
 import sys
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -37,6 +38,28 @@ FORBIDDEN_CALLS = {
     "open",
     "quit",
 }
+MISSING_CALLABLE_MESSAGE = re.compile(
+    r"^callable '[A-Za-z_][A-Za-z0-9_]*' not found$"
+)
+
+
+def exception_result(exc: BaseException, tests_total: int) -> dict[str, Any]:
+    """Return an auditable failure without conflating AttributeError causes."""
+    exception_type = type(exc).__name__
+    exception_message = str(exc)[:1000]
+    missing_callable = bool(
+        exception_type == "AttributeError"
+        and MISSING_CALLABLE_MESSAGE.fullmatch(exception_message)
+    )
+    return {
+        "passed": False,
+        "status": "failed",
+        "tests_passed": 0,
+        "tests_total": int(tests_total),
+        "failure_kind": "missing_callable" if missing_callable else exception_type,
+        "exception_type": exception_type,
+        "exception_message": exception_message,
+    }
 
 
 def safety_gate(source: str) -> None:
@@ -180,13 +203,7 @@ def main() -> int:
     try:
         result = evaluate(json.load(sys.stdin))
     except BaseException as exc:
-        result = {
-            "passed": False,
-            "status": "failed",
-            "tests_passed": 0,
-            "tests_total": 0,
-            "failure_kind": type(exc).__name__,
-        }
+        result = exception_result(exc, 0)
     sys.stdout.write(json.dumps(result, separators=(",", ":")))
     return 0
 

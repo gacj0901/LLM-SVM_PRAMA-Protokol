@@ -151,6 +151,8 @@ def main() -> int:
             "session_id": row["session_id"], "finish_reason": row["finish_reason"],
             "token_count": row["token_count"], "outcome": outcome,
             "failure_kind": result.get("failure_kind"),
+            "exception_type": result.get("exception_type"),
+            "exception_message": result.get("exception_message"),
             "tests_passed": result.get("tests_passed"), "tests_total": result.get("tests_total"),
             "projection_sha256": row["projection_sha256"],
             "verification_sha256": file_sha256(cache_path),
