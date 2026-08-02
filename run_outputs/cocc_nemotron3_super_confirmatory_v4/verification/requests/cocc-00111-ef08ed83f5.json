@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00111-ef08ed83f5",
+  "problem_id": "3184",
+  "item_id": "3184:clean_control",
+  "verifier_ref": "cocc:3184:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to find the maximum sum of a balanced subsequence.\n\nProblem: given array nums[0..n-1]. A subsequence with indices i0 < i1 < ... < ik-1 is balanced if for each j≥1:\n\nnums[i_j] - nums[i_{j-1}] >= i_j - i_{j-1}. Equivalent to: nums[i_j] - i_j >= nums[i_{j-1}] - i_{j-1}.\n\nLet's verify: rearrange inequality:\n\nnums[i_j] - nums[i_{j-1}] >= i_j - i_{j-1}\n=> nums[i_j] - i_j >= nums[i_{j-1}] - i_{j-1}.\n\nThus condition is: The transformed values a_i = nums[i] - i must be non-decreasing along the subsequence.\n\nBecause we need a_i >= previous a_{prev}.\n\nThus we need to select a subsequence where a_i is non-decreasing (i.e., a_{i_j} >= a_{i_{j-1}}), maximizing sum of nums[i_j] (original values). Equivalent to: maximize sum of nums[i] subject to the sequence of a_i being non-decreasing.\n\nThis is reminiscent of weighted longest non-decreasing subsequence (LNDS) where weight is nums[i] (can be negative), we need max sum subsequence where a_i is non-decreasing. This is like DP: dp[i] = maximum sum of a balanced subsequence ending at index i (including i). Then dp[i] = nums[i] + max{ dp[j] | j < i and a_j <= a_i } (or dp[i] can be just nums[i] if none). Answer = max_i dp[i].\n\nWe need O(n log n) solution for n up to 1e5. So we need to maintain a data structure that can query maximum dp for all a_j <= current a_i. Since a_i can be any integer (range -1e9 - index ~ -1e9 to maybe +1e9+1e5). So we need coordinate compression of a_i values. Use Fenwick tree (BIT) or segment tree for max.\n\nImplementation steps:\n\n- Compute a_i = nums[i] - i for each i.\n\n- Collect all distinct a_i, sort, assign index (1-based) for BIT.\n\n- BIT for max prefix query: update position p with value dp[i]; query max over [",
+  "event_token": 512,
+  "event_turn": 0
+}

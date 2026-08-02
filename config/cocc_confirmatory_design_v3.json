@@ -1,0 +1,155 @@
+{
+  "schema": "LLM-SVM-CoCC-confirmatory-design/3",
+  "design_id": "cocc-prama-confirmatory-v3-cluster-aware-20260731",
+  "primary_score": "max_negative_balance",
+  "p_threshold": 0.01,
+  "min_test_fail": 20,
+  "min_test_pass": 20,
+  "min_test_problem_clusters": 120,
+  "min_problem_clusters_with_fail": 20,
+  "min_problem_clusters_with_pass": 20,
+  "independent_unit": {
+    "unit": "problem_id",
+    "cluster_id_field": "problem_id",
+    "within_cluster_condition_field": "perturbation_type",
+    "expected_sessions_per_cluster": 2,
+    "required_conditions": [
+      "clean_control",
+      "negation_objective"
+    ],
+    "interpretation": "problem_id is the independent sampling and inferential unit; the two condition sessions are correlated repeated observations within problem."
+  },
+  "cluster_inference": {
+    "method": "problem_cluster_outcome_vector_permutation",
+    "statistic": "AUROC of max_negative_balance with FAIL=1",
+    "exchangeability": "Reassign complete ordered (clean_control, negation_objective) outcome vectors among problem_id clusters; never permute sessions independently.",
+    "monte_carlo": {
+      "seed": 2026073101,
+      "draws": 100000,
+      "rng_algorithm": "python_3_12_random_mt19937_shuffle",
+      "plus_one_correction": true,
+      "exact_fallback_max_assignments": 100000,
+      "exact_fallback": "Enumerate unique cluster outcome-profile assignments when their multinomial count is at most exact_fallback_max_assignments.",
+      "invalid_cluster_fallback": "fail_closed_without_session_level_fallback"
+    }
+  },
+  "incremental_auc_test": {
+    "statistic": "AUROC_PRAMA_minus_AUROC_delta",
+    "prama_score": "max_negative_balance",
+    "baseline_score": "max_delta",
+    "null_hypothesis": "AUROC_PRAMA - AUROC_delta <= 0",
+    "alternative_hypothesis": "AUROC_PRAMA - AUROC_delta > 0",
+    "method": "paired_problem_cluster_bootstrap_centered_one_sided",
+    "alpha": 0.01,
+    "minimum_effect_of_interest": 0.05,
+    "minimum_effect_interpretation": "A gain smaller than 0.05 AUROC is not considered scientifically material even if statistically significant.",
+    "decision_rule": "Require observed difference >= 0.05, centered one-sided cluster-bootstrap p < 0.01, and the one-sided 99% percentile lower confidence bound > 0.",
+    "monte_carlo": {
+      "seed": 2026073102,
+      "draws": 100000,
+      "rng_algorithm": "python_3_12_random_mt19937_randrange",
+      "plus_one_correction": true,
+      "maximum_attempts": 1000000,
+      "invalid_draw_fallback": "discard_and_redraw_until_maximum_attempts_then_fail_closed"
+    }
+  },
+  "sampling_plan": {
+    "source_root": "C:\\Users\\THINKPAD\\Desktop\\Aptadynamik Cybernetics\\btc_cocc\\Chain-of-Code-Collapse_fresh",
+    "source_file": "modified_problems_negation_objective.pkl",
+    "source_file_sha256": "0e0ab6d641eb07fc030683e99637eb5818aa841a600ff6dcb9d6051143193d8b",
+    "normalized_dataset": "data/cocc_clean_negation_confirmatory_v2.jsonl",
+    "normalized_dataset_sha256": "f22083c38c8399cbbfeb72c98276568f277081bcec38b44b18d971ac617b3433",
+    "normalized_manifest": "data/cocc_clean_negation_confirmatory_v2.manifest.json",
+    "normalized_manifest_sha256": "7705de444e286632aff293e1e31cff095b084968245dd7d0e207d821536d58da",
+    "id_hash_basis": "SHA-256 of the canonical JSON array of sorted deterministic session IDs",
+    "train_ids_sha256": "98e283dfbb5b2cb44b23ce2dc9a744eb7a15841817e068d2eb96625e9cd9336d",
+    "test_ids_sha256": "93de901b947fdac7f461b6faa7f55d26bad61f02d25b3c692281a73dd070c3df",
+    "normalization_seed": 1337,
+    "calibration_fraction": 0.25,
+    "calibration_clean_control_sessions": 20,
+    "holdout_problem_groups": 120,
+    "holdout_sessions": 240,
+    "holdout_sessions_by_condition": {
+      "clean_control": 120,
+      "negation_objective": 120
+    },
+    "model": "hermes3:8b",
+    "model_version": {
+      "ollama_model_list_id": "4f6b83f30b62",
+      "model_blob_sha256": "c8985d236593f7a17da2a3da49588aa951a9b1e57ce97753364fbf59e63af84a",
+      "ollama_version": "0.32.5"
+    },
+    "observation_interface_version": {
+      "projector_request_schema": "LLM-SVM-CoCC-projector-request/1",
+      "runner_sha256": "3a5fe418fe10faab02acc84b98d0ab7056100e47d4cd16c83da549119d8d3cb4",
+      "model_payload_sha256": "fb54ebeb74383e39c99b75a641cb34dd06feaa661092c48b2c8ca66b9d40b853",
+      "numeric_projection_only": true
+    },
+    "prama_kernel_version": {
+      "declaration_file_sha256": "10cf1f43f02f08353582a8f52d2cdd919c35fce69f64d35a1df6dc974cb4b523",
+      "package_version": "0.3.0",
+      "source_tree_sha256": "61e1063de0b5b032cd6af09eeb3b6906614f6331954697c605603afa18f641fc",
+      "recertification_sha256": "5403e4584083a5cdc59e168d66cc036870c42b93e1c4e7d99075ab8dd9756e81"
+    },
+    "parameter_set": {
+      "generation": {
+        "max_tokens": 512,
+        "temperature": 0.2,
+        "top_p": 0.95,
+        "top_logprobs": 5,
+        "seed": 1337
+      },
+      "kernel": {
+        "theta_scale": 0.2,
+        "tau": 16.0,
+        "h": 1.0,
+        "g_smooth": 8,
+        "delta_ref": 1.0,
+        "kappa_v3": 0.001,
+        "lambda_0": 1.0,
+        "lambda_min": 0.1,
+        "lambda_max": 1.0
+      }
+    },
+    "selection_blind_to_holdout_outcomes": true,
+    "stopping_rule": "Acquire and verify every frozen holdout session. No outcome-dependent early stopping, replacement, or enrichment."
+  },
+  "mandatory_coordinate_comparison": [
+    "max_delta",
+    "max_xi",
+    "max_negative_balance"
+  ],
+  "temporal_censoring": {
+    "absolute_window_horizons": [
+      1,
+      2,
+      4,
+      8,
+      16
+    ],
+    "relative_prefix_fractions": [
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "short_session_policy": "at_risk_only"
+  },
+  "activation_tolerance": 1e-12,
+  "exact_permutation_max_assignments": 100000,
+  "analysis_order": [
+    "Verify frozen dataset and design hashes",
+    "Acquire all frozen sessions",
+    "Verify final answers externally",
+    "Verify exactly 120 independent problem_id clusters with the frozen two-condition structure",
+    "Audit whether xi crossed theta and whether accumulated_excess or capacity activated",
+    "Check the frozen session-level and problem-cluster class quotas",
+    "Run the cluster-aware primary permutation test",
+    "Run the preregistered paired cluster-bootstrap test of AUROC_PRAMA - AUROC_delta",
+    "Report mandatory delta vs xi vs balance comparison",
+    "Report absolute-horizon temporal censoring and relative-prefix sensitivity"
+  ],
+  "holdout_validity_rule": "The untouched test partition must contain all 120 frozen problem_id clusters, each with clean_control and negation_objective, at least 20 externally verified FAIL sessions, at least 20 PASS sessions, at least 20 problem clusters containing a FAIL, and at least 20 problem clusters containing a PASS. Otherwise the result is inconclusive_insufficient_class_support.",
+  "confirmatory_rule": "Require cluster-aware max_negative_balance association p < 0.01; observed AUROC_PRAMA - AUROC_delta >= 0.05; paired problem-cluster bootstrap p < 0.01 and one-sided 99% lower bound > 0; and max_negative_balance AUROC strictly greater than every other frozen instantaneous/logprob baseline.",
+  "kernel_change_policy": "Do not modify theta, tau, accumulated-excess, capacity, normalization, or any PRAMA kernel parameter until the activation audit establishes whether accumulated_excess or capacity were reached under the frozen kernel."
+}

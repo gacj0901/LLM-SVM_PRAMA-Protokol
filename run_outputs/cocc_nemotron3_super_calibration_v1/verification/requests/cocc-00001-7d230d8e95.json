@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00001-7d230d8e95",
+  "problem_id": "2757",
+  "item_id": "2757:clean_control",
+  "verifier_ref": "cocc:2757:clean_control",
+  "expected_answer": "",
+  "observed_answer": "To solve this problem, we need to count the number of integers between two given numeric strings `num1` and `num2` (inclusive) such that the sum of their digits lies within a specified range `[min_sum, max_sum]`. Given the constraints where `num1` and `num2` can be as large as \\(10^{22}\\), a brute-force approach is infeasible. Instead, we use digit dynamic programming (digit DP) to efficiently compute the result.\n\n### Approach\n1. **Problem Analysis**: The problem requires counting integers in a range where the digit sum of each integer falls within `[min_sum, max_sum]`. The challenge lies in efficiently processing very large numbers (up to 22 digits) without iterating through each number in the range.\n2. **Digit Dynamic Programming (Digit DP)**: This technique involves processing each digit of the number from left to right while keeping track of:\n   - **Position (pos)**: Current digit being processed.\n   - **Tight Constraint (tight)**: Whether the digits processed so far match the prefix of the upper bound number (to ensure the number does not exceed the upper bound).\n   - **Current Digit Sum (sum_so_far)**: The sum of digits processed up to the current position.\n3. **Helper Function**: We define a helper function `count_up_to(n)` that calculates the count of valid numbers from 0 to `n` (inclusive). The result for the range `[num1, num2]` is then derived as `count_up_to(num2) - count_up_to(num1 - 1)`.\n4. **Handling Large Numbers**: Since `num1` and `num2` can be very large (up to 22 digits), we handle subtraction (`num1 - 1`) as a string operation to avoid overflow and ensure correctness.\n5. **Modulo Operation**: The result is returned modulo \\(10^9 + 7\\) to handle large numbers as specified.\n\n### Solution Code\n```python\nmod = 10**9 + 7\n\nclass Solution:\n    def count(self, num1: str, num2: str, min_sum: int, max_sum: int) -> int:\n        def subtract_one(s):\n            s_list = list(s)\n            i = len(s_list) - 1\n            while i >= 0 and s_list[i] == '0':\n                s_list[i] = '9'\n                i -= 1",
+  "event_token": 512,
+  "event_turn": 0
+}

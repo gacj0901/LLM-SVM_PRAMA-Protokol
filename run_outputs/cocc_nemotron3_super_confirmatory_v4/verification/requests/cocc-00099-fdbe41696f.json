@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00099-fdbe41696f",
+  "problem_id": "3104",
+  "item_id": "3104:clean_control",
+  "verifier_ref": "cocc:3104:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to find number of subsets of indices S such that for all i:\n\n- If i ∈ S (selected): |S| > nums[i]\n- If i ∉ S (not selected): |S| < nums[i]\n\nLet k = |S| (size of selected group). Conditions become:\n\nFor each i:\n- If i selected: k > nums[i]\n- If i not selected: k < nums[i]\n\nThus for a given k (0 ≤ k ≤ n), we want to count number of subsets of size k such that:\n\n- Every selected student has nums[i] < k\n- Every non-selected student has nums[i] > k\n\nLet’s define:\n- Let L = number of students with nums[i] < k\n- Let G = number of students with nums[i] > k\n- Let E = number of students with nums[i] == k\n\nObservation:\n- Any student with nums[i] < k can only be selected (because if not selected, we would need k < nums[i] which is false as nums[i] < k).\n- Any student with nums[i] > k can only be not selected (because if selected, we would need k > nums[i] which is false as nums[i] > k).\n- Students with nums[i] == k: \n  - If selected: need k > nums[i] → k > k → false → cannot be selected.\n  - If not selected: need k < nums[i] → k < k → false → cannot be not selected.\n  → So students with nums[i] == k cannot be in any valid subset for this k.\n\nThus, for a given k to be feasible:\n- All students with nums[i] == k must be excluded from consideration → they must not exist (E must be 0), otherwise no valid subset of size k.\n- We must select exactly k students from the L students with nums[i] < k (since those are the only ones allowed to be selected).\n- The remaining n - L - E = G students (nums[i] > k) must be not selected.\n\nTherefore, for a given k, the number of valid subsets is:\n- C(L, k) if E == 0 and L ≥ k (since we need to choose k from L)\n- Otherwise 0.\n\nWe need to sum over all k from 0 to n.\n\nImplementation steps:\n1. Sort nums.\n2. Precompute prefix counts or use binary search to compute L = number",
+  "event_token": 512,
+  "event_turn": 0
+}

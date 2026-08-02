@@ -1,0 +1,56 @@
+{
+  "schema": "LLM-SVM-structural-coherence-contract/9",
+  "status": "EXPLORATORY_OFFLINE_REPROJECTION",
+  "observer_id": "sequor_structural_coherence_v9_layered_transport_mobility",
+  "base_observer": "sequor_structural_coherence_v6_ridge_transport",
+  "model_specific_parameters": false,
+  "requires_external_calibration": false,
+  "contains_outcome_labels": false,
+  "contains_prompt_or_answer": false,
+  "numeric_channels_unchanged_from_v6": true,
+  "state_machine": {
+    "transport_statuses": ["UNRESOLVED", "INACTIVE", "COHERENT", "PROVISIONAL", "DISRUPTED"],
+    "mobility_regimes": ["VIABLE", "STAGNANT", "RECURRENT", "CRYSTALLIZING", "CRYSTALLIZED"],
+    "summary_classes": ["VIABLE", "STAGNANT", "RECURRENT", "CRYSTALLIZING", "CRYSTALLIZED", "TRANSPORT_DISRUPTED", "TRANSPORT_UNRESOLVED"],
+    "tau_windows": 16,
+    "minimum_activity_path_length": 0.5,
+    "minimum_recurrence_persistence": 0.3,
+    "minimum_transport_coherence": 0.5,
+    "minimum_variation_contraction": 0.25,
+    "hysteresis_grace_tau": 0.25,
+    "hysteresis_grace_windows": 4,
+    "layer_rule": "mobility regimes are assigned only under COHERENT or provisionally inherited transport; DISRUPTED and UNRESOLVED transport have no mobility regime",
+    "diagnostic_partition": "every observed local transport discontinuity is exactly one of HYSTERESIS_INHERITANCE or TRANSPORT_DISRUPTION",
+    "alert_stabilization": "alert endpoints begin one tau after the first active window with estimable transport coherence"
+  },
+  "session_evaluation": {
+    "minimum_transport_evaluable_windows": 8,
+    "short_trajectory_status": "SESSION_NOT_EVALUABLE_SHORT_TRAJECTORY"
+  },
+  "fixed_causal_horizons_windows": [16, 32, 64, 128],
+  "horizon_rules": {
+    "H16": "DESCRIPTIVE_WARMUP_ONLY",
+    "minimum_inferential_horizon": 32,
+    "aggregate_only_structurally_evaluable_sessions": true
+  },
+  "alert_endpoints": [
+    "post_stabilization_transport_disrupted_fraction",
+    "post_stabilization_transport_deficit_area",
+    "post_stabilization_mean_transport_deficit",
+    "maximum_transport_disrupted_dwell",
+    "observed_transport_recovery_rate_excluding_right_censoring",
+    "right_censored_transport_disruption_episodes",
+    "terminal_transport_disrupted_dwell"
+  ],
+  "kernel_boundary": {
+    "delta_xi_accumulated_excess_capacity_unchanged": true,
+    "latency_used_as_observable": false,
+    "diagnostic_only": true
+  },
+  "claim_boundary": [
+    "V9 is fully offline and calls no model.",
+    "UNRESOLVED transport is not interpreted as disruption.",
+    "First-disruption onset is diagnostic only and excluded from alert endpoints.",
+    "External completion is joined only after blind projection."
+  ]
+}

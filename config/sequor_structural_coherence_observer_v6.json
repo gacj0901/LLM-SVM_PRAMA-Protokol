@@ -1,0 +1,77 @@
+{
+  "schema": "LLM-SVM-structural-coherence-contract/6",
+  "status": "PROSPECTIVE_CANDIDATE",
+  "observer_id": "sequor_structural_coherence_v6_ridge_transport",
+  "model_specific_parameters": false,
+  "requires_external_calibration": false,
+  "contains_outcome_labels": false,
+  "contains_prompt_or_answer": false,
+  "channels": {
+    "movement": {
+      "definition": "trailing path length in normalized structural state space",
+      "activity_threshold_source": "base geometry contract"
+    },
+    "trajectory_openness": {
+      "definition": "net displacement divided by path length",
+      "interpretation": "path openness only; never coherence",
+      "range": "[0,1] or null"
+    },
+    "inertial_echo_recurrence": {
+      "definition": "movement-unconditioned persistence of state similarity",
+      "interpretation": "diagnostic echo, not coherent recurrence"
+    },
+    "recurrence_persistence": {
+      "definition": "causal recurrence persistence conditioned on sufficient movement",
+      "trailing_window_tau": 1.0,
+      "relative_radius": 0.5,
+      "range": "[0,1]"
+    },
+    "transport_coherence": {
+      "definition": "exp(-RMS(z_t - A_(t-1) z_(t-1))/s_(t-1)); A is fitted only on prior transitions",
+      "training_objective": "sum ||z_i-A z_(i-1)||^2 + alpha ||A||_F^2",
+      "training_window_tau": 2.0,
+      "minimum_training_transitions": 8,
+      "ridge_alpha": 0.001,
+      "residual_scale": "causal median prior transition magnitude with a fixed floor",
+      "residual_scale_floor": 0.05,
+      "scale_epsilon": 1e-12,
+      "fallback": "UNRESOLVED; local continuity is not substituted",
+      "range": "[0,1] or null"
+    },
+    "variation_capacity": {
+      "definition": "normalized effective rank of realized active structural updates",
+      "reference_window_tau": 2.0,
+      "contraction": "max(0,1-current_capacity/causal_reference_peak)",
+      "claim_boundary": "realized variation proxy, not the complete counterfactual viability kernel"
+    },
+    "regime_persistence": {
+      "definition": "consecutive crystallizing duration divided by one tau, clipped to one"
+    }
+  },
+  "state_machine": {
+    "primary_states": ["VIABLE", "STAGNANT", "RECURRENT", "CRYSTALLIZING", "CRYSTALLIZED"],
+    "diagnostics": ["imitative_echo", "coherence_loss", "insufficient_geometry"],
+    "classification_statuses": ["PRIMARY", "DIAGNOSTIC_ONLY", "INSUFFICIENT_GEOMETRY"],
+    "tau_windows": 16,
+    "minimum_recurrence_persistence": 0.3,
+    "minimum_transport_coherence": 0.5,
+    "minimum_variation_contraction": 0.25,
+    "crystallizing_duration_tau": 1.0,
+    "exhaustiveness_rule": "every window has exactly one primary state or an explicit non-primary classification status",
+    "STAGNANT": "geometry ready and movement below threshold",
+    "VIABLE": "active, coherent, and recurrence below threshold",
+    "RECURRENT": "active, coherent, recurrent, and not contracting",
+    "CRYSTALLIZING": "active, coherent, recurrent, contracting, and persistence below one tau",
+    "CRYSTALLIZED": "CRYSTALLIZING predicate sustained for at least one tau"
+  },
+  "kernel_boundary": {
+    "delta_xi_accumulated_excess_capacity_unchanged": true,
+    "diagnostic_only": true
+  },
+  "claim_boundary": [
+    "Coherence is out-of-sample transition predictability, not net displacement.",
+    "All operator fitting is causal and excludes the current transition.",
+    "The observer receives numeric token observations only and never external compliance.",
+    "Parameters are universal across the three evaluated models."
+  ]
+}

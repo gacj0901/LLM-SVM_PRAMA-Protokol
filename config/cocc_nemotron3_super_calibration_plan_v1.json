@@ -1,0 +1,61 @@
+{
+  "schema": "LLM-SVM-CoCC-calibration-plan/1",
+  "plan_id": "cocc-nemotron3-super-calibration-v1-20260731",
+  "status": "FROZEN_BEFORE_CALIBRATION_ACQUISITION",
+  "purpose": "Estimate only the position-wise expected surprisal and surprisal scale from the frozen calibration partition before any confirmatory holdout acquisition.",
+  "partition": "calibration",
+  "outcome_labels_allowed": false,
+  "dataset_binding": {
+    "normalized_dataset": "data/cocc_clean_negation_confirmatory_v2.jsonl",
+    "normalized_dataset_sha256": "f22083c38c8399cbbfeb72c98276568f277081bcec38b44b18d971ac617b3433",
+    "normalized_manifest": "data/cocc_clean_negation_confirmatory_v2.manifest.json",
+    "normalized_manifest_sha256": "7705de444e286632aff293e1e31cff095b084968245dd7d0e207d821536d58da",
+    "calibration_session_ids_sha256": "98e283dfbb5b2cb44b23ce2dc9a744eb7a15841817e068d2eb96625e9cd9336d",
+    "selection_rule": "Select exactly the first 20 normalized rows; all must have split=calibration and perturbation_type=clean_control.",
+    "expected_session_count": 20,
+    "required_perturbation_type": "clean_control"
+  },
+  "provider_binding": {
+    "provider": "nvidia_nim",
+    "endpoint": "https://integrate.api.nvidia.com/v1",
+    "requested_model": "nvidia/nemotron-3-super-120b-a12b",
+    "preflight_resolved_model": "nvidia/nemotron-3-super-120b-a12b",
+    "preflight_token_logprobs_supported": true,
+    "preflight_system_fingerprint": null,
+    "immutable_weight_digest": null,
+    "identity_limitation": "The hosted endpoint exposed neither a system fingerprint nor an immutable weight digest; reproducibility is therefore bound to endpoint, model alias, response identity fields when present, code and request parameters, not to immutable provider weights."
+  },
+  "generation_parameter_set": {
+    "max_tokens": 512,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_logprobs": 5,
+    "seed": 1337,
+    "enable_thinking": false,
+    "reasoning_budget": null,
+    "max_attempts": 3,
+    "retry_sleep_seconds": 5.0,
+    "timeout_seconds": 600
+  },
+  "observation_interface": {
+    "runner": "scripts/run_break_the_chain_prama_eval_nvidia.py",
+    "runner_sha256": "58da9f8d30bab074b445d12e7db41a082fcf16738d8f257cc55c2da280941ce5",
+    "model_payload": "src/aptadynamic_llm/model_payload.py",
+    "model_payload_sha256": "fb54ebeb74383e39c99b75a641cb34dd06feaa661092c48b2c8ca66b9d40b853",
+    "model_payload_boundary": "task_prompt_and_generation_parameters_only",
+    "projector_request_schema": "LLM-SVM-CoCC-projector-request/1",
+    "raw_answer_or_prompt_in_calibration_artifact": false
+  },
+  "calibrator_binding": {
+    "script": "scripts/calibrate_cocc_projector.py",
+    "script_sha256": "356afbfa32fc09eda4777e031ed99b7ec71567c0d264d1432f3436b40981b676",
+    "window_size": 16,
+    "minimum_sessions": 20,
+    "surprisal_scale_method": "calibration_token_surprisal_quantile",
+    "surprisal_scale_quantile": 0.99,
+    "output": "config/cocc_nemotron3_super_calibration_v1.json"
+  },
+  "acquisition_output": "run_outputs/cocc_nemotron3_super_calibration_v1",
+  "stopping_rule": "Acquire all 20 frozen calibration sessions. Do not inspect external correctness labels, select sessions, replace sessions or stop based on generated content.",
+  "failure_policy": "Fail closed if any selected row is not calibration clean_control, if any request lacks finite token logprobs, if the resolved model differs, or if fewer than 20 distinct calibration sessions are available."
+}

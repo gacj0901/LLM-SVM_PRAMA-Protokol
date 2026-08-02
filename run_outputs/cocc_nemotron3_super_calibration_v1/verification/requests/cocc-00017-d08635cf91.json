@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00017-d08635cf91",
+  "problem_id": "3000",
+  "item_id": "3000:clean_control",
+  "verifier_ref": "cocc:3000:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to find min_{i,j, |i - j| >= x} |nums[i] - nums[j]|.\n\nWe need O(n log n) time.\n\nBrute force O(n^2) too large.\n\nObservation: For each index i, we want to consider elements j with j <= i - x (left side) or j >= i + x (right side). So for each i, consider earlier elements at distance at least x: those indices <= i-x (we can maintain a data structure of values seen at least x behind). Similarly, consider later elements at distance >= x: j >= i + x; but we can process forward.\n\nSimplify: Use a balanced BST or sorted container to maintain values from left side as we scan. As we iterate i from 0..n-1, before processing i, we insert nums[i - x] into a sorted list (when i >= x). Then we query the sorted list for value closest to nums[i] (min abs diff). That yields min diff for left side pairs where j <= i - x.\n\nSimilarly, we need to consider right side: For each i, we need j >= i + x. Equivalent to scanning from right and maintaining sorted list of values seen that are at least x ahead. Or we can simply compute left side for all pairs i>j with distance >= x: when scanning forward, we consider pairs where i is later index and j is earlier index with distance >= x. That covers all unordered pairs with i>j and distance>=x exactly once. For each i, we query earlier indices j with i - j >= x => j <= i-x. So scanning forward and maintaining sorted list of nums[0..i-x] yields min diff for pairs where later index i and earlier index j with sufficient distance. That's sufficient because any pair (i,j) with i>j and distance>=x will be considered when we process the later index i.\n\nThus we only need to consider one direction.\n\nEdge case: x=0 => distance >=0 always satisfied; we want min absolute difference between any two elements (including same index? Actually they must be at least 0 indices apart; i and j can be same? Usually i and j should be distinct? The problem didn't forbid i==j? Typically \"two elements\" implies distinct indices, but if x=0 we can pick same index? Actually they said at least x indices apart; if x=0, indices can be",
+  "event_token": 512,
+  "event_turn": 0
+}

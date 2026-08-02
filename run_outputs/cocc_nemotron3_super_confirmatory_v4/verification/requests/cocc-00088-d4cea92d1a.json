@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00088-d4cea92d1a",
+  "problem_id": "3032",
+  "item_id": "3032:clean_control",
+  "verifier_ref": "cocc:3032:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to find for each starting node x, sum over nodes visited on a walk of length k steps (edges) in a functional graph: we start at x, then receiver[x], then receiver[receiver[x]], ..., for total k passes? Let's interpret: We start with player x. For each pass, the current holder passes to its receiver. In the definition: f(x) = x + receiver[x] + receiver[receiver[x]] + ... + receiver^(k)[x]. Note they sum x (starting player) plus after first pass receiver[x], after second pass receiver[receiver[x]], up to receiver^(k)[x] (k times applying receiver function). That means total terms = k+1 (including starting node and k passes). However, the examples: Example1: receiver [2,0,1], k=4, starting x=2 yields f=6. Let's compute manually: start x=2, passes:\nPass1: receiver[2] =1,\nPass2: receiver[1]=0,\nPass3: receiver[0]=2,\nPass4: receiver[2]=1.\nNow sum: x=2 + 1+0+2+1 =6. That's indeed sum of start node and each receiver after each pass, total k+1 terms (k=4 passes => 5 terms). So matches definition.\n\nGoal: maximize f(x). Constraints: n up to 1e5, k up to 1e10, so need to handle large k efficiently using binary lifting / doubling and prefix sums of sums of nodes along paths. The functional graph may contain cycles. For each node x we need sum of node IDs visited along the first k steps (including start). This is similar to \"sum of values on path of length k\" in functional graph, where each node i has value i (its ID). So we need to compute sum of values along length k path from each node (including start node). Equivalent to sum of values along k edges (k+1 nodes). Precompute binary lifting tables: jump[i][j] = node reached after 2^j steps from i (i.e., applying receiver 2^j times). Also sum[i][j] = sum of node IDs visited along the path of length 2^j steps starting from i (including i? need careful). Usually for binary lifting we define sum[i][j] as sum of values of nodes visited after 2^j steps",
+  "event_token": 512,
+  "event_turn": 0
+}

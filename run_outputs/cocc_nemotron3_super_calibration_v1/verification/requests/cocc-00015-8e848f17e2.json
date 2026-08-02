@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00015-8e848f17e2",
+  "problem_id": "2979",
+  "item_id": "2979:clean_control",
+  "verifier_ref": "cocc:2979:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to maximize profit from intervals [start,end] each with weight gold_i, non-overlapping intervals allowed (they cannot share houses, i.e., intervals must be disjoint). This is the classic weighted interval scheduling problem: given intervals with profit, choose a subset of non-overlapping intervals maximizing total weight.\n\nConstraints: n up to 1e5, offers up to 1e5.\n\nWe need to compute DP. Since houses are numbered 0..n-1 (like points), intervals are integer inclusive. So an interval [l, r] occupies houses from l to r inclusive. We cannot have overlapping intervals: intervals cannot share any point.\n\nWe can treat DP where dp[i] = maximum profit considering houses up to index i (i.e., first i+1 houses?). Let's think.\n\nStandard approach: sort intervals by end coordinate. Compute for each interval the best profit if we take it: profit_i + dp[prev_end] where prev_end is the largest index less than start_i (since intervals cannot overlap: if we take interval [l,r], then any prior interval must end < l). So dp[x] = max profit achievable using houses up to index x (i.e., considering houses 0..x). Then dp[-1] = 0 base case (no houses). For each house index i from 0 to n-1, dp[i] = dp[i-1] (skip house i) or max over offers ending at i: (dp[start-1] + gold) if start>0 else gold.\n\nThus we can compute dp array of size n. Since n up to 1e5 and offers up to 1e5, O(n + offers) works.\n\nImplementation steps:\n\n- Build a list of offers ending at each end index: a list per end.\n  offers_by_end = [[] for _ in range(n)]\n  for each offer [l, r, gold]:\n      offers_by_end[r].append((l, gold))\n\n- dp = [0]*n\n- For i in range(n):\n    # not take any offer ending at i\n    best = dp[i-1] if i>0 else 0\n    # consider each offer ending at i\n    for l, gold in offers_by_end[i]:\n        prev = dp[l-1] if l>0 else 0\n        cand = prev + gold\n        if cand > best:\n            best = cand\n    dp[i] = best\n\n-",
+  "event_token": 512,
+  "event_turn": 0
+}

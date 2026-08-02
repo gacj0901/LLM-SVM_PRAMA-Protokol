@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aptadynamik.org/schemas/llm-structural/common-definitions.schema.json",
+  "title": "LLM structural-state common definitions",
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^(sha256:)?[0-9a-f]{64}$"
+    },
+    "channelStatus": {
+      "enum": ["OBSERVED", "NOT_APPLICABLE", "UNAVAILABLE", "INVALID"]
+    },
+    "envelope": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "artifact_type",
+        "artifact_version",
+        "study_id",
+        "session_id",
+        "producer",
+        "created_at",
+        "source_sha256",
+        "config_sha256",
+        "partition",
+        "channel_status"
+      ],
+      "properties": {
+        "contract_version": {"const": "0.2.0"},
+        "artifact_type": {"type": "string"},
+        "artifact_version": {"const": "1.0.0"},
+        "study_id": {"type": "string", "minLength": 1},
+        "session_id": {"type": "string", "minLength": 1},
+        "producer": {"type": "string", "minLength": 1},
+        "created_at": {"type": "string", "format": "date-time"},
+        "source_sha256": {"$ref": "#/$defs/sha256"},
+        "config_sha256": {"$ref": "#/$defs/sha256"},
+        "partition": {"enum": ["calibration", "confirmatory", "exploratory"]},
+        "channel_status": {"$ref": "#/$defs/channelStatus"}
+      }
+    }
+  }
+}

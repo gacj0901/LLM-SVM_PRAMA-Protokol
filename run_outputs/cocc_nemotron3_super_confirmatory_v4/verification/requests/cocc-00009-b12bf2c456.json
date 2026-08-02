@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00009-b12bf2c456",
+  "problem_id": "2855",
+  "item_id": "2855:clean_control",
+  "verifier_ref": "cocc:2855:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to find the maximum number of jumps to get from index 0 to n-1, where each forward jump i -> j (i<j) is allowed if |nums[j] - nums[i]| <= target. Each jump counts as 1 step. Essentially we need the longest path from 0 to n-1 in a directed acyclic graph (DAG) where edges go forward and satisfy the condition. Since n <= 1000, O(n^2) DP works.\n\nDefine dp[i] = maximum number of jumps to reach i from 0 (not counting the start? We'll decide). Usually we want number of jumps (edges) used. We start at index 0 with 0 jumps made so far. Then for each i, we try all j > i where condition holds, and update dp[j] = max(dp[j], dp[i] + 1). Initialize dp[0] = 0, others = -inf (or -1 indicating unreachable). At the end, answer = dp[n-1] if reachable else -1.\n\nBut need to ensure we count jumps correctly: each transition adds one jump. Example: nums = [1,3,6,4,1,2], target=2. The path 0->1->3->5 yields dp[5] = 3 (0->1:1, 1->3:2, 3->5:3). Works.\n\nEdge case: If no path, return -1.\n\nComplexities: O(n^2) time, O(n) space.\n\nImplementation details: Use -10**9 as -inf sentinel, but better to use -1 to denote unreachable (since jumps are non-negative). However dp[0]=0, and we only update if dp[i] != -1.\n\nAlternatively, we can initialize dp with -inf and set dp[0]=0.\n\nLet's implement.\n\nPotential pitfalls: large nums values, but difference fits in Python int.\n\nCheck example2: target=3 yields path 0->1->2->3->4->5, dp[5]=5.\n\nExample3: target=0, no edges where difference==0? Actually condition is -target <= nums[j]-nums[i] <= target, which for target=0 means nums[j]==nums[i]. There are no equal consecutive? Let's see: nums = [1,3,6,4,1,2]; there are no",
+  "event_token": 512,
+  "event_turn": 0
+}

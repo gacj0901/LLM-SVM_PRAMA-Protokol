@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00066-faf0cd180c",
+  "problem_id": "2888",
+  "item_id": "2888:clean_control",
+  "verifier_ref": "cocc:2888:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to find the minimum index i such that both left subarray nums[0..i] and right subarray nums[i+1..n-1] have the same dominant element (must be same as original array's dominant element). Since the original array has exactly one dominant element, let's call it D.\n\nWe need to find earliest split i where D is dominant in both halves.\n\nObservation: Since the whole array has D as dominant, freq(D) > n/2. For any prefix of length L = i+1, D is dominant in that prefix iff count_D_prefix * 2 > L. Similarly for suffix length R = n - L, D is dominant in suffix iff (total_D - count_D_prefix) * 2 > R.\n\nThus we just need to find smallest i such that both conditions hold. Compute total_D first. Then iterate i from 0 to n-2, maintaining prefix count. Check if prefix condition and suffix condition both true. Return i. If none, return -1.\n\nComplexities O(n) time, O(1) extra.\n\nEdge Cases: The suffix length can be zero? The definition of split requires i < n-1, so suffix non-empty. Also prefix length at least 1 because i>=0. So both subarrays non-empty. However definition of subarray for empty allowed but not needed.\n\nNow confirm with examples.\n\nExample1: nums=[1,2,2,2]; total_D=2? Actually dominant element is 2 with freq 3 > 4/2=2 => yes. total_D=3. Iterate:\n\ni=0: prefix [1], count_D=0 => 0*2>1? false. skip.\n\ni=1: prefix [1,2], count_D=1 => 1*2>2? 2>2 false (need strictly greater). So false.\n\ni=2: prefix [1,2,2], count_D=2 => 2*2>3? 4>3 true. suffix length=1, suffix count_D = total_D - prefix = 3-2=1 => 1*2>1? 2>1 true. => valid, return 2.\n\nMatches.\n\nExample2: need compute.\n\nExample3: total_D? Let's compute: nums=[3,3,3,3,7,2,2]; n=7. freq 3 =4 > 7/2=3",
+  "event_token": 512,
+  "event_turn": 0
+}

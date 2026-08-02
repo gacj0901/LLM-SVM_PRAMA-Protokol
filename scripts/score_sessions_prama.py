@@ -52,6 +52,7 @@ LABEL_FIELDS = (
     "verifier_name",
     "finish_reason",
     "source_session_id",
+    "prompt_id",
 )
 
 
@@ -63,6 +64,7 @@ class StudyInvalid(RuntimeError):
 class StagedSession:
     generation_id: str
     source_session_id: str
+    prompt_id: str
     model: str
     finish_reason: str
     omega: np.ndarray
@@ -133,6 +135,7 @@ def stage_sessions(
             StagedSession(
                 generation_id=gid,
                 source_session_id=str(group["session_id"].iloc[0]),
+                prompt_id=str(group["prompt_id"].iloc[0] or group["session_id"].iloc[0]),
                 model=str(group["model"].iloc[0]),
                 finish_reason=str(finish_reason or ""),
                 omega=omega_k,
@@ -231,18 +234,52 @@ def _assign_stratified_splits(rows: list[dict[str, Any]], seed: int, test_fracti
     if all(value in {"train", "calibration", "calib", "test"} for value in explicit):
         for row, value in zip(rows, explicit):
             row["split"] = "train" if value in {"train", "calibration", "calib"} else "test"
+        group_splits: dict[str, set[str]] = {}
+        for row in rows:
+            group_splits.setdefault(str(row["prompt_id"]), set()).add(str(row["split"]))
+        leaked = sorted(group for group, splits in group_splits.items() if len(splits) > 1)
+        if leaked:
+            raise ValueError(f"prompt groups cross explicit train/test splits: {leaked!r}")
     else:
         rng = np.random.default_rng(seed)
-        for label in (0, 1):
-            indices = np.array([index for index, row in enumerate(rows) if int(row["label"]) == label])
-            if len(indices) < 2:
-                raise ValueError(f"class {label} needs at least two evaluable sessions for train/test splitting")
-            rng.shuffle(indices)
-            n_test = min(len(indices) - 1, max(1, int(round(len(indices) * test_fraction))))
+        groups: dict[str, list[int]] = {}
+        for index, row in enumerate(rows):
+            group = str(row.get("prompt_id") or "").strip()
+            if not group:
+                raise ValueError("grouped split requires a non-empty prompt_id for every session")
+            groups.setdefault(group, []).append(index)
+        if len(groups) < 2:
+            raise ValueError("grouped split requires at least two distinct prompt_id groups")
+        totals = {label: sum(int(row["label"]) == label for row in rows) for label in (0, 1)}
+        targets = {
+            label: min(totals[label] - 1, max(1, int(round(totals[label] * test_fraction))))
+            for label in (0, 1)
+        }
+        group_names = np.array(sorted(groups), dtype=object)
+        rng.shuffle(group_names)
+        n_test_groups = min(len(groups) - 1, max(1, int(round(len(groups) * test_fraction))))
+        selected: list[str] = []
+        counts = {0: 0, 1: 0}
+        remaining = list(group_names)
+        for _ in range(n_test_groups):
+            def candidate_score(group: str) -> tuple[int, int]:
+                additions = {
+                    label: sum(int(rows[index]["label"]) == label for index in groups[group])
+                    for label in (0, 1)
+                }
+                distance = sum(abs((counts[label] + additions[label]) - targets[label]) for label in (0, 1))
+                overshoot = sum(max(0, counts[label] + additions[label] - targets[label]) for label in (0, 1))
+                return distance, overshoot
+            chosen = min(remaining, key=candidate_score)
+            selected.append(chosen)
+            for index in groups[chosen]:
+                counts[int(rows[index]["label"])] += 1
+            remaining.remove(chosen)
+        test_groups = set(selected)
+        for group, indices in groups.items():
+            split = "test" if group in test_groups else "train"
             for index in indices:
-                rows[int(index)]["split"] = "train"
-            for index in indices[:n_test]:
-                rows[int(index)]["split"] = "test"
+                rows[index]["split"] = split
 
     for split in ("train", "test"):
         labels = {int(row["label"]) for row in rows if row["split"] == split}
@@ -291,6 +328,7 @@ def build_labels(
                 "verifier_name": (supplied or {}).get("verifier_name") or ("external" if supplied else "finish_reason"),
                 "finish_reason": session.finish_reason,
                 "source_session_id": session.source_session_id,
+                "prompt_id": session.prompt_id,
             }
         )
     _assign_stratified_splits(rows, seed, test_fraction)
@@ -332,6 +370,7 @@ def write_outputs(
             raw = {
                 "session_id": session.generation_id,
                 "source_session_id": session.source_session_id,
+                "prompt_id": session.prompt_id,
                 "model": session.model,
                 "finish_reason": session.finish_reason,
                 "final_outcome_proxy": True,

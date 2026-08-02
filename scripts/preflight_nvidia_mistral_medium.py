@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+"""Verify Mistral Medium 3.5 identity and token-logprob support on NVIDIA."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+from pathlib import Path
+import sys
+from types import SimpleNamespace
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.run_break_the_chain_prama_eval_nvidia_mistral import (
+    CoccItem,
+    NVIDIA_API_KEY_ENV,
+    NVIDIA_BASE_URL,
+    NVIDIA_MODEL,
+    NVIDIA_PROVIDER,
+    _call_backend,
+)
+
+
+def run_preflight(execute: bool, timeout: int, top_logprobs: int) -> dict[str, object]:
+    key_present = bool(os.environ.get(NVIDIA_API_KEY_ENV, "").strip())
+    result: dict[str, object] = {
+        "schema": "LLM-SVM-NVIDIA-preflight/1",
+        "provider": NVIDIA_PROVIDER,
+        "endpoint": NVIDIA_BASE_URL,
+        "requested_model": NVIDIA_MODEL,
+        "api_key_environment_variable": NVIDIA_API_KEY_ENV,
+        "api_key_present": key_present,
+        "remote_call_executed": False,
+        "generation_profile": {
+            "temperature": 0.7,
+            "top_p": 1.0,
+            "reasoning_effort": "high",
+        },
+    }
+    if not execute:
+        return result
+    if not key_present:
+        raise RuntimeError(
+            f"{NVIDIA_API_KEY_ENV} is not set in this PowerShell session"
+        )
+    item = CoccItem(
+        problem_id="preflight",
+        item_id="preflight",
+        prompt="Respond with exactly: OK",
+        perturbation_type="preflight",
+        split="train",
+        verifier_ref=None,
+        expected_answer="OK",
+        source_label=None,
+    )
+    args = SimpleNamespace(
+        dry_run=False,
+        provider=NVIDIA_PROVIDER,
+        model=NVIDIA_MODEL,
+        base_url=NVIDIA_BASE_URL,
+        timeout=timeout,
+        temperature=0.7,
+        top_p=1.0,
+        max_tokens=32,
+        seed=1337,
+        top_logprobs=top_logprobs,
+        reasoning_effort="high",
+    )
+    turn, resolved_model = _call_backend(item, args)
+    result.update(
+        {
+            "remote_call_executed": True,
+            "resolved_model": resolved_model,
+            "finish_reason": turn["finish_reason"],
+            "token_logprobs_supported": bool(turn["tokens"]),
+            "observed_token_count": turn["token_count"],
+            "system_fingerprint": turn["system_fingerprint"] or None,
+        }
+    )
+    return result
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--timeout", type=int, default=120)
+    parser.add_argument("--top-logprobs", type=int, default=5)
+    args = parser.parse_args(argv)
+    if args.timeout <= 0 or not 2 <= args.top_logprobs <= 20:
+        parser.error("timeout must be positive and top-logprobs must be 2..20")
+    try:
+        report = run_preflight(args.execute, args.timeout, args.top_logprobs)
+    except Exception as exc:
+        status_code = getattr(exc, "status_code", None)
+        if status_code == 401:
+            print(
+                "NVIDIA preflight failed: 401 Unauthorized. Re-enter the nvapi- "
+                "Build/Endpoints key in NVIDIA_API_KEY and retry."
+            )
+        else:
+            print(
+                "NVIDIA Mistral preflight failed: "
+                f"{type(exc).__name__}: {str(exc)[:500]}"
+            )
+        return 1
+    print(json.dumps(report, indent=2, ensure_ascii=False))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

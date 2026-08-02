@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prama ProbLog Monitor</title>
+  <link rel="icon" type="image/png" href="assets/PRAMA_Protokol-Logo.png" />
+  <link rel="apple-touch-icon" href="assets/PRAMA_Protokol-Logo.png" />
+  <style>
+    :root {
+      --bg: #0c0d0f;
+      --panel: #17191e;
+      --panel-2: #20232a;
+      --border: #30343d;
+      --text: #eef0f4;
+      --muted: #9da3ad;
+      --accent: #df5132;
+      --good: #77d69b;
+      --scroll-track: #364153;
+      --scroll-thumb: #CAD5E2;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+    }
+
+    *::-webkit-scrollbar {
+      width: 12px;
+      height: 12px;
+    }
+
+    *::-webkit-scrollbar-track {
+      background: var(--scroll-track);
+    }
+
+    *::-webkit-scrollbar-thumb {
+      background: var(--scroll-thumb);
+      border: 3px solid var(--scroll-track);
+      border-radius: 999px;
+    }
+
+    *::-webkit-scrollbar-thumb:hover {
+      background: #eef4fb;
+    }
+
+    *::-webkit-scrollbar-button {
+      background: var(--scroll-thumb);
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 370px;
+      overflow: hidden;
+    }
+
+    main {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      min-width: 0;
+      min-height: 0;
+      border-right: 1px solid var(--border);
+    }
+
+    header {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      background: #121419;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .brand {
+      width: 122px;
+      max-height: 48px;
+      object-fit: contain;
+    }
+
+    .toolmark {
+      width: 138px;
+      height: 86px;
+      object-fit: contain;
+      border-radius: 0;
+      border: 0;
+      background: transparent;
+      padding: 0;
+    }
+
+    h1 { margin: 0; font-size: 18px; letter-spacing: 0; }
+    .sub { color: var(--muted); margin-top: 4px; font: 12px var(--mono); }
+
+    #chat {
+      overflow: auto;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .message {
+      max-width: 860px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      padding: 12px 14px;
+      border-radius: 8px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      border-color: rgba(223, 81, 50, .48);
+      background: rgba(223, 81, 50, .11);
+    }
+
+    .role {
+      display: block;
+      color: var(--muted);
+      font: 12px var(--mono);
+      margin-bottom: 6px;
+    }
+
+    .composer {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(280px, 760px) 108px;
+      justify-content: center;
+      align-items: end;
+      gap: 10px;
+      padding: 14px 72px 14px 18px;
+      border-top: 1px solid var(--border);
+      background: #121419;
+    }
+
+    .test-tools {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 132px;
+      gap: 10px;
+    }
+
+    .test-tools select { font-family: var(--sans); }
+
+    textarea {
+      width: 100%;
+      min-height: 46px;
+      max-height: 180px;
+      resize: none;
+      overflow-y: auto;
+      color: var(--text);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      font: 14px/1.4 var(--sans);
+    }
+
+    button {
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: var(--panel-2);
+      border-radius: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      font-weight: 650;
+    }
+
+    button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+
+    select {
+      width: 100%;
+      color: var(--text);
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 10px;
+      font: 12px var(--mono);
+    }
+
+    aside {
+      background: var(--panel);
+      display: grid;
+      grid-template-rows: auto auto auto 1fr auto;
+      min-width: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .side-head {
+      display: block;
+      padding: 10px 14px 8px;
+    }
+
+    .side-logo {
+      display: flex;
+      align-items: center;
+      flex-direction: row;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .monitor-caption {
+      text-align: center;
+      color: var(--muted);
+      font: 11px var(--mono);
+      margin-top: 4px;
+    }
+
+    .controls, .metrics, .prama-live {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .controls button:nth-child(5) { grid-column: span 2; }
+
+    .control-field {
+      display: grid;
+      gap: 4px;
+      font: 10px var(--mono);
+      color: var(--muted);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 10px;
+      row-gap: 0;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      min-width: 0;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      font: 11px var(--mono);
+    }
+
+    .metric span:first-child {
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .metric span:last-child {
+      color: var(--good);
+      flex: 0 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    .prama-live h1 {
+      margin: 0 0 8px;
+      font-size: 15px;
+    }
+
+    .live-note {
+      color: var(--muted);
+      font: 10px/1.35 var(--mono);
+      margin-top: 8px;
+    }
+
+    .viability-head, .collapse-row, .mode-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font: 11px var(--mono);
+      color: var(--muted);
+      margin: 5px 0;
+    }
+
+    .viability-head span:last-child,
+    .collapse-row span:last-child,
+    .mode-row span:last-child {
+      color: var(--text);
+    }
+
+    .bar {
+      height: 9px;
+      background: #0f1116;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      width: 0%;
+      height: 100%;
+      background: #77d69b;
+      transition: width .22s ease, background-color .22s ease, opacity .22s ease;
+    }
+
+    .mini-bars {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 10px;
+      margin-top: 8px;
+    }
+
+    .mini, .mode-gauge {
+      min-width: 0;
+    }
+
+    .mini label, .mode-gauge label {
+      display: flex;
+      justify-content: space-between;
+      font: 10px var(--mono);
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    .mode-gauges {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .trajectory {
+      margin-top: 8px;
+      border: 1px solid rgba(255,255,255,.07);
+      background: #101217;
+      width: 100%;
+      height: 92px;
+    }
+
+    .archive-toggle {
+      position: absolute;
+      right: 16px;
+      bottom: 15px;
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      background: transparent;
+      border: 0;
+      color: var(--text);
+      opacity: .92;
+    }
+
+    .archive-toggle svg {
+      width: 34px;
+      height: 34px;
+      display: block;
+      filter: drop-shadow(0 0 2px rgba(0,0,0,.55));
+    }
+
+    .archive-toggle:hover,
+    .archive-toggle:focus-visible {
+      opacity: 1;
+      outline: none;
+    }
+
+    .archive-toggle::after {
+      content: "Document archive\A Generate";
+      position: absolute;
+      right: 0;
+      bottom: calc(100% + 8px);
+      min-width: 142px;
+      padding: 7px 9px;
+      white-space: pre;
+      color: var(--text);
+      background: #0f1116;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font: 11px/1.35 var(--mono);
+      text-align: left;
+      box-shadow: 0 10px 22px rgba(0,0,0,.32);
+      opacity: 0;
+      transform: translateY(4px);
+      pointer-events: none;
+      transition: opacity .14s ease, transform .14s ease;
+      z-index: 4;
+    }
+
+    .archive-toggle:hover::after,
+    .archive-toggle:focus-visible::after {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .archive-panel {
+      position: absolute;
+      right: 14px;
+      bottom: 64px;
+      width: min(360px, calc(100vw - 32px));
+      max-height: 320px;
+      padding: 12px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 18px 42px rgba(0,0,0,.45);
+      z-index: 3;
+    }
+
+    .archive-panel[hidden] {
+      display: none;
+    }
+
+    .archive-title {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .archive-panel a {
+      display: block;
+      color: var(--text);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 10px;
+      margin-bottom: 8px;
+      background: #121419;
+      font-size: 13px;
+    }
+
+    #links {
+      overflow: auto;
+      min-height: 0;
+      max-height: 224px;
+      padding-right: 3px;
+    }
+
+    .status {
+      padding: 9px 14px;
+      color: var(--muted);
+      font: 12px var(--mono);
+    }
+
+    @media (max-width: 880px) {
+      body { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+      aside { grid-row: 2; height: auto; max-height: 48vh; overflow: hidden; }
+      .composer { grid-template-columns: minmax(0, 1fr) 88px; padding-right: 66px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="sub" id="sessionLine" hidden></div>
+
+    <section id="chat"></section>
+
+    <section class="composer">
+      <div class="test-tools">
+        <select id="testSelect" aria-label="Prueba sugerida">
+          <option value="">Interacción libre</option>
+          <option value="constraint">Prueba de consistencia bajo restricciones</option>
+          <option value="revision">Prueba de revisión causal</option>
+          <option value="compression">Prueba de compresión sin pérdida</option>
+        </select>
+        <button id="loadTestBtn" type="button">Cargar prueba</button>
+      </div>
+      <textarea id="input" placeholder="Escribe un mensaje o carga una prueba..."></textarea>
+      <button class="primary" id="sendBtn" disabled>Enviar</button>
+      <button class="archive-toggle" id="archiveToggle" type="button" aria-label="Document archive" aria-expanded="false" aria-controls="archivePanel">
+        <svg viewBox="0 0 64 52" aria-hidden="true" focusable="false">
+          <path d="M5 15.5h19.2l5-6.2h13.1l4.8 6.2H59v29.2L5 49.5V15.5Z" fill="#0c0d0f" stroke="#eef0f4" stroke-width="2.6" stroke-linejoin="round"/>
+          <path d="M5 20.7h54L53.7 45.8H5V20.7Z" fill="#17191e" stroke="#eef0f4" stroke-width="2.6" stroke-linejoin="round"/>
+          <path d="M9.8 25.4h43.6" fill="none" stroke="#CAD5E2" stroke-width="1.8" stroke-linecap="round" opacity=".75"/>
+        </svg>
+      </button>
+      <div class="archive-panel" id="archivePanel" hidden>
+        <h1 class="archive-title">Document archive</h1>
+        <div class="sub" style="margin-bottom: 12px;">Generate results to enable links</div>
+        <div id="links"></div>
+      </div>
+    </section>
+  </main>
+
+  <aside>
+    <header class="side-head">
+      <div class="side-logo">
+        <img class="brand" src="assets/AptadynamiK-Logo.png" alt="" />
+        <img class="toolmark" src="assets/PRAMA_Protokol-Logo.png" alt="" />
+      </div>
+      <div class="monitor-caption">ProbLog Monitor · conexión ciega</div>
+    </header>
+
+    <section class="controls">
+      <label class="control-field">Proveedor
+        <select id="providerSelect">
+          <option value="nvidia_nim">NVIDIA NIM</option>
+        </select>
+      </label>
+      <label class="control-field">Modelo
+        <select id="modelSelect">
+          <option value="nvidia/nemotron-3-super-120b-a12b" data-provider="nvidia_nim">Nemotron 3 Super</option>
+          <option value="mistralai/mistral-medium-3.5-128b" data-provider="nvidia_nim">Mistral Medium 3.5</option>
+          <option value="nvidia/nemotron-3-ultra-550b-a55b" data-provider="nvidia_nim">Nemotron 3 Ultra</option>
+        </select>
+      </label>
+      <button id="startBtn">Iniciar sesión</button>
+      <button id="stopBtn" disabled>Detener sesión</button>
+      <button id="reportBtn" disabled>Exportar resultados</button>
+    </section>
+
+    <section class="metrics">
+      <div class="metric"><span>Status</span><span id="m_status">idle</span></div>
+      <div class="metric"><span>Turns</span><span id="m_turns">0</span></div>
+      <div class="metric"><span>Tokens</span><span id="m_tokens">0</span></div>
+      <div class="metric"><span>Windows</span><span id="m_windows">0</span></div>
+      <div class="metric"><span>Response time</span><span id="m_response_time">--</span></div>
+      <div class="metric"><span>Entropy norm</span><span id="m_entropy">0.000</span></div>
+      <div class="metric"><span>Gap norm</span><span id="m_gap">0.000</span></div>
+      <div class="metric"><span>Rigidity</span><span id="m_rigidity">0.000</span></div>
+      <div class="metric"><span>Uncertainty</span><span id="m_uncertainty">0.000</span></div>
+      <div class="metric"><span>Entropy range</span><span id="m_range">0.000</span></div>
+      <div class="metric"><span>Provider</span><span id="m_provider">--</span></div>
+      <div class="metric"><span>Model</span><span id="m_model">--</span></div>
+      <div class="metric"><span>Requested</span><span id="m_requested_model">--</span></div>
+      <div class="metric"><span>Resolved</span><span id="m_resolved_model">--</span></div>
+    </section>
+
+    <section class="prama-live">
+      <h1>PRAMA Live Viability</h1>
+      <div class="sub" id="prama_wait">PRAMA Live: waiting for backend metrics</div>
+      <div class="viability-head"><span>Viability</span><span id="prama_viability">--%</span></div>
+      <div class="bar"><div class="bar-fill" id="viability_fill"></div></div>
+      <div class="collapse-row"><span>COLLAPSED</span><span id="prama_collapsed">NO</span></div>
+      <div class="mode-row"><span>Boundary side</span><span id="prama_boundary">UNRESOLVED</span></div>
+      <div class="mode-row"><span>Status</span><span id="prama_vstatus">UNRESOLVED</span></div>
+      <div class="mode-row"><span>Regime</span><span id="prama_regime">UNRESOLVED</span></div>
+      <div class="mode-row"><span>Assessment</span><span id="prama_assessment">UNRESOLVED</span></div>
+      <div class="mode-row"><span>First crossing</span><span id="prama_first_crossing">--</span></div>
+      <div class="mode-row"><span>Recovery</span><span id="prama_recovery">--</span></div>
+
+      <div class="mini-bars">
+        <div class="mini"><label><span>micro</span><span id="v_micro">0.000</span></label><div class="bar"><div class="bar-fill" id="b_micro"></div></div></div>
+        <div class="mini"><label><span>macro</span><span id="v_macro">0.000</span></label><div class="bar"><div class="bar-fill" id="b_macro"></div></div></div>
+        <div class="mini"><label><span>acople</span><span id="v_acople">0.000</span></label><div class="bar"><div class="bar-fill" id="b_acople"></div></div></div>
+        <div class="mini"><label><span>micro_drop</span><span id="v_micro_drop">0.000</span></label><div class="bar"><div class="bar-fill" id="b_micro_drop"></div></div></div>
+      </div>
+
+      <div class="mode-gauges">
+        <div class="mode-gauge"><label><span>RIGIDEZ</span><span id="v_rig">0.000</span></label><div class="bar"><div class="bar-fill" id="b_rig"></div></div></div>
+        <div class="mode-gauge"><label><span>ECO</span><span id="v_eco">0.000</span></label><div class="bar"><div class="bar-fill" id="b_eco"></div></div></div>
+        <div class="mode-gauge"><label><span>ALUCINACIÓN</span><span id="v_alu">0.000</span></label><div class="bar"><div class="bar-fill" id="b_alu"></div></div></div>
+        <div class="mode-gauge"><label><span>TURBACIÓN</span><span id="v_turb">0.000</span></label><div class="bar"><div class="bar-fill" id="b_turb"></div></div></div>
+      </div>
+
+      <svg class="trajectory" id="prama_traj" viewBox="0 0 320 92" preserveAspectRatio="none"></svg>
+      <div class="live-note">Live PRAMA visualization displays generative-structure signals from backend metrics. It does not measure material cost.</div>
+    </section>
+
+    <div class="status" id="status">Comprobando servidor…</div>
+  </aside>
+
+  <script>
+    const API = window.location.origin;
+    let sessionId = null;
+    const pramaSnapshots = [];
+    const $ = id => document.getElementById(id);
+    const chat = $('chat');
+    const TEST_PROMPTS = {
+      constraint: `Analiza el siguiente problema sin omitir ninguna restricción. Una caja contiene cinco fichas numeradas del 1 al 5. Debes ordenar las cinco fichas de modo que: (1) la 2 quede antes que la 5; (2) la 1 no quede junto a la 4; (3) exactamente una ficha quede entre la 3 y la 5; y (4) la 4 quede después de la 2. Propón un orden válido, comprueba cada restricción por separado y, si detectas un error en tu propuesta, corrígelo antes de concluir.`,
+      revision: `Un sistema tiene tres causas posibles A, B y C. Se observa que al retirar A el efecto persiste, al retirar B desaparece, y al restaurar B reaparece sólo cuando C está presente. Explica la estructura causal mínima compatible con esas observaciones. Después formula una alternativa plausible, identifica qué observación la contradice y revisa tu conclusión.`,
+      compression: `Resume el siguiente conjunto de reglas en no más de cuatro frases sin perder ninguna condición: todo miembro rojo es estable; ningún miembro estable y liviano puede ser opaco; los miembros azules son livianos salvo cuando son triangulares; todo triángulo azul es opaco; y ningún objeto opaco puede ser rojo. Después indica si puede existir un miembro simultáneamente rojo, azul y triangular, justificando la respuesta sólo con las reglas dadas.`
+    };
+
+    function setStatus(text) { $('status').textContent = text; }
+
+    function addMessage(role, text) {
+      const node = document.createElement('div');
+      node.className = `message ${role}`;
+      node.innerHTML = `<span class="role">${role}</span><span></span>`;
+      node.querySelector('span:last-child').textContent = text;
+      chat.appendChild(node);
+      chat.scrollTop = chat.scrollHeight;
+      return node.querySelector('span:last-child');
+    }
+
+    function fmt(value) { return Number(value || 0).toFixed(3); }
+
+    function clamp01(value) {
+      if (value === null || value === undefined || Number.isNaN(Number(value))) return 0;
+      return Math.max(0, Math.min(1, Number(value)));
+    }
+
+    function setBar(id, value, color = '#77d69b') {
+      const fill = $(id);
+      fill.style.width = `${clamp01(value) * 100}%`;
+      fill.style.backgroundColor = color;
+      fill.style.opacity = value === null || value === undefined ? '.35' : '1';
+    }
+
+    function viabilityColor(value, collapsed, threshold = 0.35) {
+      if (collapsed || value <= threshold) return '#5f6876';
+      if (value > 0.65) return '#77d69b';
+      if (value >= 0.35) return '#e6c86e';
+      return '#df5132';
+    }
+
+    function drawTrajectory() {
+      const svg = $('prama_traj');
+      svg.replaceChildren();
+      const keys = [
+        ['viability', '#77d69b'],
+        ['micro', '#CAD5E2'],
+        ['macro', '#7aa7ff'],
+        ['acople', '#77d69b'],
+        ['micro_drop', '#df5132'],
+        ['rig', '#f2a65a'],
+        ['eco', '#b48cff'],
+        ['alu', '#ff6f91'],
+        ['turb', '#60d4d4'],
+      ];
+      const values = pramaSnapshots.slice(-48);
+      if (values.length < 2) return;
+      const width = 320;
+      const height = 92;
+      keys.forEach(([key, color]) => {
+        const points = values.map((item, index) => {
+          const x = (index / Math.max(values.length - 1, 1)) * width;
+          const y = height - clamp01(item[key]) * (height - 8) - 4;
+          return `${x.toFixed(2)},${y.toFixed(2)}`;
+        }).join(' ');
+        const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        poly.setAttribute('points', points);
+        poly.setAttribute('fill', 'none');
+        poly.setAttribute('stroke', color);
+        poly.setAttribute('stroke-width', key === 'viability' ? '2.6' : '1.4');
+        poly.setAttribute('opacity', key === 'viability' ? '1' : '.72');
+        svg.appendChild(poly);
+      });
+    }
+
+    // This UI does not measure PRAMA signals. It only displays backend-generated PRAMA telemetry.
+    function updatePramaLive(event) {
+      if (!event || (event.type !== 'prama' && event.type !== 'final_prama')) return;
+      const viability = event.viability === null || event.viability === undefined ? null : clamp01(event.viability);
+      const collapsed = Boolean(event.threshold_crossed ?? event.collapsed);
+      const boundary = event.boundary_side || 'UNRESOLVED';
+      const vstatus = event.viability_status || (collapsed ? 'COLLAPSED' : 'UNRESOLVED');
+      const threshold = Number(event.collapse_threshold ?? 0.35);
+      const color = viabilityColor(viability ?? 0, collapsed, threshold);
+      const snapshot = {
+        type: event.type === 'final_prama' ? 'final_prama' : 'prama',
+        turn_index: event.turn_index,
+        window_index: event.window_index,
+        micro: clamp01(event.micro),
+        macro: clamp01(event.macro_health ?? event.macro),
+        acople: clamp01(event.acople),
+        micro_drop: clamp01(event.micro_drop),
+        viability: viability ?? 0,
+        collapsed,
+        boundary_side: boundary,
+        viability_status: vstatus,
+        regime_label: event.regime_label || null,
+        trajectory_assessment: event.trajectory_assessment || null,
+        first_crossing_turn: event.first_crossing_turn ?? null,
+        recovery_observed: event.recovery_observed ?? null,
+        rig: clamp01(event.rig),
+        eco: clamp01(event.eco),
+        alu: clamp01(event.alu),
+        turb: clamp01(event.turb),
+        timestamp: new Date().toISOString(),
+      };
+      pramaSnapshots.push(snapshot);
+      $('prama_wait').textContent = event.live_mode ? `PRAMA Live: ${event.live_mode}` : 'PRAMA Live: receiving backend metrics';
+      $('prama_viability').textContent = viability === null ? '--%' : `${Math.round(viability * 100)}%`;
+      $('prama_collapsed').textContent = collapsed ? 'YES' : 'NO';
+      $('prama_boundary').textContent = boundary;
+      $('prama_vstatus').textContent = vstatus;
+      $('prama_regime').textContent = snapshot.regime_label || 'UNRESOLVED';
+      $('prama_assessment').textContent = snapshot.trajectory_assessment || 'UNRESOLVED';
+      $('prama_first_crossing').textContent = snapshot.first_crossing_turn === null ? '--' : snapshot.first_crossing_turn;
+      $('prama_recovery').textContent = snapshot.recovery_observed === null ? '--' : (snapshot.recovery_observed ? 'YES' : 'NO');
+      setBar('viability_fill', collapsed ? 0 : viability, color);
+      [['micro', '#CAD5E2'], ['macro', '#7aa7ff'], ['acople', '#77d69b'], ['micro_drop', '#df5132'], ['rig', '#f2a65a'], ['eco', '#b48cff'], ['alu', '#ff6f91'], ['turb', '#60d4d4']].forEach(([key, barColor]) => {
+        $(`v_${key}`).textContent = fmt(snapshot[key]);
+        setBar(`b_${key}`, snapshot[key], barColor);
+      });
+      drawTrajectory();
+    }
+
+    function updateSummary(summary) {
+      $('sessionLine').textContent = summary.session_id ? `Session ${summary.session_id}` : '';
+      $('m_status').textContent = summary.status || 'idle';
+      $('m_provider').textContent = summary.provider || '--';
+      $('m_model').textContent = summary.model || '--';
+      $('m_requested_model').textContent = summary.requested_model || summary.model || '--';
+      $('m_resolved_model').textContent = summary.resolved_model || summary.model || '--';
+      $('m_turns').textContent = summary.turn_count || 0;
+      $('m_tokens').textContent = summary.token_count || 0;
+      $('m_windows').textContent = summary.window_count || 0;
+      $('m_response_time').textContent = summary.response_time_seconds == null
+        ? '--'
+        : `${Number(summary.response_time_seconds).toFixed(3)} s`;
+      $('m_entropy').textContent = fmt(summary.avg_entropy_norm);
+      $('m_gap').textContent = fmt(summary.avg_gap_norm);
+      $('m_rigidity').textContent = fmt(summary.avg_rigidity);
+      $('m_uncertainty').textContent = fmt(summary.avg_uncertainty);
+      $('m_range').textContent = fmt(summary.max_entropy_range);
+      if (summary.regime_label !== undefined) $('prama_regime').textContent = summary.regime_label || 'UNRESOLVED';
+      if (summary.trajectory_assessment !== undefined) $('prama_assessment').textContent = summary.trajectory_assessment || 'UNRESOLVED';
+      if (summary.first_crossing_turn !== undefined) $('prama_first_crossing').textContent = summary.first_crossing_turn === null ? '--' : summary.first_crossing_turn;
+      if (summary.recovery_observed !== undefined) $('prama_recovery').textContent = summary.recovery_observed === null ? '--' : (summary.recovery_observed ? 'YES' : 'NO');
+    }
+
+    function resizeInput() {
+      const input = $('input');
+      input.style.height = 'auto';
+      input.style.height = `${Math.min(input.scrollHeight, 180)}px`;
+    }
+
+    async function post(path, body = {}) {
+      const response = await fetch(`${API}${path}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!response.ok) {
+        const raw = await response.text();
+        try {
+          const payload = JSON.parse(raw);
+          throw new Error(payload.error || raw);
+        } catch (error) {
+          if (error instanceof SyntaxError) throw new Error(raw);
+          throw error;
+        }
+      }
+      return response;
+    }
+
+    function syncModelForProvider() {
+      const provider = $('providerSelect').value;
+      const modelSelect = $('modelSelect');
+      Array.from(modelSelect.options).forEach(option => {
+        option.hidden = option.dataset.provider !== provider;
+      });
+      const selected = modelSelect.options[modelSelect.selectedIndex];
+      if (!selected || selected.dataset.provider !== provider) {
+        const first = Array.from(modelSelect.options).find(option => option.dataset.provider === provider);
+        if (first) modelSelect.value = first.value;
+      }
+    }
+
+    $('providerSelect').addEventListener('change', syncModelForProvider);
+    syncModelForProvider();
+
+    $('loadTestBtn').onclick = () => {
+      const prompt = TEST_PROMPTS[$('testSelect').value];
+      if (!prompt) return;
+      $('input').value = prompt;
+      resizeInput();
+      $('input').focus();
+      setStatus('Prueba cargada; lista para enviar');
+    };
+
+    $('startBtn').onclick = async () => {
+      setStatus('Iniciando sesión…');
+      try {
+        const response = await post('/session/start', {
+          provider: $('providerSelect').value,
+          model: $('modelSelect').value,
+        });
+        const summary = await response.json();
+        sessionId = summary.session_id;
+        updateSummary(summary);
+        $('sendBtn').disabled = false;
+        $('stopBtn').disabled = false;
+        $('reportBtn').disabled = false;
+        $('startBtn').disabled = true;
+        $('providerSelect').disabled = true;
+        $('modelSelect').disabled = true;
+        setStatus('Sesión activa');
+      } catch (error) {
+        setStatus(`No se pudo iniciar: ${error.message}`);
+      }
+    };
+
+    $('sendBtn').onclick = async () => {
+      const text = $('input').value.trim();
+      if (!text || !sessionId) return;
+      $('input').value = '';
+      resizeInput();
+      addMessage('user', text);
+      const assistantSpan = addMessage('assistant', '');
+      setStatus('Generando respuesta…');
+      $('sendBtn').disabled = true;
+      try {
+        const response = await post('/chat', { session_id: sessionId, user_message: text });
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            const event = JSON.parse(line);
+            if (event.type === 'chunk') assistantSpan.textContent += event.text;
+            if (event.type === 'prama' || event.type === 'final_prama') updatePramaLive(event);
+            if (event.type === 'turn_summary') updateSummary(event.session);
+            if (event.type === 'error') throw new Error(event.message);
+            chat.scrollTop = chat.scrollHeight;
+          }
+        }
+        setStatus('Respuesta registrada');
+      } catch (error) {
+        assistantSpan.textContent ||= `[Error] ${error.message}`;
+        setStatus(`Error: ${error.message}`);
+      } finally {
+        $('sendBtn').disabled = !sessionId;
+      }
+    };
+
+    $('input').addEventListener('keydown', event => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        if (!$('sendBtn').disabled) $('sendBtn').click();
+      }
+    });
+
+    $('input').addEventListener('input', resizeInput);
+    resizeInput();
+
+    $('archiveToggle').onclick = event => {
+      event.stopPropagation();
+      const panel = $('archivePanel');
+      panel.hidden = !panel.hidden;
+      $('archiveToggle').setAttribute('aria-expanded', String(!panel.hidden));
+    };
+
+    document.addEventListener('click', event => {
+      const panel = $('archivePanel');
+      if (panel.hidden) return;
+      if (panel.contains(event.target) || $('archiveToggle').contains(event.target)) return;
+      panel.hidden = true;
+      $('archiveToggle').setAttribute('aria-expanded', 'false');
+    });
+
+    document.addEventListener('keydown', event => {
+      if (event.key !== 'Escape') return;
+      $('archivePanel').hidden = true;
+      $('archiveToggle').setAttribute('aria-expanded', 'false');
+    });
+
+    $('stopBtn').onclick = async () => {
+      if (!sessionId) return;
+      const response = await post('/session/stop', { session_id: sessionId });
+      updateSummary(await response.json());
+      $('sendBtn').disabled = true;
+      $('stopBtn').disabled = true;
+      $('providerSelect').disabled = false;
+      $('modelSelect').disabled = false;
+      setStatus('Sesión detenida');
+    };
+
+    $('reportBtn').onclick = async () => {
+      if (!sessionId) return;
+      setStatus('Exportando resultados…');
+      try {
+        const response = await post('/session/report', { session_id: sessionId });
+        const payload = await response.json();
+        const labels = {
+          conversation_md: 'Conversation Markdown',
+          conversation_json: 'Conversation JSON',
+          report: 'PRAMA Report',
+          detail: 'Detail CSV',
+          summary: 'Summary CSV',
+          raw: 'Raw JSON',
+          metadata: 'Metadata JSON'
+        };
+        $('links').innerHTML = '';
+        Object.entries(payload.files).forEach(([key, path]) => {
+          const a = document.createElement('a');
+          const filename = path.split(/[\\/]/).pop();
+          a.href = `${API}/download?path=${encodeURIComponent(path)}`;
+          a.download = '';
+          a.textContent = `${labels[key] || key} (${filename})`;
+          $('links').appendChild(a);
+        });
+        setStatus(`Resultados listos: ${payload.output_folder}`);
+      } catch (error) {
+        setStatus(`Error de exportación: ${error.message}`);
+      }
+    };
+
+    fetch(`${API}/api/health`, { cache: 'no-store' })
+      .then(response => response.json())
+      .then(health => {
+        setStatus(health.api_key_present
+          ? 'Servidor listo · API key NVIDIA activa'
+          : 'Servidor listo · falta NVIDIA_API_KEY en esta consola');
+      })
+      .catch(() => setStatus('Servidor no disponible'));
+  </script>
+</body>
+</html>

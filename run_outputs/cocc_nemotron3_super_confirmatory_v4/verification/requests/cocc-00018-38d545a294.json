@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00018-38d545a294",
+  "problem_id": "3046",
+  "item_id": "3046:clean_control",
+  "verifier_ref": "cocc:3046:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to find the minimal number of deletions from string `num` (with length up to 100) to produce a number (possibly empty => treated as 0) that is divisible by 25. Each deletion removes any digit; the resulting string is formed by the remaining digits in order. Leading zeros are allowed after deletions? Input has no leading zeros, but after deletion we may get leading zeros, which are okay (they represent numbers). If all digits removed => 0, which is divisible by 25.\n\nGoal: minimize deletions => maximize length of resulting subsequence (not necessarily contiguous? Wait: we delete digits (anywhere) but maintain order of remaining digits => resulting number is a subsequence of original). So we need to find the longest subsequence of `num` that forms a number divisible by 25. Then answer = len(num) - length_of_longest_subseq_divisible_by_25.\n\nWe need to handle case of empty subsequence (=> length 0 => value 0, which is divisible by 25). So answer <= len(num).\n\nBecause length <= 100, we can brute force? Subsequence enumeration is 2^n, not feasible. But we can treat dynamic programming: we want longest subsequence whose value modulo 25 = 0 (or 0 when no digits?). However, leading zeros allowed; the numeric value could be large but we only care modulo 25.\n\nBut we need to ensure not counting empty subsequence incorrectly? Actually empty subsequence yields 0, which is divisible by 25. So DP should capture ability to have value zero for empty subsequence.\n\nWe can treat DP[i][r] = maximum length of subsequence using first i characters (0-indexed up to i-1) that yields remainder r modulo 25. Initialize DP[0][0] = 0 (empty subsequence). Others = -inf.\n\nFor each character c = digit d at position i (0-indexed), we update DP[i+1][r] = max(DP[i][r] (skip c), DP[i][prev_r] + 1 where new remainder = (prev_r * 10 + d) % 25). Because when we append digit d to the right of existing subsequence, the value changes: new_val = old_val * 10 + d.\n\nWe also need to consider starting a new subsequence with just this digit: that is like",
+  "event_token": 512,
+  "event_turn": 0
+}

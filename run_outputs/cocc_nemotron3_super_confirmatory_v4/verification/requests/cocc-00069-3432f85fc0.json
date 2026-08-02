@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00069-3432f85fc0",
+  "problem_id": "2893",
+  "item_id": "2893:clean_control",
+  "verifier_ref": "cocc:2893:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to find the score minus penalties. Starting at index 0, we will have accumulated point: dp[0] = nums[0]\n\nTransition:\n\nFor each position i from 1 to n-1, you can come from any previous j < i.\n\ndp[i] = nums[i] + max{ dp[j] - (x if parity different else 0) } \n\nThis is O(n^2), too big. We need linear.\n\nObservation: The penalty depends only on parity difference. So we can maintain the best total score seen so far for each parity (even/odd), subtract x if moving from opposite parity.\n\nWe can compute:\n\nLet best_even = max total score ending at a position with even nums[j] (including that nums[j] value)\nLet best_odd = max total score ending at a position with odd nums[j]\n\nInitialize:\n\nif nums[0] even: best_even = nums[0]; best_odd = -inf\nelse: best_odd = nums[0]; best_even = -inf\n\nFor i from 1 to n-1:\n    parity = nums[i] % 2\n    if parity == 0: # even\n        # from same parity: best_even (no penalty)\n        # from opposite: best_odd - x (penalty)\n        cand = max(best_even, best_odd - x)\n        dp_i = nums[i] + cand\n        best_even = max(best_even, dp_i)\n    else:\n        cand = max(best_odd, best_even - x)\n        dp_i = nums[i] + cand\n        best_odd = max(best_odd, dp_i)\n\nAnswer = max(best_even, best_odd)\n\nBut note dp_i could be less than previous best_even? We update best_even with max.\n\nWorks.\n\nEdge case: what if no path? We always can stay at start? Actually we must start at index 0; we can choose not to move? Score will be nums[0]? Yes.\n\nOur DP considers any path ending at i. At the end, answer is max over all i.\n\nCheck example:\n\nnums=[2,3,6,1,9,2], x=5\n\nnums[0]=2 even -> best_even=2, best_odd=-inf\n\ni=1: 3 odd: cand = max(best_odd=-inf,",
+  "event_token": 512,
+  "event_turn": 0
+}

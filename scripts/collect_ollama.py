@@ -11,8 +11,19 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
+from time import monotonic
 from typing import Any
 
+from aptadynamic_llm.model_payload import (
+    encode_task_only_payload,
+    task_only_prompt,
+)
+from aptadynamic_llm.artifact_schema import (
+    ChannelStatus,
+    make_envelope,
+    sha256_value,
+    write_jsonl_atomic,
+)
 from aptadynamic_llm.ep1_config import (
     BASE_SEED,
     MIN_OLLAMA_VERSION,
@@ -35,7 +46,7 @@ FROZEN_SEED = BASE_SEED
 
 def _request(base_url: str, endpoint: str, payload: dict[str, Any] | None = None, timeout: int = 600) -> dict[str, Any]:
     url = base_url.rstrip("/") + endpoint
-    data = None if payload is None else json.dumps(payload).encode("utf-8")
+    data = None if payload is None else encode_task_only_payload(payload)
     request = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
@@ -126,6 +137,17 @@ def load_prompts(path: Path) -> list[dict[str, str]]:
             )
     if not prompts:
         raise ValueError(f"prompt suite is empty or invalid: {path}")
+    prompt_ids = [prompt["prompt_id"] for prompt in prompts]
+    if len(prompts) < 40:
+        raise ValueError("E-P1 v2 prompt suite requires at least 40 distinct prompts")
+    if len(prompt_ids) != len(set(prompt_ids)):
+        raise ValueError("E-P1 v2 prompt suite contains duplicate prompt_id values")
+    invalid_families = sorted({prompt["family"] for prompt in prompts if prompt["family"] != "structured_analysis"})
+    if invalid_families:
+        raise ValueError(
+            "E-P1 v2 permits only bounded structured_analysis prompts; "
+            f"found {invalid_families!r}"
+        )
     return prompts
 
 
@@ -181,12 +203,13 @@ def collect(args: argparse.Namespace) -> dict[str, Any]:
 
     args.out.mkdir(parents=True)
     completed: list[dict[str, Any]] = []
+    generation_artifacts: list[dict[str, Any]] = []
     for index in range(count):
         prompt = prompts[index % len(prompts)]
         seed = args.seed + index if args.seed_per_index else args.seed
         payload = {
             "model": args.model,
-            "prompt": prompt["prompt"],
+            "prompt": task_only_prompt(prompt["prompt"]),
             "stream": False,
             "logprobs": True,
             "top_logprobs": args.top_logprobs,
@@ -197,7 +220,9 @@ def collect(args: argparse.Namespace) -> dict[str, Any]:
                 "seed": seed,
             },
         }
+        response_started = monotonic()
         response = _request(args.base_url, "/api/generate", payload, timeout=args.timeout)
+        response_time_seconds = monotonic() - response_started
         tokens = response_tokens(response)
         session_id = f"{args.mode}_{index:04d}"
         raw = {
@@ -215,6 +240,8 @@ def collect(args: argparse.Namespace) -> dict[str, Any]:
             "temperature": args.temperature,
             "top_p": args.top_p,
             "num_predict": args.num_predict,
+            # Execution metadata only; never included in the model payload.
+            "response_time_seconds": response_time_seconds,
             "turns": [
                 {
                     "turn_index": 0,
@@ -225,6 +252,40 @@ def collect(args: argparse.Namespace) -> dict[str, Any]:
                 }
             ],
         }
+        generation_artifacts.append(
+            {
+                **make_envelope(
+                    artifact_type="generation_observation",
+                    study_id=f"E-P1-{args.mode}",
+                    session_id=session_id,
+                    producer="scripts.collect_ollama/2",
+                    created_at=raw["created_at"],
+                    source_sha256=sha256_value(response),
+                    config_sha256=sha256_value(
+                        {
+                            "model": args.model,
+                            "logprobs": True,
+                            "top_logprobs": args.top_logprobs,
+                            "options": payload["options"],
+                        }
+                    ),
+                    partition=(
+                        "calibration" if args.mode == "pilot" else "confirmatory"
+                    ),
+                    channel_status=ChannelStatus.OBSERVED,
+                ),
+                "model_id": f"{args.model}@{digest}",
+                "prompt_sha256": hashlib.sha256(
+                    prompt["prompt"].encode("utf-8")
+                ).hexdigest(),
+                "response_sha256": hashlib.sha256(
+                    raw["turns"][0]["assistant_message"].encode("utf-8")
+                ).hexdigest(),
+                "response_time_seconds": response_time_seconds,
+                "finish_reason": raw["turns"][0]["finish_reason"],
+                "token_count": len(tokens),
+            }
+        )
         path = args.out / f"{session_id}.json"
         path.write_text(json.dumps(raw, indent=2, ensure_ascii=False), encoding="utf-8")
         completed.append(
@@ -233,10 +294,14 @@ def collect(args: argparse.Namespace) -> dict[str, Any]:
                 "prompt_id": prompt["prompt_id"],
                 "finish_reason": raw["turns"][0]["finish_reason"],
                 "token_count": len(tokens),
+                "response_time_seconds": response_time_seconds,
             }
         )
         print(f"[{index + 1}/{count}] {session_id}: {len(tokens)} tokens, {raw['turns'][0]['finish_reason']}")
 
+    write_jsonl_atomic(
+        args.out / "generation_observation.jsonl", generation_artifacts
+    )
     manifest = {
         "schema": "LLM-SVM-Ollama-collection/1",
         "created_at_utc": datetime.now(timezone.utc).isoformat(),

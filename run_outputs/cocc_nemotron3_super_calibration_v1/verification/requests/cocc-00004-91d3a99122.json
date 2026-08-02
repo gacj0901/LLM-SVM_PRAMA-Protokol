@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00004-91d3a99122",
+  "problem_id": "2786",
+  "item_id": "2786:clean_control",
+  "verifier_ref": "cocc:2786:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to find length of longest substring where there is at most one pair of consecutive equal digits. Equivalent: in the substring, the number of positions i where s[i] == s[i+1] is <=1. The substring may have zero or one adjacent equal pair.\n\nThus we can slide window while counting number of consecutive equal pairs inside it.\n\nWe can have two pointers left, right, maintaining count of equal adjacent pairs in the window.\n\nWhen we add a new character at position right, if right>0 and s[right]==s[right-1], then we increment pair count.\n\nIf pair count >1, we need to move left forward until pair count <=1. When moving left, we need to subtract any pair that we drop from the window.\n\nSpecifically, when we move left pointer from L to L+1, we need to check if there is a pair between s[L] and s[L+1]; if so, decrement pair count.\n\nWe also need to check if moving left beyond the pair may affect the pair count for other positions? Since pair count counts pairs i where i,i+1 inside window. So if we increment left, we remove the possible pair at index left (i.e., between left and left+1). That's the only pair removed.\n\nImplementation:\n\nInitialize left=0, ans=0, pairCount=0.\n\nLoop right from 0 to n-1:\n\nif right>0 and s[right]==s[right-1]:\n    pairCount +=1\n\nwhile pairCount >1:\n    # move left\n    if left+1 <= right and s[left]==s[left+1]:\n        pairCount -=1\n    left+=1\n\nNow window [left, right] has at most 1 pair. Update ans = max(ans, right-left+1).\n\nEdge Cases: When left moves, we need to ensure left+1 <= right; but if left == right, then left+1 > right, no pair to subtract. We can just check if s[left]==s[left+1] and left+1 <= right.\n\nComplexities O(n).\n\nTest:\n\nExample: s = \"52233\"\nIndices:0:5,1:2,2:2,3:3,4:3\n\nLoop:\nright=0: pairCount=0 -> ans=1\nright=1: s[1]!=s[0] -> pairCount=0 -> ans=2",
+  "event_token": 512,
+  "event_turn": 0
+}

@@ -1,0 +1,61 @@
+{
+  "schema": "LLM-SVM-CoCC-structural-mobility-contract/2",
+  "status": "FROZEN_EXPLORATORY_REPROJECTION",
+  "observer_id": "structural_mobility_v2",
+  "model_specific_parameters": false,
+  "requires_external_calibration": false,
+  "contains_outcome_labels": false,
+  "contains_prompt_or_answer": false,
+  "base_geometry_contract": "config/cocc_operator_geometry_observer_v1.json",
+  "base_geometry_contract_sha256": "dfc9c0740b845381cea7b8aa9733764e2c1c885e9b46a85e98e17f01d63c0ba7",
+  "channels": {
+    "transport_efficiency": {
+      "definition": "net_displacement/(path_length+epsilon)",
+      "range": "[0,1]"
+    },
+    "recurrence_persistence": {
+      "definition": "trailing mean distance-weighted recurrence intensity",
+      "trailing_window": 16,
+      "pair_similarity": "max(0,1-rms_distance/recurrence_radius)",
+      "range": "[0,1]"
+    },
+    "recurrent_dwell_fraction": {
+      "definition": "current recurrent dwell/min(elapsed_windows,geometry_window)",
+      "range": "[0,1]"
+    },
+    "recirculation_onset": {
+      "definition": "first absolute window satisfying RECIRCULATING",
+      "range": "nonnegative integer or null"
+    }
+  },
+  "classification": {
+    "logic": "unweighted_boolean_conjunction",
+    "activity_gate": 0.5,
+    "maximum_transport_efficiency": 0.25,
+    "minimum_recurrence_persistence": 0.3,
+    "minimum_recurrent_dwell_fraction": 0.5,
+    "early_crystallization_before_window": 32,
+    "RECIRCULATING": "activity_gate AND low_transport AND persistent_recurrence",
+    "CRYSTALLIZED": "RECIRCULATING AND high_recurrent_dwell_fraction",
+    "EARLY_CRYSTALLIZATION": "CRYSTALLIZED AND crystallization_onset < 32"
+  },
+  "session_endpoints": [
+    "minimum_transport_efficiency",
+    "recurrence_persistence_area",
+    "maximum_recurrence_persistence",
+    "maximum_recurrent_dwell/geometry_ready_windows",
+    "recirculation_onset",
+    "fraction_recirculating",
+    "fraction_crystallized"
+  ],
+  "kernel_boundary": {
+    "delta_xi_accumulated_excess_capacity_unchanged": true,
+    "diagnostic_only": true
+  },
+  "claim_boundary": [
+    "Version 2 was specified after exploratory inspection of version 1 and remains exploratory.",
+    "No endpoint is a weighted composite and all channels remain separately reportable.",
+    "Constants are identical across models, outcomes, conditions and trajectory lengths.",
+    "Saved numeric observations are reused; no LLM receives observer information."
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00128-d61d495e78",
+  "problem_id": "3225",
+  "item_id": "3225:clean_control",
+  "verifier_ref": "cocc:3225:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to find length of longest subarray where each element's frequency <= k.\n\nWe can solve using sliding window with two pointers and a frequency map.\n\nSince we need to ensure that in the current window, all elements frequencies <= k. If any element exceeds k, we need to move left pointer until condition satisfied.\n\nWe can maintain count map. For each right index, increment count of nums[r]. While count[nums[r]] > k (i.e., that element exceeded allowed frequency), we decrement count[nums[l]] and increment l. This ensures after while loop, window [l..r] is valid (since only the element at r could cause violation; but after moving left enough, all frequencies <= k). However, need to check that moving left for this element may cause other elements to still be >k? Actually if we only enforce that the element causing exceedance is reduced, other elements frequencies can only decrease or stay same when we move left, so they cannot increase beyond k. So the window remains valid.\n\nThus algorithm: Initialize l=0, ans=0, freq=defaultdict(int). Iterate r from 0 to n-1: freq[nums[r]]+=1; while freq[nums[r]] > k: freq[nums[l]]-=1; l+=1; ans = max(ans, r-l+1). Return ans.\n\nComplexities: O(n) time, O(n) space.\n\nEdge cases: works.\n\nCheck examples:\n\nExample1: nums = [1,2,3,1,2,3,1,2], k=2.\n\nLet's simulate quickly: r0:1 cnt1=1 ok ans=1. r1:2 cnt2=1 ans=2. r2:3 cnt3=1 ans=3. r3:1 cnt1=2 ans=4. r4:2 cnt2=2 ans=5. r5:3 cnt3=2 ans=6. r6:1 cnt1=3 >2 => while: decrement nums[l]=1 (l0) cnt1=2 l=1; now cnt1=2 <=2 stop; window [1..6] length=6 ans stays6. r7:2 cnt2=3 >2 => while: decrement nums[l]=2 (l1) cnt2=1 l=2; now cnt2=2? Wait we had cnt2 was 2 before increment? Actually after r5, cnt2=",
+  "event_token": 512,
+  "event_turn": 0
+}

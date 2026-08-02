@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00002-99e2264408",
+  "problem_id": "2777",
+  "item_id": "2777:clean_control",
+  "verifier_ref": "cocc:2777:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to implement function distinctDifferenceArray returning list of length n where each element diff[i] = distinct count in prefix [0..i] minus distinct count in suffix [i+1..n-1] (empty suffix -> distinct count 0).\n\nConstraints small: n <= 50, values 1..50. Could compute per i via set prefix and suffix each time O(n^2) trivial. But we can also compute prefix distinct counts in O(n) using a set, suffix distinct counts using a set from right.\n\nBut given constraints small, we can just compute for each i using set(prefix) and set(suffix). Implementation is straightforward.\n\nDefine prefix_set = set(); iterate through i: add nums[i] to prefix_set; prefix_len = len(prefix_set). Then suffix_set = set(nums[i+1:]) (or precomputed). Then diff[i] = prefix_len - len(suffix_set). Return diff.\n\nComplexities O(n^2). Acceptable.\n\nBut we can also compute suffix distinct counts array of length n+1 (suffix_counts[i] = distinct count of suffix starting at i). Compute from right: suffix_counts[n] = 0 (empty suffix). Then for i from n-1 down to 0: suffix_counts[i] = suffix_counts[i+1] + (1 if nums[i] not in seen else 0) where seen tracks seen elements from right.\n\nThen for each i: prefix distinct count can be computed similarly left-to-right. Or we can compute prefix distinct counts array prefix_counts[i] = distinct count of prefix[0..i] (i inclusive). Compute with seen set left.\n\nThen diff[i] = prefix_counts[i] - suffix_counts[i+1] (since suffix after i). That yields O(n). We'll implement either.\n\nLet's produce solution:\n\n```\nclass Solution:\n    def distinctDifferenceArray(self, nums: List[int]) -> List[int]:\n        n = len(nums)\n        prefix = [0]*n\n        seen = set()\n        for i, val in enumerate(nums):\n            seen.add(val)\n            prefix[i] = len(seen)\n        suffix = [0]*(n+1)  # suffix[i] = distinct count of nums[i:]\n        seen = set()\n        for i in range(n-1, -1, -1):\n            seen.add(nums[i])\n            suffix[i] = len(seen)\n        # suffix[n] stays 0\n        res = []\n       ",
+  "event_token": 512,
+  "event_turn": 0
+}

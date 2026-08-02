@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00016-c51e958c4e",
+  "problem_id": "2999",
+  "item_id": "2999:clean_control",
+  "verifier_ref": "cocc:2999:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to parse the problem: strings of length 4, allowed operation: pick indices i and j such that j-i = 2, i.e., swap characters with distance exactly 2: positions 0 and 2, or positions 1 and 3 (since length 4). So we can swap s[0] <-> s[2] arbitrarily many times, and s[1] <-> s[3] arbitrarily many times. This operation is independent: we can swap within each parity class: positions of same parity mod 2 (0-indexed). Essentially, we can reorder characters within the even positions arbitrarily (only 2 positions: index 0 and 2) by swapping them; same for odd positions (indices 1 and 3). Since there are only two positions each, swapping allows us to either keep original order or swap them. So overall reachable strings from s1 are those where the multiset of characters at even positions matches that of s1's even positions (i.e., {s1[0], s1[2]}) and same for odd positions ({s1[1], s1[3]}). So s2 must have even-position characters equal to a permutation of s1[0], s1[2]; and odd-position characters equal to a permutation of s1[1], s1[3].\n\nThus solution: return sorted(s1[0] + s1[2]) == sorted(s2[0] + s2[2]) and sorted(s1[1] + s1[3]) == sorted(s2[1] + s2[3]).\n\nAlternatively, we can just check if multiset of characters at even indices in s1 equals that in s2, and same for odd.\n\nBecause length is fixed 4, we can even brute force all reachable strings via at most 2 swaps? Actually we can apply operation any number times: we can swap evens and odds any number times, which yields at most 2*2=4 possible strings: we can decide whether to swap evens (0/1) and swap odds (0/1). So we can simply generate four variants and compare.\n\nBut better to do parity sets.\n\nEdge Cases: s1 == s2 always true.\n\nLet's test with given examples.\n\nExample1: s1=\"abcd\": evens = a,c => sorted \"ac\"; odds = b,d => sorted \"bd\". s2=\"cdab",
+  "event_token": 512,
+  "event_turn": 0
+}

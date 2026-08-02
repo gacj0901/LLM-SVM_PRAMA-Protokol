@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00003-f92144c6f7",
+  "problem_id": "2784",
+  "item_id": "2784:clean_control",
+  "verifier_ref": "cocc:2784:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to find sum over all non-empty subsets (groups) of the value: max(S)^2 * min(S) where S is the subset of nums.\n\nGiven constraints n up to 1e5, we need O(n log n) solution.\n\nObservation: Because the function depends only on min and max, we can sort the array and consider contributions based on sorted order.\n\nLet’s sort the array ascending: a[0] ≤ a[1] ≤ ... ≤ a[n-1].\n\nNow any subset's min is some a[i] (the smallest index in the subset), and max is some a[j] (largest index in the subset), with i ≤ j.\n\nIf we fix i as min index and j as max index, then any subset where min = a[i], max = a[j] (and i ≤ j) consists of picking any subset of elements strictly between i and j (i.e., indices i+1 … j-1) to include or not, and we must include both a[i] and a[j] (to ensure min and max are exactly these). However, there could be other elements equal to a[i] or a[j] that can affect min or max: if there are duplicates of the min value (same as a[i]), then the min remains a[i] even if we pick others equal to a[i]; similarly for max.\n\nThus, counting subsets where min = a[i] and max = a[j] requires careful handling of duplicates.\n\nWe can instead compute sum over subsets as sum_{subsets} (max^2 * min). Another approach: we can sum contributions of each pair (i, j) as contribution = a[j]^2 * a[i] * number_of_subsets_where_min_is_at_least a[i] and max_is_at_most a[j] with min exactly a[i] and max exactly a[j]? Actually we need exactly min = a[i] and max = a[j]; but we can transform to contributions using inclusion-exclusion or using prefix sums.\n\nAlternate viewpoint: Since we sorted, min is the first element chosen (lowest index), max is the last element chosen (highest index). For any subset, after sorting its elements, we can consider its first and last element in the sorted original array (not necessarily contiguous). However, any subset corresponds to picking some set of indices; the min is the smallest index selected; the max is the largest index selected.\n\nThus we can think: For each ordered pair",
+  "event_token": 512,
+  "event_turn": 0
+}

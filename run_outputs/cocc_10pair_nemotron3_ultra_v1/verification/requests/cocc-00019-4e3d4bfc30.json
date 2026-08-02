@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00019-4e3d4bfc30",
+  "problem_id": "3235",
+  "item_id": "3235:clean_control",
+  "verifier_ref": "cocc:3235:clean_control",
+  "expected_answer": "",
+  "observed_answer": "```python\nfrom typing import List\nimport heapq\n\nclass Solution:\n    def minimumCost(self, source: str, target: str, original: List[str], changed: List[str], cost: List[int]) -> int:\n        # There are 26 lowercase English letters\n        N = 26\n        INF = 10**18\n        \n        # Initialize distance matrix with infinity\n        # dist[i][j] = min cost to convert char i ('a'+i) to char j ('a'+j)\n        dist = [[INF] * N for _ in range(N)]\n        \n        # Cost from a node to itself is 0\n        for i in range(N):\n            dist[i][i] = 0\n            \n        # Add direct edges from the transformation rules\n        # Note: there might be multiple rules for the same (original, changed) pair.\n        # We keep the minimum cost edge.\n        for o_char, c_char, c in zip(original, changed, cost):\n            u = ord(o_char) - ord('a')\n            v = ord(c_char) - ord('a')\n            if c < dist[u][v]:\n                dist[u][v] = c\n        \n        # Floyd-Warshall algorithm to find all-pairs shortest paths\n        # Complexity: O(26^3) which is very fast (~17k operations)\n        for k in range(N):\n            for i in range(N):\n                # Optimization: if dist[i][k] is INF, no path exists via k\n                if dist[i][k] == INF:\n                    continue\n                for j in range(N):\n                    # Optimization: if dist[k][j] is INF, no path exists via k\n                    if dist[k][j] == INF:\n                        continue\n                    if dist[i][j] > dist[i][k] + dist[k][j]:\n                        dist[i][j] = dist[i][k] + dist[k][j]\n        \n        total_cost = 0\n        for s_char, t_char in zip(source, target):\n            if s_char == t_char:\n                continue\n            u = ord(s_char) - ord('a')\n            v = ord(t_char) - ord('a')\n            if dist[u][v] == INF:\n                return -1\n            total_cost += dist[u][v]\n            \n        return total_cost\n```",
+  "event_token": 508,
+  "event_turn": 0
+}

@@ -1,0 +1,247 @@
+# State-Discrimination Input Validation Report
+
+- valid: `True`
+- primary_score: `latent_occupancy`
+- input_count: `115`
+- labeled_session_count: `115`
+- valid_session_count: `115`
+
+## Errors
+
+- None
+
+## Warnings
+
+- s005: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s006: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s007: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s008: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s009: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s010: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s011: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s012: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s013: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s014: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s015: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s016: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s017: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s018: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s019: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s020: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s021: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s022: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s023: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s024: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s025: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s026: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s027: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s028: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s029: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s030: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s031: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s032: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s033: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s034: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s035: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s036: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s037: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s038: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s039: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s040: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s041: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s042: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s043: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s044: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s045: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s046: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s047: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s048: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s049: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s050: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s051: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s052: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s053: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s054: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s055: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s056: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s057: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s058: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s059: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s060: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s061: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s062: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s063: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s064: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s065: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s066: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s067: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s068: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s069: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s070: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s071: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s072: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s073: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s074: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s075: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s076: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s077: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s078: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s079: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s080: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s081: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s082: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s083: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s084: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s085: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s086: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s087: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s088: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s089: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s090: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s091: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s092: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s093: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s094: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s095: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s096: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s097: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s098: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s099: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s100: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s101: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s102: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s103: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s104: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s105: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s106: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s107: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s108: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s109: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s110: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s111: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s112: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s113: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s114: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s115: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s116: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s117: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s118: event_token equals/exceeds final token; lead time is a final-outcome proxy
+- s119: event_token equals/exceeds final token; lead time is a final-outcome proxy
+
+## Sessions
+
+- `s005` valid=True turns=16 final_token=256 event_token=256
+- `s006` valid=True turns=15 final_token=226 event_token=226
+- `s007` valid=True turns=16 final_token=256 event_token=256
+- `s008` valid=True turns=16 final_token=256 event_token=256
+- `s009` valid=True turns=12 final_token=177 event_token=177
+- `s010` valid=True turns=16 final_token=256 event_token=256
+- `s011` valid=True turns=16 final_token=256 event_token=256
+- `s012` valid=True turns=16 final_token=256 event_token=256
+- `s013` valid=True turns=16 final_token=256 event_token=256
+- `s014` valid=True turns=14 final_token=215 event_token=215
+- `s015` valid=True turns=16 final_token=256 event_token=256
+- `s016` valid=True turns=13 final_token=206 event_token=206
+- `s017` valid=True turns=16 final_token=256 event_token=256
+- `s018` valid=True turns=16 final_token=256 event_token=256
+- `s019` valid=True turns=16 final_token=256 event_token=256
+- `s020` valid=True turns=16 final_token=256 event_token=256
+- `s021` valid=True turns=16 final_token=256 event_token=256
+- `s022` valid=True turns=12 final_token=190 event_token=190
+- `s023` valid=True turns=16 final_token=256 event_token=256
+- `s024` valid=True turns=11 final_token=175 event_token=175
+- `s025` valid=True turns=16 final_token=256 event_token=256
+- `s026` valid=True turns=16 final_token=256 event_token=256
+- `s027` valid=True turns=16 final_token=256 event_token=256
+- `s028` valid=True turns=16 final_token=256 event_token=256
+- `s029` valid=True turns=16 final_token=256 event_token=256
+- `s030` valid=True turns=16 final_token=256 event_token=256
+- `s031` valid=True turns=16 final_token=256 event_token=256
+- `s032` valid=True turns=15 final_token=231 event_token=231
+- `s033` valid=True turns=16 final_token=256 event_token=256
+- `s034` valid=True turns=16 final_token=256 event_token=256
+- `s035` valid=True turns=16 final_token=256 event_token=256
+- `s036` valid=True turns=16 final_token=256 event_token=256
+- `s037` valid=True turns=16 final_token=256 event_token=256
+- `s038` valid=True turns=16 final_token=256 event_token=256
+- `s039` valid=True turns=16 final_token=256 event_token=256
+- `s040` valid=True turns=16 final_token=256 event_token=256
+- `s041` valid=True turns=16 final_token=256 event_token=256
+- `s042` valid=True turns=16 final_token=256 event_token=256
+- `s043` valid=True turns=13 final_token=207 event_token=207
+- `s044` valid=True turns=16 final_token=256 event_token=256
+- `s045` valid=True turns=16 final_token=242 event_token=242
+- `s046` valid=True turns=16 final_token=256 event_token=256
+- `s047` valid=True turns=16 final_token=256 event_token=256
+- `s048` valid=True turns=16 final_token=256 event_token=256
+- `s049` valid=True turns=16 final_token=256 event_token=256
+- `s050` valid=True turns=16 final_token=256 event_token=256
+- `s051` valid=True turns=16 final_token=256 event_token=256
+- `s052` valid=True turns=16 final_token=256 event_token=256
+- `s053` valid=True turns=16 final_token=256 event_token=256
+- `s054` valid=True turns=11 final_token=162 event_token=162
+- `s055` valid=True turns=16 final_token=256 event_token=256
+- `s056` valid=True turns=16 final_token=256 event_token=256
+- `s057` valid=True turns=16 final_token=256 event_token=256
+- `s058` valid=True turns=16 final_token=256 event_token=256
+- `s059` valid=True turns=16 final_token=256 event_token=256
+- `s060` valid=True turns=16 final_token=256 event_token=256
+- `s061` valid=True turns=16 final_token=256 event_token=256
+- `s062` valid=True turns=10 final_token=156 event_token=156
+- `s063` valid=True turns=16 final_token=245 event_token=245
+- `s064` valid=True turns=16 final_token=256 event_token=256
+- `s065` valid=True turns=16 final_token=256 event_token=256
+- `s066` valid=True turns=16 final_token=256 event_token=256
+- `s067` valid=True turns=16 final_token=256 event_token=256
+- `s068` valid=True turns=16 final_token=256 event_token=256
+- `s069` valid=True turns=16 final_token=256 event_token=256
+- `s070` valid=True turns=16 final_token=256 event_token=256
+- `s071` valid=True turns=15 final_token=239 event_token=239
+- `s072` valid=True turns=16 final_token=256 event_token=256
+- `s073` valid=True turns=16 final_token=256 event_token=256
+- `s074` valid=True turns=16 final_token=254 event_token=254
+- `s075` valid=True turns=16 final_token=256 event_token=256
+- `s076` valid=True turns=16 final_token=242 event_token=242
+- `s077` valid=True turns=16 final_token=256 event_token=256
+- `s078` valid=True turns=16 final_token=256 event_token=256
+- `s079` valid=True turns=13 final_token=194 event_token=194
+- `s080` valid=True turns=16 final_token=256 event_token=256
+- `s081` valid=True turns=16 final_token=256 event_token=256
+- `s082` valid=True turns=16 final_token=256 event_token=256
+- `s083` valid=True turns=16 final_token=256 event_token=256
+- `s084` valid=True turns=16 final_token=256 event_token=256
+- `s085` valid=True turns=13 final_token=200 event_token=200
+- `s086` valid=True turns=16 final_token=256 event_token=256
+- `s087` valid=True turns=16 final_token=256 event_token=256
+- `s088` valid=True turns=16 final_token=256 event_token=256
+- `s089` valid=True turns=16 final_token=256 event_token=256
+- `s090` valid=True turns=16 final_token=256 event_token=256
+- `s091` valid=True turns=16 final_token=256 event_token=256
+- `s092` valid=True turns=16 final_token=256 event_token=256
+- `s093` valid=True turns=16 final_token=256 event_token=256
+- `s094` valid=True turns=16 final_token=256 event_token=256
+- `s095` valid=True turns=16 final_token=256 event_token=256
+- `s096` valid=True turns=16 final_token=256 event_token=256
+- `s097` valid=True turns=16 final_token=256 event_token=256
+- `s098` valid=True turns=14 final_token=222 event_token=222
+- `s099` valid=True turns=16 final_token=256 event_token=256
+- `s100` valid=True turns=16 final_token=256 event_token=256
+- `s101` valid=True turns=16 final_token=256 event_token=256
+- `s102` valid=True turns=13 final_token=199 event_token=199
+- `s103` valid=True turns=12 final_token=180 event_token=180
+- `s104` valid=True turns=14 final_token=222 event_token=222
+- `s105` valid=True turns=11 final_token=170 event_token=170
+- `s106` valid=True turns=16 final_token=256 event_token=256
+- `s107` valid=True turns=11 final_token=172 event_token=172
+- `s108` valid=True turns=16 final_token=256 event_token=256
+- `s109` valid=True turns=16 final_token=256 event_token=256
+- `s110` valid=True turns=16 final_token=256 event_token=256
+- `s111` valid=True turns=16 final_token=256 event_token=256
+- `s112` valid=True turns=16 final_token=256 event_token=256
+- `s113` valid=True turns=16 final_token=256 event_token=256
+- `s114` valid=True turns=14 final_token=216 event_token=216
+- `s115` valid=True turns=16 final_token=256 event_token=256
+- `s116` valid=True turns=16 final_token=256 event_token=256
+- `s117` valid=True turns=16 final_token=256 event_token=256
+- `s118` valid=True turns=16 final_token=256 event_token=256
+- `s119` valid=True turns=16 final_token=256 event_token=256

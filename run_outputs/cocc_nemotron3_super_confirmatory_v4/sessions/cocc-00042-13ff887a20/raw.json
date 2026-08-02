@@ -1,0 +1,6704 @@
+{
+  "session_id": "cocc-00042-13ff887a20",
+  "provider": "nvidia_nim",
+  "model": "nvidia/nemotron-3-super-120b-a12b",
+  "created_at": "2026-07-31T13:04:28.435771+00:00",
+  "response_time_seconds": 16.446877599984873,
+  "measurement_status": "OBSERVED",
+  "attempts": 1,
+  "problem_id": "2833",
+  "item_id": "2833:clean_control",
+  "benchmark_name": "chain_of_code_collapse",
+  "perturbation_type": "clean_control",
+  "turns": [
+    {
+      "turn_index": 0,
+      "user_message": "You are an expert Python programmer. Solve the following programming problem.\n\nYou are given an integer n denoting the total number of servers and a 2D 0-indexed integer array logs, where logs[i] = [server_id, time] denotes that the server with id server_id received a request at time time.\nYou are also given an integer x and a 0-indexed integer array queries.\nReturn a 0-indexed integer array arr of length queries.length where arr[i] represents the number of servers that did not receive any requests during the time interval [queries[i] - x, queries[i]].\nNote that the time intervals are inclusive.\n \nExample 1:\n\nInput: n = 3, logs = [[1,3],[2,6],[1,5]], x = 5, queries = [10,11]\nOutput: [1,2]\nExplanation: \nFor queries[0]: The servers with ids 1 and 2 get requests in the duration of [5, 10]. Hence, only server 3 gets zero requests.\nFor queries[1]: Only the server with id 2 gets a request in duration of [6,11]. Hence, the servers with ids 1 and 3 are the only servers that do not receive any requests during that time period.\n\n\nExample 2:\n\nInput: n = 3, logs = [[2,4],[2,1],[1,2],[3,1]], x = 2, queries = [3,4]\nOutput: [0,1]\nExplanation: \nFor queries[0]: All servers get at least one request in the duration of [1, 3].\nFor queries[1]: Only server with id 3 gets no request in the duration [2,4].\n\n\n \nConstraints:\n\n1 <= n <= 10^5\n1 <= logs.length <= 10^5\n1 <= queries.length <= 10^5\nlogs[i].length == 2\n1 <= logs[i][0] <= n\n1 <= logs[i][1] <= 10^6\n1 <= x <= 10^5\nx < queries[i] <= 10^6\n\nUse the following starter code and return the complete implementation:\n\n```python\nclass Solution:\n    def countServers(self, n: int, logs: List[List[int]], x: int, queries: List[int]) -> List[int]:\n```\n\nReturn only the final Python solution inside one fenced code block.",
+      "assistant_message": "We need to parse the problem: n servers, logs: list of [server_id, time]; each entry indicates a request from server_id at time time. For each query q in queries, we need to count number of servers that did NOT receive any requests during the inclusive interval [q - x, q].\n\nThat is, for each query, we need to count number of server IDs from 1..n such that there is no request from that server at a time t satisfying q - x <= t <= q.\n\nGiven constraints up to 10^5 for logs length, queries length, n. Straight O(#servers * #queries) is too slow.\n\nWe need to compute for each query quickly.\n\nObservations: For each server, we can compute the times when it receives requests; we need to know, for each query, whether there exists at least one request time for that server within interval [q-x, q]. Equivalent to the server being \"active\" during that interval.\n\nAlternatively, for each query we can compute set of servers that had at least one request in interval, then answer = n - size of that set.\n\nThus we need to compute, for each query, number of distinct server IDs appearing in logs with time in [q-x, q].\n\nThus we need a data structure to answer number of distinct values in a time range (over logs). logs are not sorted by time; we can sort them by time. Then queries can be processed offline sorted by query time.\n\nWe need to answer distinct count in a sliding time window of length x (but inclusive). Since x constant across queries (though variable for each query start? Actually start = q - x). So windows of variable start and end, but same length x: window is [q - x, q].\n\nThus we need to answer: for each query with right endpoint q, count distinct server IDs among logs with time between q - x and q inclusive.\n\nWe need to process up to 10^5 queries efficiently. Typically we can use Mo's algorithm on time axis, O((logs+queries)*sqrt(N)). However we have time up to 10^6 and logs length 1e5, queries 1e5. Mo's algorithm could be okay with O((logs+queries)*sqrt(logs)) ~ 1e5 * 316 ~ 3e7, might be borderline but likely okay in Python if well optimized? Could do better with offline BIT.\n\nAlternative: Use BIT + offline",
+      "finish_reason": "length",
+      "token_count": 512,
+      "tokens": [
+        {
+          "token": "We",
+          "top1_logprob": -0.045746677,
+          "top_logprobs": [
+            -0.045746677,
+            -3.1707466,
+            -7.170747,
+            -7.420747,
+            -8.920747
+          ],
+          "gap": 3.1249999230000003,
+          "entropy": 0.18692174649433
+        },
+        {
+          "token": " need",
+          "top1_logprob": -0.031100247,
+          "top_logprobs": [
+            -0.031100247,
+            -3.5311003,
+            -7.5311003,
+            -8.0311,
+            -8.5311
+          ],
+          "gap": 3.500000053,
+          "entropy": 0.1415955961808809
+        },
+        {
+          "token": " to",
+          "top1_logprob": -0.0015001959,
+          "top_logprobs": [
+            -0.0015001959,
+            -7.0015,
+            -8.5015,
+            -10.0015,
+            -10.0015
+          ],
+          "gap": 6.9999998041,
+          "entropy": 0.010215211477393914
+        },
+        {
+          "token": " parse",
+          "top1_logprob": -2.154435,
+          "top_logprobs": [
+            -0.654435,
+            -2.154435,
+            -2.654435,
+            -2.654435,
+            -3.154435
+          ],
+          "gap": 1.5,
+          "entropy": 1.1409388475156734
+        },
+        {
+          "token": " the",
+          "top1_logprob": -0.051589772,
+          "top_logprobs": [
+            -0.051589772,
+            -3.0515897,
+            -6.05159,
+            -7.55159,
+            -10.55159
+          ],
+          "gap": 2.9999999280000003,
+          "entropy": 0.2117021320446972
+        },
+        {
+          "token": " problem",
+          "top1_logprob": -2.4079987e-05,
+          "top_logprobs": [
+            -2.4079987e-05,
+            -12.500024,
+            -12.500024,
+            -12.750024,
+            -13.250024
+          ],
+          "gap": 12.499999920013,
+          "entropy": 0.0001656095553679804
+        },
+        {
+          "token": ":",
+          "top1_logprob": -0.45169178,
+          "top_logprobs": [
+            -0.45169178,
+            -1.4516917,
+            -2.9516919,
+            -3.4516919,
+            -3.4516919
+          ],
+          "gap": 0.99999992,
+          "entropy": 1.0005855311623002
+        },
+        {
+          "token": " n",
+          "top1_logprob": -2.9648933,
+          "top_logprobs": [
+            -0.9648934,
+            -1.9648933,
+            -1.9648933,
+            -1.9648933,
+            -2.4648933,
+            -2.9648933
+          ],
+          "gap": 0.9999998999999999,
+          "entropy": 1.5951397212175737
+        },
+        {
+          "token": " servers",
+          "top1_logprob": -0.038600598,
+          "top_logprobs": [
+            -0.038600598,
+            -4.0386004,
+            -5.0386004,
+            -5.5386004,
+            -6.0386004
+          ],
+          "gap": 3.999999802,
+          "entropy": 0.17100873690332702
+        },
+        {
+          "token": ",",
+          "top1_logprob": -0.7999689,
+          "top_logprobs": [
+            -0.7999689,
+            -1.299969,
+            -2.799969,
+            -2.799969,
+            -2.799969
+          ],
+          "gap": 0.5000001,
+          "entropy": 1.253560712031094
+        },
+        {
+          "token": " logs",
+          "top1_logprob": -0.3459847,
+          "top_logprobs": [
+            -0.3459847,
+            -1.3459847,
+            -5.8459845,
+            -5.8459845,
+            -5.8459845
+          ],
+          "gap": 1.0,
+          "entropy": 0.6375957097631031
+        },
+        {
+          "token": ":",
+          "top1_logprob": -1.5519954,
+          "top_logprobs": [
+            -1.5519954,
+            -1.5519954,
+            -1.5519954,
+            -2.5519953,
+            -2.5519953
+          ],
+          "gap": 0.0,
+          "entropy": 1.5149013084264757
+        },
+        {
+          "token": " list",
+          "top1_logprob": -1.4128977,
+          "top_logprobs": [
+            -0.4128977,
+            -1.4128977,
+            -2.9128976,
+            -4.4128976,
+            -4.9128976
+          ],
+          "gap": 1.0,
+          "entropy": 0.8623268953964012
+        },
+        {
+          "token": " of",
+          "top1_logprob": -0.010882316,
+          "top_logprobs": [
+            -0.010882316,
+            -5.5108824,
+            -5.5108824,
+            -6.5108824,
+            -8.010882
+          ],
+          "gap": 5.500000084,
+          "entropy": 0.06680406861430066
+        },
+        {
+          "token": " [",
+          "top1_logprob": -0.056980677,
+          "top_logprobs": [
+            -0.056980677,
+            -3.5569806,
+            -4.5569806,
+            -5.0569806,
+            -6.0569806
+          ],
+          "gap": 3.4999999230000003,
+          "entropy": 0.2437090601925368
+        },
+        {
+          "token": "server",
+          "top1_logprob": -0.0006099271,
+          "top_logprobs": [
+            -0.0006099271,
+            -7.50061,
+            -10.50061,
+            -11.00061,
+            -12.50061
+          ],
+          "gap": 7.5000000729,
+          "entropy": 0.005265631891203479
+        },
+        {
+          "token": "_id",
+          "top1_logprob": -0.0004094001,
+          "top_logprobs": [
+            -0.0004094001,
+            -9.000409,
+            -9.000409,
+            -10.000409,
+            -10.000409
+          ],
+          "gap": 8.999999599899999,
+          "entropy": 0.0034658826257412726
+        },
+        {
+          "token": ",",
+          "top1_logprob": -0.0043962975,
+          "top_logprobs": [
+            -0.0043962975,
+            -5.5043964,
+            -8.504396,
+            -10.754396,
+            -11.004396
+          ],
+          "gap": 5.5000001025000005,
+          "entropy": 0.02883391579178905
+        },
+        {
+          "token": " time",
+          "top1_logprob": -0.0032101548,
+          "top_logprobs": [
+            -0.0032101548,
+            -6.50321,
+            -6.50321,
+            -8.75321,
+            -11.25321
+          ],
+          "gap": 6.4999998452000005,
+          "entropy": 0.02418410857624766
+        },
+        {
+          "token": "];",
+          "top1_logprob": -2.3672564,
+          "top_logprobs": [
+            -0.36725646,
+            -1.8672564,
+            -2.3672564,
+            -2.8672564,
+            -6.8672566
+          ],
+          "gap": 1.49999994,
+          "entropy": 0.9349449908739805
+        },
+        {
+          "token": " each",
+          "top1_logprob": -1.4553998,
+          "top_logprobs": [
+            -0.9553998,
+            -1.4553998,
+            -1.9553998,
+            -2.9553998,
+            -2.9553998
+          ],
+          "gap": 0.4999999999999999,
+          "entropy": 1.348804855000376
+        },
+        {
+          "token": " entry",
+          "top1_logprob": -1.4824287,
+          "top_logprobs": [
+            -0.98242867,
+            -1.4824287,
+            -1.9824287,
+            -1.9824287,
+            -3.4824286
+          ],
+          "gap": 0.50000003,
+          "entropy": 1.3987932430306362
+        },
+        {
+          "token": " indicates",
+          "top1_logprob": -0.49847203,
+          "top_logprobs": [
+            -0.49847203,
+            -1.498472,
+            -2.498472,
+            -3.998472,
+            -4.498472
+          ],
+          "gap": 0.99999997,
+          "entropy": 0.9662032981719342
+        },
+        {
+          "token": " a",
+          "top1_logprob": -0.46285677,
+          "top_logprobs": [
+            -0.46285677,
+            -1.4628568,
+            -2.4628568,
+            -3.4628568,
+            -4.462857
+          ],
+          "gap": 1.00000003,
+          "entropy": 0.9999728097643998
+        },
+        {
+          "token": " request",
+          "top1_logprob": -0.03150208,
+          "top_logprobs": [
+            -0.03150208,
+            -3.531502,
+            -7.5315022,
+            -8.031502,
+            -8.031502
+          ],
+          "gap": 3.49999992,
+          "entropy": 0.14263456260393853
+        },
+        {
+          "token": " from",
+          "top1_logprob": -1.9271753,
+          "top_logprobs": [
+            -0.92717534,
+            -1.9271753,
+            -1.9271753,
+            -2.4271753,
+            -2.9271753
+          ],
+          "gap": 0.99999996,
+          "entropy": 1.3795753349618962
+        },
+        {
+          "token": " server",
+          "top1_logprob": -0.97450966,
+          "top_logprobs": [
+            -0.97450966,
+            -0.97450966,
+            -1.4745097,
+            -4.9745097,
+            -5.4745097
+          ],
+          "gap": 0.0,
+          "entropy": 1.1310535442761633
+        },
+        {
+          "token": "_id",
+          "top1_logprob": -0.46676755,
+          "top_logprobs": [
+            -0.46676755,
+            -1.9667675,
+            -1.9667675,
+            -2.9667675,
+            -3.9667675
+          ],
+          "gap": 1.49999995,
+          "entropy": 1.0727322855605157
+        },
+        {
+          "token": " at",
+          "top1_logprob": -0.006886439,
+          "top_logprobs": [
+            -0.006886439,
+            -6.5068865,
+            -6.5068865,
+            -6.5068865,
+            -7.5068865
+          ],
+          "gap": 6.500000061000001,
+          "entropy": 0.03834722697167827
+        },
+        {
+          "token": " time",
+          "top1_logprob": -0.23168083,
+          "top_logprobs": [
+            -0.23168083,
+            -2.7316809,
+            -2.7316809,
+            -3.2316809,
+            -3.7316809
+          ],
+          "gap": 2.50000007,
+          "entropy": 0.7533390924304789
+        },
+        {
+          "token": " time",
+          "top1_logprob": -0.5177859,
+          "top_logprobs": [
+            -0.5177859,
+            -1.5177859,
+            -2.517786,
+            -3.017786,
+            -4.017786
+          ],
+          "gap": 1.0,
+          "entropy": 1.0673585945600244
+        },
+        {
+          "token": ".",
+          "top1_logprob": -0.37647575,
+          "top_logprobs": [
+            -0.37647575,
+            -1.8764758,
+            -1.8764758,
+            -5.376476,
+            -6.376476
+          ],
+          "gap": 1.50000005,
+          "entropy": 0.8686102537537759
+        },
+        {
+          "token": " For",
+          "top1_logprob": -0.6983697,
+          "top_logprobs": [
+            -0.6983697,
+            -2.1983697,
+            -2.1983697,
+            -2.6983697,
+            -2.6983697
+          ],
+          "gap": 1.5000000000000002,
+          "entropy": 1.245710343992462
+        },
+        {
+          "token": " each",
+          "top1_logprob": -0.003097025,
+          "top_logprobs": [
+            -0.003097025,
+            -6.003097,
+            -8.003097,
+            -9.003097,
+            -9.503097
+          ],
+          "gap": 5.999999975000001,
+          "entropy": 0.022327742784026043
+        },
+        {
+          "token": " query",
+          "top1_logprob": -0.0018215269,
+          "top_logprobs": [
+            -0.0018215269,
+            -6.5018215,
+            -9.0018215,
+            -9.2518215,
+            -10.2518215
+          ],
+          "gap": 6.4999999731,
+          "entropy": 0.013869965755838877
+        },
+        {
+          "token": " q",
+          "top1_logprob": -0.620315,
+          "top_logprobs": [
+            -0.620315,
+            -1.6203151,
+            -1.6203151,
+            -3.620315,
+            -4.620315
+          ],
+          "gap": 1.0000001,
+          "entropy": 1.1212246752749122
+        },
+        {
+          "token": " in",
+          "top1_logprob": -1.6645638,
+          "top_logprobs": [
+            -0.6645638,
+            -1.6645638,
+            -1.6645638,
+            -2.6645637,
+            -4.1645637
+          ],
+          "gap": 1.0,
+          "entropy": 1.227462288633441
+        },
+        {
+          "token": " queries",
+          "top1_logprob": -0.0005795468,
+          "top_logprobs": [
+            -0.0005795468,
+            -8.75058,
+            -9.00058,
+            -9.50058,
+            -9.50058
+          ],
+          "gap": 8.7500004532,
+          "entropy": 0.004349198723360929
+        },
+        {
+          "token": ",",
+          "top1_logprob": -0.122795574,
+          "top_logprobs": [
+            -0.122795574,
+            -2.6227956,
+            -3.6227956,
+            -4.6227956,
+            -5.6227956
+          ],
+          "gap": 2.500000026,
+          "entropy": 0.4600086783248984
+        },
+        {
+          "token": " we",
+          "top1_logprob": -0.07598729,
+          "top_logprobs": [
+            -0.07598729,
+            -3.5759873,
+            -4.0759873,
+            -4.0759873,
+            -5.5759873
+          ],
+          "gap": 3.50000001,
+          "entropy": 0.3250169880383542
+        },
+        {
+          "token": " need",
+          "top1_logprob": -0.56840205,
+          "top_logprobs": [
+            -0.56840205,
+            -1.068402,
+            -3.068402,
+            -4.5684023,
+            -4.5684023
+          ],
+          "gap": 0.4999999500000001,
+          "entropy": 0.9250276789007064
+        },
+        {
+          "token": " to",
+          "top1_logprob": -0.08975515,
+          "top_logprobs": [
+            -0.08975515,
+            -3.589755,
+            -3.589755,
+            -3.589755,
+            -7.089755
+          ],
+          "gap": 3.49999985,
+          "entropy": 0.3838960774563233
+        },
+        {
+          "token": " count",
+          "top1_logprob": -0.6662578,
+          "top_logprobs": [
+            -0.6662578,
+            -1.1662579,
+            -2.1662579,
+            -3.1662579,
+            -4.666258
+          ],
+          "gap": 0.5000001,
+          "entropy": 1.1323738077558128
+        },
+        {
+          "token": " number",
+          "top1_logprob": -0.60322016,
+          "top_logprobs": [
+            -0.60322016,
+            -1.6032202,
+            -2.1032202,
+            -2.1032202,
+            -5.10322
+          ],
+          "gap": 1.00000004,
+          "entropy": 1.1973942074661963
+        },
+        {
+          "token": " of",
+          "top1_logprob": -0.00026294112,
+          "top_logprobs": [
+            -0.00026294112,
+            -8.625263,
+            -10.250263,
+            -11.375263,
+            -11.750263
+          ],
+          "gap": 8.62500005888,
+          "entropy": 0.0023681516320372543
+        },
+        {
+          "token": " servers",
+          "top1_logprob": -0.025428625,
+          "top_logprobs": [
+            -0.025428625,
+            -4.025429,
+            -5.025429,
+            -8.275429,
+            -8.275429
+          ],
+          "gap": 4.000000375,
+          "entropy": 0.13374281433282642
+        },
+        {
+          "token": " that",
+          "top1_logprob": -0.15275308,
+          "top_logprobs": [
+            -0.15275308,
+            -2.152753,
+            -4.652753,
+            -4.652753,
+            -6.652753
+          ],
+          "gap": 1.99999992,
+          "entropy": 0.47582504957454824
+        },
+        {
+          "token": " did",
+          "top1_logprob": -0.5136167,
+          "top_logprobs": [
+            -0.5136167,
+            -1.5136167,
+            -3.0136166,
+            -3.0136166,
+            -3.5136166
+          ],
+          "gap": 1.0,
+          "entropy": 1.0450350409745492
+        },
+        {
+          "token": " NOT",
+          "top1_logprob": -0.3499021,
+          "top_logprobs": [
+            -0.3499021,
+            -1.2874022,
+            -4.240527,
+            -5.365527,
+            -9.271777
+          ],
+          "gap": 0.9375001000000001,
+          "entropy": 0.6888942664456758
+        },
+        {
+          "token": " receive",
+          "top1_logprob": -0.0046795616,
+          "top_logprobs": [
+            -0.0046795616,
+            -5.5046797,
+            -7.5046797,
+            -11.00468,
+            -11.50468
+          ],
+          "gap": 5.5000001384,
+          "entropy": 0.031456349408383974
+        },
+        {
+          "token": " any",
+          "top1_logprob": -0.0028508757,
+          "top_logprobs": [
+            -0.0028508757,
+            -6.002851,
+            -8.502851,
+            -9.002851,
+            -10.502851
+          ],
+          "gap": 6.0000001243,
+          "entropy": 0.020780115817324477
+        },
+        {
+          "token": " requests",
+          "top1_logprob": -0.5233078,
+          "top_logprobs": [
+            -0.5233078,
+            -0.8983078,
+            -9.773308,
+            -10.398308,
+            -10.773308
+          ],
+          "gap": 0.375,
+          "entropy": 0.6770077959232762
+        },
+        {
+          "token": " during",
+          "top1_logprob": -0.49525112,
+          "top_logprobs": [
+            -0.49525112,
+            -0.9952511,
+            -3.9952512,
+            -6.995251,
+            -7.495251
+          ],
+          "gap": 0.49999998000000007,
+          "entropy": 0.753523684635187
+        },
+        {
+          "token": " the",
+          "top1_logprob": -0.8526698,
+          "top_logprobs": [
+            -0.8526698,
+            -1.3526697,
+            -1.3526697,
+            -3.3526697,
+            -3.8526697
+          ],
+          "gap": 0.49999990000000005,
+          "entropy": 1.2621212613270671
+        },
+        {
+          "token": " inclusive",
+          "top1_logprob": -2.557115,
+          "top_logprobs": [
+            -0.5571151,
+            -1.0571151,
+            -2.557115,
+            -6.557115,
+            -8.057116
+          ],
+          "gap": 0.5000000000000001,
+          "entropy": 0.8965190690426117
+        },
+        {
+          "token": " interval",
+          "top1_logprob": -0.52376974,
+          "top_logprobs": [
+            -0.52376974,
+            -0.89876974,
+            -7.64877,
+            -9.898769,
+            -10.523769
+          ],
+          "gap": 0.375,
+          "entropy": 0.6804788910731703
+        },
+        {
+          "token": " [",
+          "top1_logprob": -0.00073989667,
+          "top_logprobs": [
+            -0.00073989667,
+            -7.50074,
+            -9.00074,
+            -10.50074,
+            -12.00074
+          ],
+          "gap": 7.500000103330001,
+          "entropy": 0.006327616934917905
+        },
+        {
+          "token": "q",
+          "top1_logprob": -0.00021562635,
+          "top_logprobs": [
+            -0.00021562635,
+            -8.500216,
+            -12.250216,
+            -12.500216,
+            -14.000216
+          ],
+          "gap": 8.50000037365,
+          "entropy": 0.002058718893319305
+        },
+        {
+          "token": " -",
+          "top1_logprob": -0.048883777,
+          "top_logprobs": [
+            -0.048883777,
+            -3.0488837,
+            -8.548883,
+            -9.548883,
+            -11.548883
+          ],
+          "gap": 2.9999999230000003,
+          "entropy": 0.19353576224894836
+        },
+        {
+          "token": " x",
+          "top1_logprob": -5.960463e-07,
+          "top_logprobs": [
+            -5.960463e-07,
+            -15.000001,
+            -15.250001,
+            -17.0,
+            -17.25
+          ],
+          "gap": 15.000000403953699,
+          "entropy": 1.0099382088148938e-05
+        },
+        {
+          "token": ",",
+          "top1_logprob": -4.911302e-05,
+          "top_logprobs": [
+            -4.911302e-05,
+            -10.500049,
+            -11.000049,
+            -13.250049,
+            -13.500049
+          ],
+          "gap": 10.499999886980001,
+          "entropy": 0.0005620279758284267
+        },
+        {
+          "token": " q",
+          "top1_logprob": -9.1790735e-06,
+          "top_logprobs": [
+            -9.1790735e-06,
+            -12.00001,
+            -13.00001,
+            -15.50001,
+            -15.50001
+          ],
+          "gap": 12.0000008209265,
+          "entropy": 0.00011764108054915397
+        },
+        {
+          "token": "].\n\n",
+          "top1_logprob": -0.58736676,
+          "top_logprobs": [
+            -0.58736676,
+            -1.0873668,
+            -2.5873668,
+            -3.5873668,
+            -5.5873666
+          ],
+          "gap": 0.5000000400000001,
+          "entropy": 1.0078168590991576
+        },
+        {
+          "token": "That",
+          "top1_logprob": -4.475568,
+          "top_logprobs": [
+            -0.97556806,
+            -1.975568,
+            -1.975568,
+            -2.475568,
+            -2.475568,
+            -4.475568
+          ],
+          "gap": 0.99999994,
+          "entropy": 1.476948124832518
+        },
+        {
+          "token": " is",
+          "top1_logprob": -0.14397253,
+          "top_logprobs": [
+            -0.14397253,
+            -2.6439726,
+            -3.1439726,
+            -5.1439724,
+            -5.6439724
+          ],
+          "gap": 2.50000007,
+          "entropy": 0.4928395869961975
+        },
+        {
+          "token": ",",
+          "top1_logprob": -0.42510775,
+          "top_logprobs": [
+            -0.42510775,
+            -1.4251077,
+            -3.4251077,
+            -3.9251077,
+            -4.425108
+          ],
+          "gap": 0.9999999500000001,
+          "entropy": 0.8574955304410472
+        },
+        {
+          "token": " for",
+          "top1_logprob": -0.703412,
+          "top_logprobs": [
+            -0.703412,
+            -1.203412,
+            -3.703412,
+            -3.703412,
+            -3.703412
+          ],
+          "gap": 0.4999999999999999,
+          "entropy": 0.9908785167802644
+        },
+        {
+          "token": " each",
+          "top1_logprob": -0.012285511,
+          "top_logprobs": [
+            -0.012285511,
+            -5.0122857,
+            -6.5122857,
+            -6.5122857,
+            -7.0122857
+          ],
+          "gap": 5.000000189,
+          "entropy": 0.06958930368870585
+        },
+        {
+          "token": " query",
+          "top1_logprob": -0.2714645,
+          "top_logprobs": [
+            -0.2714645,
+            -1.7714645,
+            -3.2714646,
+            -4.2714643,
+            -4.2714643
+          ],
+          "gap": 1.5,
+          "entropy": 0.7512083616983721
+        },
+        {
+          "token": ",",
+          "top1_logprob": -0.70665294,
+          "top_logprobs": [
+            -0.70665294,
+            -1.7066529,
+            -2.2066529,
+            -2.2066529,
+            -2.7066529
+          ],
+          "gap": 0.9999999599999999,
+          "entropy": 1.3384794708419439
+        },
+        {
+          "token": " we",
+          "top1_logprob": -0.5991655,
+          "top_logprobs": [
+            -0.5991655,
+            -2.0991654,
+            -2.0991654,
+            -2.5991654,
+            -3.0991654
+          ],
+          "gap": 1.4999999,
+          "entropy": 1.197429905201256
+        },
+        {
+          "token": " need",
+          "top1_logprob": -0.9325354,
+          "top_logprobs": [
+            -0.9325354,
+            -0.9325354,
+            -2.9325354,
+            -2.9325354,
+            -3.4325354
+          ],
+          "gap": 0.0,
+          "entropy": 1.1728975456246686
+        },
+        {
+          "token": " to",
+          "top1_logprob": -0.10219861,
+          "top_logprobs": [
+            -0.10219861,
+            -3.1021986,
+            -3.6021986,
+            -4.1021986,
+            -6.6021986
+          ],
+          "gap": 2.99999999,
+          "entropy": 0.4025382425502662
+        },
+        {
+          "token": " count",
+          "top1_logprob": -1.8164492,
+          "top_logprobs": [
+            -1.3164492,
+            -1.8164492,
+            -1.8164492,
+            -1.8164492,
+            -1.8164492
+          ],
+          "gap": 0.5,
+          "entropy": 1.5854916294030823
+        },
+        {
+          "token": " number",
+          "top1_logprob": -2.026918,
+          "top_logprobs": [
+            -0.52691805,
+            -2.026918,
+            -2.526918,
+            -2.526918,
+            -3.026918
+          ],
+          "gap": 1.4999999500000003,
+          "entropy": 1.1409388692850615
+        },
+        {
+          "token": " of",
+          "top1_logprob": -0.00056429673,
+          "top_logprobs": [
+            -0.00056429673,
+            -8.375565,
+            -8.875565,
+            -10.375565,
+            -10.375565
+          ],
+          "gap": 8.37500070327,
+          "entropy": 0.004250551767316481
+        },
+        {
+          "token": " server",
+          "top1_logprob": -0.5709586,
+          "top_logprobs": [
+            -0.5709586,
+            -1.5709586,
+            -1.5709586,
+            -4.5709586,
+            -5.5709586
+          ],
+          "gap": 1.0,
+          "entropy": 1.0443675662468244
+        },
+        {
+          "token": " IDs",
+          "top1_logprob": -0.7090077,
+          "top_logprobs": [
+            -0.7090077,
+            -0.7090077,
+            -4.2090077,
+            -7.7090077,
+            -8.709007
+          ],
+          "gap": 0.0,
+          "entropy": 0.765237920689819
+        },
+        {
+          "token": " from",
+          "top1_logprob": -0.7371981,
+          "top_logprobs": [
+            -0.7371981,
+            -1.2371981,
+            -2.237198,
+            -3.737198,
+            -3.737198
+          ],
+          "gap": 0.5000000000000001,
+          "entropy": 1.1426439806917277
+        },
+        {
+          "token": " ",
+          "top1_logprob": -0.0009856133,
+          "top_logprobs": [
+            -0.0009856133,
+            -7.2509856,
+            -8.500985,
+            -10.750985,
+            -11.250985
+          ],
+          "gap": 7.2499999867,
+          "entropy": 0.008195891329854176
+        },
+        {
+          "token": "1",
+          "top1_logprob": -1.5735503e-05,
+          "top_logprobs": [
+            -1.5735503e-05,
+            -11.625015,
+            -12.125015,
+            -14.625015,
+            -15.375015
+          ],
+          "gap": 11.624999264497,
+          "entropy": 0.00019442620210257855
+        },
+        {
+          "token": "..",
+          "top1_logprob": -0.1379916,
+          "top_logprobs": [
+            -0.1379916,
+            -2.1379917,
+            -4.6379914,
+            -7.1379914,
+            -8.637992
+          ],
+          "gap": 2.0000001000000003,
+          "entropy": 0.4241357606986064
+        },
+        {
+          "token": "n",
+          "top1_logprob": -0.00010442189,
+          "top_logprobs": [
+            -0.00010442189,
+            -9.250104,
+            -12.000104,
+            -14.500104,
+            -15.000104
+          ],
+          "gap": 9.24999957811,
+          "entropy": 0.0010776256757178875
+        },
+        {
+          "token": " such",
+          "top1_logprob": -0.5695321,
+          "top_logprobs": [
+            -0.5695321,
+            -1.0695322,
+            -3.0695322,
+            -4.069532,
+            -4.569532
+          ],
+          "gap": 0.5000001000000001,
+          "entropy": 0.9479620028705187
+        },
+        {
+          "token": " that",
+          "top1_logprob": -2.6940936e-05,
+          "top_logprobs": [
+            -2.6940936e-05,
+            -11.000027,
+            -12.750027,
+            -12.875027,
+            -14.500027
+          ],
+          "gap": 11.000000059064,
+          "entropy": 0.00028367639626037847
+        },
+        {
+          "token": " there",
+          "top1_logprob": -0.2282055,
+          "top_logprobs": [
+            -0.2282055,
+            -2.7282054,
+            -2.7282054,
+            -3.2282054,
+            -4.2282057
+          ],
+          "gap": 2.4999998999999997,
+          "entropy": 0.7225847785145386
+        },
+        {
+          "token": " is",
+          "top1_logprob": -0.0629556,
+          "top_logprobs": [
+            -0.0629556,
+            -3.0629556,
+            -5.5629554,
+            -5.5629554,
+            -6.0629554
+          ],
+          "gap": 3.0,
+          "entropy": 0.25594892381205925
+        },
+        {
+          "token": " no",
+          "top1_logprob": -0.03532435,
+          "top_logprobs": [
+            -0.03532435,
+            -4.0353246,
+            -4.5353246,
+            -5.5353246,
+            -7.0353246
+          ],
+          "gap": 4.00000025,
+          "entropy": 0.18089548872843011
+        },
+        {
+          "token": " request",
+          "top1_logprob": -2.619362,
+          "top_logprobs": [
+            -0.11936213,
+            -2.619362,
+            -4.1193624,
+            -4.6193624,
+            -5.1193624
+          ],
+          "gap": 2.4999998700000003,
+          "entropy": 0.435622437052365
+        },
+        {
+          "token": " from",
+          "top1_logprob": -0.7334552,
+          "top_logprobs": [
+            -0.7334552,
+            -2.2334552,
+            -2.2334552,
+            -2.7334552,
+            -2.7334552
+          ],
+          "gap": 1.5,
+          "entropy": 1.245710343992462
+        },
+        {
+          "token": " that",
+          "top1_logprob": -0.006665378,
+          "top_logprobs": [
+            -0.006665378,
+            -6.006665,
+            -6.506665,
+            -6.506665,
+            -7.506665
+          ],
+          "gap": 5.999999622,
+          "entropy": 0.04435443741231199
+        },
+        {
+          "token": " server",
+          "top1_logprob": -0.00061707525,
+          "top_logprobs": [
+            -0.00061707525,
+            -7.750617,
+            -9.750617,
+            -10.250617,
+            -10.500617
+          ],
+          "gap": 7.74999992475,
+          "entropy": 0.0051074395910018595
+        },
+        {
+          "token": " at",
+          "top1_logprob": -2.170869,
+          "top_logprobs": [
+            -1.1708691,
+            -1.1708691,
+            -2.170869,
+            -2.170869,
+            -2.670869
+          ],
+          "gap": 0.0,
+          "entropy": 1.4465895880390445
+        },
+        {
+          "token": " a",
+          "top1_logprob": -3.0797155,
+          "top_logprobs": [
+            -0.07971554,
+            -3.0797155,
+            -3.5797155,
+            -6.0797157,
+            -8.579716
+          ],
+          "gap": 2.99999996,
+          "entropy": 0.33033912735561877
+        },
+        {
+          "token": " time",
+          "top1_logprob": -0.018260699,
+          "top_logprobs": [
+            -0.018260699,
+            -4.0182605,
+            -10.018261,
+            -10.018261,
+            -12.268261
+          ],
+          "gap": 3.9999998010000004,
+          "entropy": 0.09113103180206455
+        },
+        {
+          "token": " t",
+          "top1_logprob": -0.13989191,
+          "top_logprobs": [
+            -0.13989191,
+            -2.6398919,
+            -3.1398919,
+            -5.139892,
+            -6.139892
+          ],
+          "gap": 2.49999999,
+          "entropy": 0.4852734768240529
+        },
+        {
+          "token": " satisfying",
+          "top1_logprob": -1.2781637,
+          "top_logprobs": [
+            -0.7781637,
+            -1.2781637,
+            -2.2781637,
+            -2.2781637,
+            -3.7781637
+          ],
+          "gap": 0.4999999999999999,
+          "entropy": 1.2768029334116262
+        },
+        {
+          "token": " q",
+          "top1_logprob": -0.10506118,
+          "top_logprobs": [
+            -0.10506118,
+            -2.6050613,
+            -4.105061,
+            -5.105061,
+            -7.105061
+          ],
+          "gap": 2.50000012,
+          "entropy": 0.390087197622587
+        },
+        {
+          "token": " -",
+          "top1_logprob": -0.22596854,
+          "top_logprobs": [
+            -0.22596854,
+            -1.6009686,
+            -8.600968,
+            -9.663468,
+            -9.850968
+          ],
+          "gap": 1.37500006,
+          "entropy": 0.5057709607252993
+        },
+        {
+          "token": " x",
+          "top1_logprob": -2.2530301e-05,
+          "top_logprobs": [
+            -2.2530301e-05,
+            -11.000023,
+            -12.750023,
+            -14.000023,
+            -14.500023
+          ],
+          "gap": 11.000000469699,
+          "entropy": 0.0002606122841278107
+        },
+        {
+          "token": " <=",
+          "top1_logprob": -0.12693824,
+          "top_logprobs": [
+            -0.12693824,
+            -2.1269383,
+            -12.626938,
+            -12.626938,
+            -13.626938
+          ],
+          "gap": 2.00000006,
+          "entropy": 0.36543812351313315
+        },
+        {
+          "token": " t",
+          "top1_logprob": -1.3113013e-06,
+          "top_logprobs": [
+            -1.3113013e-06,
+            -14.000001,
+            -15.500001,
+            -16.000002,
+            -16.500002
+          ],
+          "gap": 13.999999688698699,
+          "entropy": 1.864188598667062e-05
+        },
+        {
+          "token": " <=",
+          "top1_logprob": -4.6013727e-05,
+          "top_logprobs": [
+            -4.6013727e-05,
+            -10.250046,
+            -12.250046,
+            -13.250046,
+            -13.500046
+          ],
+          "gap": 10.249999986273,
+          "entropy": 0.0005061175726766445
+        },
+        {
+          "token": " q",
+          "top1_logprob": -0.00016723665,
+          "top_logprobs": [
+            -0.00016723665,
+            -9.000167,
+            -11.750167,
+            -11.750167,
+            -12.000167
+          ],
+          "gap": 8.999999763349999,
+          "entropy": 0.0015149412984965453
+        },
+        {
+          "token": ".\n\n",
+          "top1_logprob": -0.052827016,
+          "top_logprobs": [
+            -0.052827016,
+            -3.0528271,
+            -5.552827,
+            -9.052827,
+            -10.052827
+          ],
+          "gap": 3.000000084,
+          "entropy": 0.21714534989358988
+        },
+        {
+          "token": "Given",
+          "top1_logprob": -2.3406188,
+          "top_logprobs": [
+            -0.8406188,
+            -1.8406188,
+            -2.3406188,
+            -3.3406188,
+            -3.3406188
+          ],
+          "gap": 1.0,
+          "entropy": 1.1966941425689384
+        },
+        {
+          "token": " constraints",
+          "top1_logprob": -0.23366238,
+          "top_logprobs": [
+            -0.23366238,
+            -2.2336624,
+            -3.2336624,
+            -3.7336624,
+            -4.7336626
+          ],
+          "gap": 2.00000002,
+          "entropy": 0.6735288440929377
+        },
+        {
+          "token": " up",
+          "top1_logprob": -0.35666195,
+          "top_logprobs": [
+            -0.35666195,
+            -1.3566619,
+            -4.356662,
+            -4.856662,
+            -4.856662
+          ],
+          "gap": 0.99999995,
+          "entropy": 0.7266711638027326
+        },
+        {
+          "token": " to",
+          "top1_logprob": -0.00010299152,
+          "top_logprobs": [
+            -0.00010299152,
+            -9.750103,
+            -12.500103,
+            -12.750103,
+            -13.000103
+          ],
+          "gap": 9.750000008479999,
+          "entropy": 0.0007484809353429733
+        },
+        {
+          "token": " ",
+          "top1_logprob": -0.0005505953,
+          "top_logprobs": [
+            -0.0005505953,
+            -8.50055,
+            -9.00055,
+            -10.25055,
+            -10.50055
+          ],
+          "gap": 8.4999994047,
+          "entropy": 0.0038800542906541687
+        },
+        {
+          "token": "1",
+          "top1_logprob": -9.059496e-05,
+          "top_logprobs": [
+            -9.059496e-05,
+            -9.375091,
+            -12.750091,
+            -13.375091,
+            -15.062591
+          ],
+          "gap": 9.37500040504,
+          "entropy": 0.0009467623898422395
+        },
+        {
+          "token": "0",
+          "top1_logprob": -2.350273,
+          "top_logprobs": [
+            -0.1002728,
+            -2.350273,
+            -10.600273,
+            -12.475273,
+            -12.475273
+          ],
+          "gap": 2.2500002,
+          "entropy": 0.3151244861448775
+        },
+        {
+          "token": "^",
+          "top1_logprob": -0.12767537,
+          "top_logprobs": [
+            -0.12767537,
+            -2.1276753,
+            -7.3776755,
+            -10.377675,
+            -10.627675
+          ],
+          "gap": 1.99999993,
+          "entropy": 0.37095775100271083
+        },
+        {
+          "token": "5",
+          "top1_logprob": -4.255681e-05,
+          "top_logprobs": [
+            -4.255681e-05,
+            -10.750043,
+            -11.500043,
+            -12.375043,
+            -13.625043
+          ],
+          "gap": 10.75000044319,
+          "entropy": 0.0004527684049444255
+        },
+        {
+          "token": " for",
+          "top1_logprob": -0.5511849,
+          "top_logprobs": [
+            -0.5511849,
+            -1.5511849,
+            -2.051185,
+            -3.051185,
+            -5.0511847
+          ],
+          "gap": 1.0,
+          "entropy": 1.089975619402548
+        },
+        {
+          "token": " logs",
+          "top1_logprob": -0.8755056,
+          "top_logprobs": [
+            -0.8755056,
+            -0.8755056,
+            -1.8755057,
+            -4.8755054,
+            -6.3755054
+          ],
+          "gap": 0.0,
+          "entropy": 1.0653713555707691
+        },
+        {
+          "token": " length",
+          "top1_logprob": -3.0293875,
+          "top_logprobs": [
+            -0.52938735,
+            -1.0293874,
+            -3.0293875,
+            -6.0293875,
+            -7.0293875
+          ],
+          "gap": 0.50000005,
+          "entropy": 0.8463768571103427
+        },
+        {
+          "token": ",",
+          "top1_logprob": -0.39083987,
+          "top_logprobs": [
+            -0.39083987,
+            -1.1408398,
+            -6.64084,
+            -6.89084,
+            -7.89084
+          ],
+          "gap": 0.74999993,
+          "entropy": 0.6471427611489131
+        },
+        {
+          "token": " queries",
+          "top1_logprob": -0.05884438,
+          "top_logprobs": [
+            -0.05884438,
+            -3.0588443,
+            -5.0588446,
+            -6.5588446,
+            -7.0588446
+          ],
+          "gap": 2.99999992,
+          "entropy": 0.24538741589608087
+        },
+        {
+          "token": " length",
+          "top1_logprob": -0.031746473,
+          "top_logprobs": [
+            -0.031746473,
+            -3.5317464,
+            -8.031747,
+            -8.031747,
+            -8.031747
+          ],
+          "gap": 3.4999999269999997,
+          "entropy": 0.14102699698251675
+        },
+        {
+          "token": ",",
+          "top1_logprob": -0.057886638,
+          "top_logprobs": [
+            -0.057886638,
+            -3.5578866,
+            -4.0578866,
+            -5.5578866,
+            -5.5578866
+          ],
+          "gap": 3.499999962,
+          "entropy": 0.2670343528368583
+        },
+        {
+          "token": " n",
+          "top1_logprob": -0.3446951,
+          "top_logprobs": [
+            -0.3446951,
+            -1.8446951,
+            -2.344695,
+            -4.344695,
+            -4.844695
+          ],
+          "gap": 1.5,
+          "entropy": 0.852767794825379
+        },
+        {
+          "token": ".",
+          "top1_logprob": -1.295118,
+          "top_logprobs": [
+            -1.295118,
+            -1.295118,
+            -1.295118,
+            -2.2951179,
+            -3.2951179
+          ],
+          "gap": 0.0,
+          "entropy": 1.435956495903948
+        },
+        {
+          "token": " Straight",
+          "top1_logprob": -2.7241826,
+          "top_logprobs": [
+            -1.2241826,
+            -1.2241826,
+            -2.2241826,
+            -2.7241826,
+            -2.7241826
+          ],
+          "gap": 0.0,
+          "entropy": 1.4032488082407175
+        },
+        {
+          "token": " O",
+          "top1_logprob": -0.98662364,
+          "top_logprobs": [
+            -0.98662364,
+            -1.4866236,
+            -1.9866236,
+            -1.9866236,
+            -3.4866238
+          ],
+          "gap": 0.4999999599999999,
+          "entropy": 1.3987932376683956
+        },
+        {
+          "token": "(#",
+          "top1_logprob": -4.6360354,
+          "top_logprobs": [
+            -0.13603556,
+            -2.6360354,
+            -4.6360354,
+            -4.6360354,
+            -4.6360354
+          ],
+          "gap": 2.49999984,
+          "entropy": 0.4276568464028875
+        },
+        {
+          "token": "serv",
+          "top1_logprob": -3.552899,
+          "top_logprobs": [
+            -0.052898813,
+            -3.552899,
+            -4.052899,
+            -6.052899,
+            -6.552899
+          ],
+          "gap": 3.500000187,
+          "entropy": 0.244607116716988
+        },
+        {
+          "token": "ers",
+          "top1_logprob": -7.378783e-05,
+          "top_logprobs": [
+            -7.378783e-05,
+            -9.750073,
+            -12.500073,
+            -12.750073,
+            -13.000073
+          ],
+          "gap": 9.74999921217,
+          "entropy": 0.0007484814778323316
+        },
+        {
+          "token": " *",
+          "top1_logprob": -0.021325924,
+          "top_logprobs": [
+            -0.021325924,
+            -5.021326,
+            -5.021326,
+            -6.021326,
+            -6.021326
+          ],
+          "gap": 5.000000076,
+          "entropy": 0.11363212173807995
+        },
+        {
+          "token": " #",
+          "top1_logprob": -0.13632487,
+          "top_logprobs": [
+            -0.13632487,
+            -2.636325,
+            -4.136325,
+            -4.136325,
+            -5.136325
+          ],
+          "gap": 2.5000001299999997,
+          "entropy": 0.46065047993523733
+        },
+        {
+          "token": "queries",
+          "top1_logprob": -0.006841331,
+          "top_logprobs": [
+            -0.006841331,
+            -5.506841,
+            -7.006841,
+            -7.506841,
+            -7.506841
+          ],
+          "gap": 5.499999668999999,
+          "entropy": 0.043017499032593665
+        },
+        {
+          "token": ")",
+          "top1_logprob": -0.0032650516,
+          "top_logprobs": [
+            -0.0032650516,
+            -6.003265,
+            -8.503265,
+            -9.003265,
+            -9.003265
+          ],
+          "gap": 5.9999999484,
+          "entropy": 0.021693157120239837
+        },
+        {
+          "token": " is",
+          "top1_logprob": -0.45665726,
+          "top_logprobs": [
+            -0.45665726,
+            -2.4566572,
+            -2.4566572,
+            -2.9566572,
+            -2.9566572
+          ],
+          "gap": 1.99999994,
+          "entropy": 1.0243791201937895
+        },
+        {
+          "token": " too",
+          "top1_logprob": -0.10710173,
+          "top_logprobs": [
+            -0.10710173,
+            -2.6071017,
+            -4.107102,
+            -5.107102,
+            -6.107102
+          ],
+          "gap": 2.4999999699999997,
+          "entropy": 0.3987449954019744
+        },
+        {
+          "token": " slow",
+          "top1_logprob": -0.5917288,
+          "top_logprobs": [
+            -0.5917288,
+            -1.5917288,
+            -2.0917287,
+            -3.0917287,
+            -3.0917287
+          ],
+          "gap": 1.0,
+          "entropy": 1.1966941710289498
+        },
+        {
+          "token": ".\n\n",
+          "top1_logprob": -0.59003896,
+          "top_logprobs": [
+            -0.59003896,
+            -1.090039,
+            -2.590039,
+            -4.090039,
+            -4.590039
+          ],
+          "gap": 0.50000004,
+          "entropy": 1.0029468153320489
+        },
+        {
+          "token": "We",
+          "top1_logprob": -0.17386068,
+          "top_logprobs": [
+            -0.17386068,
+            -2.6738608,
+            -3.1738608,
+            -4.1738605,
+            -4.6738605
+          ],
+          "gap": 2.50000012,
+          "entropy": 0.5609968698569077
+        },
+        {
+          "token": " need",
+          "top1_logprob": -0.09416372,
+          "top_logprobs": [
+            -0.09416372,
+            -2.5941637,
+            -5.094164,
+            -5.594164,
+            -6.594164
+          ],
+          "gap": 2.49999998,
+          "entropy": 0.33797829995159256
+        },
+        {
+          "token": " to",
+          "top1_logprob": -0.3400619,
+          "top_logprobs": [
+            -0.3400619,
+            -1.8400619,
+            -2.840062,
+            -3.340062,
+            -4.340062
+          ],
+          "gap": 1.5,
+          "entropy": 0.8724772221123034
+        },
+        {
+          "token": " compute",
+          "top1_logprob": -0.9822194,
+          "top_logprobs": [
+            -0.9822194,
+            -1.4822195,
+            -1.4822195,
+            -2.4822195,
+            -2.9822195
+          ],
+          "gap": 0.5000001000000001,
+          "entropy": 1.4157748497005016
+        },
+        {
+          "token": " for",
+          "top1_logprob": -0.26796046,
+          "top_logprobs": [
+            -0.26796046,
+            -2.2679605,
+            -2.7679605,
+            -3.2679605,
+            -5.2679605
+          ],
+          "gap": 2.00000004,
+          "entropy": 0.7593574542408983
+        },
+        {
+          "token": " each",
+          "top1_logprob": -0.0002592466,
+          "top_logprobs": [
+            -0.0002592466,
+            -9.000259,
+            -10.000259,
+            -10.250259,
+            -11.000259
+          ],
+          "gap": 8.9999997534,
+          "entropy": 0.0023311995828951687
+        },
+        {
+          "token": " query",
+          "top1_logprob": -0.13602734,
+          "top_logprobs": [
+            -0.13602734,
+            -2.1360273,
+            -5.1360273,
+            -6.1360273,
+            -8.636027
+          ],
+          "gap": 1.9999999599999998,
+          "entropy": 0.415567342553287
+        },
+        {
+          "token": " quickly",
+          "top1_logprob": -3.8261929,
+          "top_logprobs": [
+            -0.826193,
+            -1.326193,
+            -2.3261929,
+            -2.8261929,
+            -3.3261929,
+            -3.8261929
+          ],
+          "gap": 0.5,
+          "entropy": 1.342869453490082
+        },
+        {
+          "token": ".\n\n",
+          "top1_logprob": -1.0451496,
+          "top_logprobs": [
+            -1.0451496,
+            -1.5451496,
+            -1.5451496,
+            -2.0451496,
+            -3.5451496
+          ],
+          "gap": 0.5,
+          "entropy": 1.4224262494345976
+        },
+        {
+          "token": "Observ",
+          "top1_logprob": -0.24748348,
+          "top_logprobs": [
+            -0.24748348,
+            -2.7474835,
+            -2.7474835,
+            -4.2474833,
+            -4.2474833
+          ],
+          "gap": 2.50000002,
+          "entropy": 0.6468044607877246
+        },
+        {
+          "token": "ations",
+          "top1_logprob": -1.7024064,
+          "top_logprobs": [
+            -0.20240647,
+            -1.7024064,
+            -7.2024064,
+            -9.202407,
+            -10.202407
+          ],
+          "gap": 1.49999993,
+          "entropy": 0.4821854085827386
+        },
+        {
+          "token": ":",
+          "top1_logprob": -0.15760691,
+          "top_logprobs": [
+            -0.15760691,
+            -2.0013568,
+            -4.579482,
+            -8.970107,
+            -9.532607
+          ],
+          "gap": 1.84374989,
+          "entropy": 0.4538193506086318
+        },
+        {
+          "token": " For",
+          "top1_logprob": -0.4655877,
+          "top_logprobs": [
+            -0.4655877,
+            -1.9655877,
+            -2.9655876,
+            -2.9655876,
+            -3.4655876
+          ],
+          "gap": 1.5,
+          "entropy": 0.9850450201645189
+        },
+        {
+          "token": " each",
+          "top1_logprob": -0.03084217,
+          "top_logprobs": [
+            -0.03084217,
+            -3.530842,
+            -7.5308423,
+            -8.530842,
+            -9.030842
+          ],
+          "gap": 3.4999998299999997,
+          "entropy": 0.13988716036895335
+        },
+        {
+          "token": " server",
+          "top1_logprob": -0.03218037,
+          "top_logprobs": [
+            -0.03218037,
+            -3.5321803,
+            -6.5321803,
+            -7.5321803,
+            -8.532181
+          ],
+          "gap": 3.49999993,
+          "entropy": 0.14946798693428942
+        },
+        {
+          "token": ",",
+          "top1_logprob": -0.14398038,
+          "top_logprobs": [
+            -0.14398038,
+            -3.1439805,
+            -3.1439805,
+            -3.6439805,
+            -4.1439805
+          ],
+          "gap": 3.00000012,
+          "entropy": 0.5541594947262573
+        },
+        {
+          "token": " we",
+          "top1_logprob": -0.06309215,
+          "top_logprobs": [
+            -0.06309215,
+            -4.063092,
+            -4.563092,
+            -4.563092,
+            -5.063092
+          ],
+          "gap": 3.99999985,
+          "entropy": 0.24378105294162075
+        },
+        {
+          "token": " can",
+          "top1_logprob": -0.8546833,
+          "top_logprobs": [
+            -0.8546833,
+            -0.8546833,
+            -2.8546834,
+            -3.3546834,
+            -4.3546834
+          ],
+          "gap": 0.0,
+          "entropy": 1.0686220777645574
+        },
+        {
+          "token": " compute",
+          "top1_logprob": -1.5409648,
+          "top_logprobs": [
+            -1.0409648,
+            -1.5409648,
+            -2.5409648,
+            -3.0409648,
+            -3.0409648
+          ],
+          "gap": 0.5,
+          "entropy": 1.3035787710206934
+        },
+        {
+          "token": " the",
+          "top1_logprob": -0.63436884,
+          "top_logprobs": [
+            -0.63436884,
+            -1.1343689,
+            -3.134369,
+            -3.634369,
+            -3.634369
+          ],
+          "gap": 0.5000000599999999,
+          "entropy": 1.03261013628763
+        },
+        {
+          "token": " times",
+          "top1_logprob": -0.45311236,
+          "top_logprobs": [
+            -0.45311236,
+            -1.4531124,
+            -2.4531124,
+            -3.9531124,
+            -4.9531126
+          ],
+          "gap": 1.00000004,
+          "entropy": 0.9489388584665506
+        },
+        {
+          "token": " when",
+          "top1_logprob": -1.567101,
+          "top_logprobs": [
+            -1.067101,
+            -1.067101,
+            -1.567101,
+            -2.567101,
+            -5.067101
+          ],
+          "gap": 0.0,
+          "entropy": 1.296338012940877
+        },
+        {
+          "token": " it",
+          "top1_logprob": -0.013831717,
+          "top_logprobs": [
+            -0.013831717,
+            -5.0138316,
+            -5.5138316,
+            -6.5138316,
+            -7.5138316
+          ],
+          "gap": 4.999999882999999,
+          "entropy": 0.08199512572813293
+        },
+        {
+          "token": " receives",
+          "top1_logprob": -0.6680198,
+          "top_logprobs": [
+            -0.6680198,
+            -1.6680198,
+            -1.6680198,
+            -3.1680198,
+            -3.1680198
+          ],
+          "gap": 0.9999999999999999,
+          "entropy": 1.2450937067235075
+        },
+        {
+          "token": " requests",
+          "top1_logprob": -0.04353601,
+          "top_logprobs": [
+            -0.04353601,
+            -4.043536,
+            -4.543536,
+            -4.543536,
+            -6.043536
+          ],
+          "gap": 3.9999999899999996,
+          "entropy": 0.22247144423255014
+        },
+        {
+          "token": ";",
+          "top1_logprob": -2.4074934,
+          "top_logprobs": [
+            -0.9074934,
+            -0.9074934,
+            -2.4074934,
+            -2.9074934,
+            -3.4074934
+          ],
+          "gap": 0.0,
+          "entropy": 1.224352902120233
+        },
+        {
+          "token": " we",
+          "top1_logprob": -0.7054262,
+          "top_logprobs": [
+            -0.7054262,
+            -1.2054262,
+            -3.2054262,
+            -4.205426,
+            -4.205426
+          ],
+          "gap": 0.5,
+          "entropy": 0.9706312069113927
+        },
+        {
+          "token": " need",
+          "top1_logprob": -0.37726647,
+          "top_logprobs": [
+            -0.37726647,
+            -1.8772664,
+            -2.8772664,
+            -3.3772664,
+            -3.8772664
+          ],
+          "gap": 1.49999993,
+          "entropy": 0.8997397530780822
+        },
+        {
+          "token": " to",
+          "top1_logprob": -0.015082838,
+          "top_logprobs": [
+            -0.015082838,
+            -4.515083,
+            -6.015083,
+            -8.015083,
+            -8.515083
+          ],
+          "gap": 4.500000162,
+          "entropy": 0.08233898676364577
+        },
+        {
+          "token": " know",
+          "top1_logprob": -0.7158399,
+          "top_logprobs": [
+            -0.7158399,
+            -1.2158399,
+            -2.2158399,
+            -3.2158399,
+            -3.7158399
+          ],
+          "gap": 0.5,
+          "entropy": 1.1797255547759884
+        },
+        {
+          "token": ",",
+          "top1_logprob": -2.4666083,
+          "top_logprobs": [
+            -0.96660835,
+            -0.96660835,
+            -1.9666083,
+            -2.4666083,
+            -4.4666085
+          ],
+          "gap": 0.0,
+          "entropy": 1.271991134743559
+        },
+        {
+          "token": " for",
+          "top1_logprob": -0.12459403,
+          "top_logprobs": [
+            -0.12459403,
+            -2.624594,
+            -3.124594,
+            -8.624594,
+            -9.124594
+          ],
+          "gap": 2.49999997,
+          "entropy": 0.4398428746139723
+        },
+        {
+          "token": " each",
+          "top1_logprob": -0.33509892,
+          "top_logprobs": [
+            -0.33509892,
+            -1.335099,
+            -4.8350987,
+            -5.3350987,
+            -5.3350987
+          ],
+          "gap": 1.00000008,
+          "entropy": 0.6795575412012764
+        },
+        {
+          "token": " query",
+          "top1_logprob": -0.04589983,
+          "top_logprobs": [
+            -0.04589983,
+            -3.5458999,
+            -4.5459,
+            -5.5459,
+            -7.0459
+          ],
+          "gap": 3.50000007,
+          "entropy": 0.22163962936700488
+        },
+        {
+          "token": ",",
+          "top1_logprob": -1.7778933,
+          "top_logprobs": [
+            -0.27789336,
+            -1.7778933,
+            -3.7778933,
+            -4.2778935,
+            -4.2778935
+          ],
+          "gap": 1.49999994,
+          "entropy": 0.7095947385091463
+        },
+        {
+          "token": " whether",
+          "top1_logprob": -0.54285157,
+          "top_logprobs": [
+            -0.54285157,
+            -1.0428516,
+            -3.0428514,
+            -4.5428514,
+            -5.5428514
+          ],
+          "gap": 0.5000000300000002,
+          "entropy": 0.8977669016124642
+        },
+        {
+          "token": " there",
+          "top1_logprob": -1.400556,
+          "top_logprobs": [
+            -1.400556,
+            -1.400556,
+            -1.900556,
+            -1.900556,
+            -1.900556
+          ],
+          "gap": 0.0,
+          "entropy": 1.5783355362812235
+        },
+        {
+          "token": " exists",
+          "top1_logprob": -0.52810234,
+          "top_logprobs": [
+            -0.52810234,
+            -1.0281024,
+            -3.0281024,
+            -6.0281024,
+            -7.0281024
+          ],
+          "gap": 0.5000000600000001,
+          "entropy": 0.8463768675909549
+        },
+        {
+          "token": " at",
+          "top1_logprob": -1.1850733,
+          "top_logprobs": [
+            -0.68507326,
+            -1.1850733,
+            -1.6850733,
+            -6.1850734,
+            -6.6850734
+          ],
+          "gap": 0.50000004,
+          "entropy": 1.041238744709229
+        },
+        {
+          "token": " least",
+          "top1_logprob": -0.0034514638,
+          "top_logprobs": [
+            -0.0034514638,
+            -6.2534513,
+            -7.5034513,
+            -7.8784513,
+            -8.878451
+          ],
+          "gap": 6.2499998362,
+          "entropy": 0.02338586030851992
+        },
+        {
+          "token": " one",
+          "top1_logprob": -0.0007929042,
+          "top_logprobs": [
+            -0.0007929042,
+            -8.0007925,
+            -8.7507925,
+            -8.7507925,
+            -9.7507925
+          ],
+          "gap": 7.999999595799999,
+          "entropy": 0.006731298234171903
+        },
+        {
+          "token": " request",
+          "top1_logprob": -0.03234439,
+          "top_logprobs": [
+            -0.03234439,
+            -4.0323443,
+            -4.5323443,
+            -6.5323443,
+            -7.0323443
+          ],
+          "gap": 3.99999991,
+          "entropy": 0.16645036064046392
+        },
+        {
+          "token": " time",
+          "top1_logprob": -1.2476938,
+          "top_logprobs": [
+            -1.2476938,
+            -1.2476938,
+            -1.7476938,
+            -2.2476938,
+            -2.7476938
+          ],
+          "gap": 0.0,
+          "entropy": 1.4769486468853208
+        },
+        {
+          "token": " for",
+          "top1_logprob": -1.0983791,
+          "top_logprobs": [
+            -1.0983791,
+            -1.0983791,
+            -2.0983791,
+            -2.0983791,
+            -3.0983791
+          ],
+          "gap": 0.0,
+          "entropy": 1.4052318411170017
+        },
+        {
+          "token": " that",
+          "top1_logprob": -0.22397548,
+          "top_logprobs": [
+            -0.22397548,
+            -2.7239754,
+            -3.2239754,
+            -3.2239754,
+            -3.2239754
+          ],
+          "gap": 2.49999992,
+          "entropy": 0.7387005767396894
+        },
+        {
+          "token": " server",
+          "top1_logprob": -8.0224636e-05,
+          "top_logprobs": [
+            -8.0224636e-05,
+            -11.00008,
+            -11.00008,
+            -11.50008,
+            -12.00008
+          ],
+          "gap": 10.999999775364001,
+          "entropy": 0.0006073129388095554
+        },
+        {
+          "token": " within",
+          "top1_logprob": -0.59646463,
+          "top_logprobs": [
+            -0.59646463,
+            -1.0964646,
+            -2.5964646,
+            -4.0964646,
+            -4.0964646
+          ],
+          "gap": 0.49999996999999996,
+          "entropy": 1.0247821106481825
+        },
+        {
+          "token": " interval",
+          "top1_logprob": -1.925906,
+          "top_logprobs": [
+            -0.92590594,
+            -0.92590594,
+            -1.925906,
+            -3.425906,
+            -4.425906
+          ],
+          "gap": 0.0,
+          "entropy": 1.1820086715641456
+        },
+        {
+          "token": " [",
+          "top1_logprob": -0.3834709,
+          "top_logprobs": [
+            -0.3834709,
+            -1.8834709,
+            -1.8834709,
+            -5.383471,
+            -5.383471
+          ],
+          "gap": 1.5,
+          "entropy": 0.8829838842880534
+        },
+        {
+          "token": "q",
+          "top1_logprob": -0.08612391,
+          "top_logprobs": [
+            -0.08612391,
+            -2.586124,
+            -5.586124,
+            -6.086124,
+            -8.086123
+          ],
+          "gap": 2.50000009,
+          "entropy": 0.31045275208658246
+        },
+        {
+          "token": "-x",
+          "top1_logprob": -0.7419125,
+          "top_logprobs": [
+            -0.6481625,
+            -0.7419125,
+            -8.529022,
+            -8.814178,
+            -9.027069
+          ],
+          "gap": 0.09375,
+          "entropy": 0.6962743950713222
+        },
+        {
+          "token": ",",
+          "top1_logprob": -0.048623323,
+          "top_logprobs": [
+            -0.048623323,
+            -3.0486233,
+            -11.048623,
+            -12.548623,
+            -13.048623
+          ],
+          "gap": 2.999999977,
+          "entropy": 0.191130876757812
+        },
+        {
+          "token": " q",
+          "top1_logprob": -8.6184606e-05,
+          "top_logprobs": [
+            -8.6184606e-05,
+            -9.500086,
+            -13.250086,
+            -13.500086,
+            -13.500086
+          ],
+          "gap": 9.499999815394,
+          "entropy": 0.0008507227447939459
+        },
+        {
+          "token": "].",
+          "top1_logprob": -0.6220836,
+          "top_logprobs": [
+            -0.6220836,
+            -1.1220837,
+            -2.1220837,
+            -4.1220837,
+            -6.6220837
+          ],
+          "gap": 0.5000001,
+          "entropy": 1.0291289277709346
+        },
+        {
+          "token": " Equ",
+          "top1_logprob": -0.5217953,
+          "top_logprobs": [
+            -0.5217953,
+            -1.5217953,
+            -2.5217953,
+            -4.0217953,
+            -4.0217953
+          ],
+          "gap": 1.0,
+          "entropy": 0.9905672323104415
+        },
+        {
+          "token": "ivalent",
+          "top1_logprob": -0.011071676,
+          "top_logprobs": [
+            -0.011071676,
+            -4.5110717,
+            -12.011071,
+            -12.261071,
+            -13.011071
+          ],
+          "gap": 4.500000023999999,
+          "entropy": 0.06066133882664423
+        },
+        {
+          "token": " to",
+          "top1_logprob": -0.3175986,
+          "top_logprobs": [
+            -0.3175986,
+            -1.3175986,
+            -6.317599,
+            -7.317599,
+            -7.817599
+          ],
+          "gap": 1.0,
+          "entropy": 0.602827180239357
+        },
+        {
+          "token": " the",
+          "top1_logprob": -5.4513855,
+          "top_logprobs": [
+            -0.45138562,
+            -1.9513856,
+            -2.9513855,
+            -3.4513855,
+            -3.9513855,
+            -5.4513855
+          ],
+          "gap": 1.4999999800000001,
+          "entropy": 0.9260176391851047
+        },
+        {
+          "token": " server",
+          "top1_logprob": -0.38189572,
+          "top_logprobs": [
+            -0.38189572,
+            -1.8818958,
+            -3.3818958,
+            -3.8818958,
+            -3.8818958
+          ],
+          "gap": 1.50000008,
+          "entropy": 0.8092529817164192
+        },
+        {
+          "token": " being",
+          "top1_logprob": -0.73714143,
+          "top_logprobs": [
+            -0.73714143,
+            -1.2371414,
+            -2.2371414,
+            -3.2371414,
+            -3.2371414
+          ],
+          "gap": 0.49999997000000007,
+          "entropy": 1.2158725350087862
+        },
+        {
+          "token": " \"",
+          "top1_logprob": -0.073047675,
+          "top_logprobs": [
+            -0.073047675,
+            -3.5730476,
+            -3.5730476,
+            -4.5730476,
+            -7.0730476
+          ],
+          "gap": 3.499999925,
+          "entropy": 0.3195887020206482
+        },
+        {
+          "token": "active",
+          "top1_logprob": -0.008814119,
+          "top_logprobs": [
+            -0.008814119,
+            -5.0088143,
+            -6.5088143,
+            -8.508814,
+            -9.008814
+          ],
+          "gap": 5.000000181,
+          "entropy": 0.0544406572665714
+        },
+        {
+          "token": "\"",
+          "top1_logprob": -0.0073684114,
+          "top_logprobs": [
+            -0.0073684114,
+            -5.5073686,
+            -6.0073686,
+            -8.007368,
+            -9.507368
+          ],
+          "gap": 5.5000001886000005,
+          "entropy": 0.047413904902529315
+        },
+        {
+          "token": " during",
+          "top1_logprob": -2.4560328,
+          "top_logprobs": [
+            -0.45603278,
+            -2.4560328,
+            -2.4560328,
+            -2.4560328,
+            -2.9560328
+          ],
+          "gap": 2.00000002,
+          "entropy": 1.0810706555421057
+        },
+        {
+          "token": " that",
+          "top1_logprob": -0.3082513,
+          "top_logprobs": [
+            -0.3082513,
+            -1.8082513,
+            -2.8082514,
+            -3.8082514,
+            -4.8082514
+          ],
+          "gap": 1.5,
+          "entropy": 0.8141068103971824
+        },
+        {
+          "token": " interval",
+          "top1_logprob": -0.23560111,
+          "top_logprobs": [
+            -0.23560111,
+            -1.7356011,
+            -3.7356012,
+            -5.235601,
+            -5.735601
+          ],
+          "gap": 1.49999999,
+          "entropy": 0.6271970432580113
+        },
+        {
+          "token": ".\n\n",
+          "top1_logprob": -0.34328765,
+          "top_logprobs": [
+            -0.34328765,
+            -1.8432877,
+            -2.8432877,
+            -3.3432877,
+            -3.8432877
+          ],
+          "gap": 1.5000000500000001,
+          "entropy": 0.8997397033614521
+        },
+        {
+          "token": "Alternatively",
+          "top1_logprob": -4.4069486,
+          "top_logprobs": [
+            -0.9069485,
+            -1.4069486,
+            -2.4069486,
+            -2.4069486,
+            -2.9069486,
+            -4.4069486
+          ],
+          "gap": 0.5000001,
+          "entropy": 1.4048763864487845
+        },
+        {
+          "token": ",",
+          "top1_logprob": -0.049549025,
+          "top_logprobs": [
+            -0.049549025,
+            -4.049549,
+            -4.049549,
+            -4.549549,
+            -7.049549
+          ],
+          "gap": 3.9999999749999997,
+          "entropy": 0.24099097609679157
+        },
+        {
+          "token": " for",
+          "top1_logprob": -1.9499364,
+          "top_logprobs": [
+            -0.44993645,
+            -1.9499364,
+            -1.9499364,
+            -3.9499364,
+            -4.4499364
+          ],
+          "gap": 1.4999999499999999,
+          "entropy": 0.9695147479483041
+        },
+        {
+          "token": " each",
+          "top1_logprob": -0.005390276,
+          "top_logprobs": [
+            -0.005390276,
+            -5.50539,
+            -7.00539,
+            -9.50539,
+            -9.50539
+          ],
+          "gap": 5.499999724,
+          "entropy": 0.035262652197980075
+        },
+        {
+          "token": " query",
+          "top1_logprob": -0.11546101,
+          "top_logprobs": [
+            -0.11546101,
+            -2.615461,
+            -4.115461,
+            -4.115461,
+            -6.115461
+          ],
+          "gap": 2.4999999899999996,
+          "entropy": 0.4413766881232169
+        },
+        {
+          "token": " we",
+          "top1_logprob": -1.2113414,
+          "top_logprobs": [
+            -0.7113414,
+            -1.2113414,
+            -1.7113414,
+            -4.2113414,
+            -5.2113414
+          ],
+          "gap": 0.5,
+          "entropy": 1.1111643854104818
+        },
+        {
+          "token": " can",
+          "top1_logprob": -0.8126405,
+          "top_logprobs": [
+            -0.8126405,
+            -1.3126404,
+            -1.8126404,
+            -2.3126404,
+            -4.8126407
+          ],
+          "gap": 0.49999990000000005,
+          "entropy": 1.2826300626239344
+        },
+        {
+          "token": " compute",
+          "top1_logprob": -0.21827225,
+          "top_logprobs": [
+            -0.21827225,
+            -2.2182722,
+            -3.2182722,
+            -3.7182722,
+            -4.718272
+          ],
+          "gap": 1.9999999499999999,
+          "entropy": 0.6735288854894207
+        },
+        {
+          "token": " set",
+          "top1_logprob": -3.8260531,
+          "top_logprobs": [
+            -0.8260531,
+            -0.8260531,
+            -3.3260531,
+            -3.3260531,
+            -3.8260531
+          ],
+          "gap": 0.0,
+          "entropy": 1.0476256396759716
+        },
+        {
+          "token": " of",
+          "top1_logprob": -0.021001697,
+          "top_logprobs": [
+            -0.021001697,
+            -4.021002,
+            -7.021002,
+            -7.521002,
+            -8.021002
+          ],
+          "gap": 4.000000303,
+          "entropy": 0.10468866586759636
+        },
+        {
+          "token": " servers",
+          "top1_logprob": -0.063043244,
+          "top_logprobs": [
+            -0.063043244,
+            -3.0630434,
+            -5.063043,
+            -5.063043,
+            -7.563043
+          ],
+          "gap": 3.000000156,
+          "entropy": 0.26950064418460745
+        },
+        {
+          "token": " that",
+          "top1_logprob": -0.107296854,
+          "top_logprobs": [
+            -0.107296854,
+            -3.107297,
+            -3.107297,
+            -5.107297,
+            -6.107297
+          ],
+          "gap": 3.000000146,
+          "entropy": 0.41648029632726574
+        },
+        {
+          "token": " had",
+          "top1_logprob": -1.3943028,
+          "top_logprobs": [
+            -0.3943029,
+            -1.3943028,
+            -3.3943028,
+            -3.8943028,
+            -4.894303
+          ],
+          "gap": 0.9999998999999999,
+          "entropy": 0.8389626494226348
+        },
+        {
+          "token": " at",
+          "top1_logprob": -0.21999156,
+          "top_logprobs": [
+            -0.21999156,
+            -2.2199917,
+            -2.7199917,
+            -4.2199917,
+            -5.2199917
+          ],
+          "gap": 2.00000014,
+          "entropy": 0.6861970394148637
+        },
+        {
+          "token": " least",
+          "top1_logprob": -0.00045551415,
+          "top_logprobs": [
+            -0.00045551415,
+            -8.375456,
+            -9.375456,
+            -9.500456,
+            -10.875456
+          ],
+          "gap": 8.37500048585,
+          "entropy": 0.004050597151430024
+        },
+        {
+          "token": " one",
+          "top1_logprob": -0.0033216085,
+          "top_logprobs": [
+            -0.0033216085,
+            -6.0033216,
+            -7.5033216,
+            -9.003322,
+            -9.003322
+          ],
+          "gap": 5.999999991499999,
+          "entropy": 0.024445896996180053
+        },
+        {
+          "token": " request",
+          "top1_logprob": -0.0004861365,
+          "top_logprobs": [
+            -0.0004861365,
+            -8.000486,
+            -10.500486,
+            -10.500486,
+            -11.000486
+          ],
+          "gap": 7.9999998635,
+          "entropy": 0.003851437326961723
+        },
+        {
+          "token": " in",
+          "top1_logprob": -0.1038705,
+          "top_logprobs": [
+            -0.1038705,
+            -2.6038704,
+            -4.1038704,
+            -5.1038704,
+            -7.6038704
+          ],
+          "gap": 2.4999998999999997,
+          "entropy": 0.38783873777725114
+        },
+        {
+          "token": " interval",
+          "top1_logprob": -1.2368124,
+          "top_logprobs": [
+            -1.2368124,
+            -1.2368124,
+            -1.2368124,
+            -2.2368124,
+            -4.2368126
+          ],
+          "gap": 0.0,
+          "entropy": 1.3803012203562077
+        },
+        {
+          "token": ",",
+          "top1_logprob": -0.89452386,
+          "top_logprobs": [
+            -0.89452386,
+            -0.89452386,
+            -2.3945239,
+            -2.8945239,
+            -3.8945239
+          ],
+          "gap": 0.0,
+          "entropy": 1.1922933505727649
+        },
+        {
+          "token": " then",
+          "top1_logprob": -0.13639945,
+          "top_logprobs": [
+            -0.13639945,
+            -2.1363995,
+            -5.6363993,
+            -6.6363993,
+            -6.6363993
+          ],
+          "gap": 2.00000005,
+          "entropy": 0.40686514199215107
+        },
+        {
+          "token": " answer",
+          "top1_logprob": -0.039565638,
+          "top_logprobs": [
+            -0.039565638,
+            -4.5395656,
+            -5.0395656,
+            -5.5395656,
+            -5.5395656
+          ],
+          "gap": 4.499999962,
+          "entropy": 0.1510601714877603
+        },
+        {
+          "token": " =",
+          "top1_logprob": -0.21267521,
+          "top_logprobs": [
+            -0.21267521,
+            -1.7126752,
+            -5.712675,
+            -6.212675,
+            -6.212675
+          ],
+          "gap": 1.49999999,
+          "entropy": 0.5227924129115776
+        },
+        {
+          "token": " n",
+          "top1_logprob": -0.00020537652,
+          "top_logprobs": [
+            -0.00020537652,
+            -9.500205,
+            -9.750205,
+            -10.500205,
+            -11.000205
+          ],
+          "gap": 9.499999623479999,
+          "entropy": 0.0019293755757248368
+        },
+        {
+          "token": " -",
+          "top1_logprob": -0.0019676387,
+          "top_logprobs": [
+            -0.0019676387,
+            -6.2519674,
+            -11.251967,
+            -11.876967,
+            -12.126967
+          ],
+          "gap": 6.2499997613,
+          "entropy": 0.014289904198702798
+        },
+        {
+          "token": " size",
+          "top1_logprob": -0.2064648,
+          "top_logprobs": [
+            -0.2064648,
+            -2.2064648,
+            -3.7064648,
+            -4.206465,
+            -4.706465
+          ],
+          "gap": 2.0,
+          "entropy": 0.596212779239957
+        },
+        {
+          "token": " of",
+          "top1_logprob": -0.8090752,
+          "top_logprobs": [
+            -0.8090752,
+            -0.8090752,
+            -2.309075,
+            -5.3090754,
+            -5.8090754
+          ],
+          "gap": 0.0,
+          "entropy": 0.9936053185744155
+        },
+        {
+          "token": " that",
+          "top1_logprob": -0.4958495,
+          "top_logprobs": [
+            -0.4958495,
+            -0.9958495,
+            -3.9958496,
+            -5.9958496,
+            -7.9958496
+          ],
+          "gap": 0.5,
+          "entropy": 0.7609071289583873
+        },
+        {
+          "token": " set",
+          "top1_logprob": -0.00022837892,
+          "top_logprobs": [
+            -0.00022837892,
+            -9.000228,
+            -10.750228,
+            -10.750228,
+            -11.250228
+          ],
+          "gap": 8.99999962108,
+          "entropy": 0.0018970810965151844
+        },
+        {
+          "token": ".\n\n",
+          "top1_logprob": -0.10695103,
+          "top_logprobs": [
+            -0.10695103,
+            -2.606951,
+            -3.606951,
+            -8.606951,
+            -8.606951
+          ],
+          "gap": 2.49999997,
+          "entropy": 0.3893046786229054
+        },
+        {
+          "token": "Thus",
+          "top1_logprob": -0.34403446,
+          "top_logprobs": [
+            -0.34403446,
+            -1.8440344,
+            -3.3440344,
+            -3.3440344,
+            -4.3440347
+          ],
+          "gap": 1.49999994,
+          "entropy": 0.8204026651098298
+        },
+        {
+          "token": " we",
+          "top1_logprob": -0.3770491,
+          "top_logprobs": [
+            -0.3770491,
+            -2.377049,
+            -2.877049,
+            -3.377049,
+            -3.377049
+          ],
+          "gap": 1.9999999,
+          "entropy": 0.8635137753868366
+        },
+        {
+          "token": " need",
+          "top1_logprob": -0.077060744,
+          "top_logprobs": [
+            -0.077060744,
+            -3.0770607,
+            -4.5770607,
+            -5.0770607,
+            -5.5770607
+          ],
+          "gap": 2.999999956,
+          "entropy": 0.30768464051666233
+        },
+        {
+          "token": " to",
+          "top1_logprob": -0.04442766,
+          "top_logprobs": [
+            -0.04442766,
+            -4.544428,
+            -5.044428,
+            -5.044428,
+            -5.044428
+          ],
+          "gap": 4.50000034,
+          "entropy": 0.1773140159336945
+        },
+        {
+          "token": " compute",
+          "top1_logprob": -0.43985334,
+          "top_logprobs": [
+            -0.43985334,
+            -1.9398533,
+            -2.4398534,
+            -2.9398534,
+            -3.9398534
+          ],
+          "gap": 1.49999996,
+          "entropy": 1.0087663945982914
+        },
+        {
+          "token": ",",
+          "top1_logprob": -1.2842709,
+          "top_logprobs": [
+            -0.7842709,
+            -1.2842709,
+            -1.7842709,
+            -3.2842708,
+            -4.284271
+          ],
+          "gap": 0.5000000000000001,
+          "entropy": 1.2062045338654557
+        },
+        {
+          "token": " for",
+          "top1_logprob": -0.05194283,
+          "top_logprobs": [
+            -0.05194283,
+            -3.0519428,
+            -7.051943,
+            -7.051943,
+            -7.051943
+          ],
+          "gap": 2.9999999699999997,
+          "entropy": 0.21129161661424056
+        },
+        {
+          "token": " each",
+          "top1_logprob": -0.00797398,
+          "top_logprobs": [
+            -0.00797398,
+            -5.007974,
+            -7.507974,
+            -8.007974,
+            -9.007974
+          ],
+          "gap": 5.00000002,
+          "entropy": 0.04903211902673341
+        },
+        {
+          "token": " query",
+          "top1_logprob": -0.0037232381,
+          "top_logprobs": [
+            -0.0037232381,
+            -6.003723,
+            -7.003723,
+            -9.003723,
+            -10.003723
+          ],
+          "gap": 5.9999997619,
+          "entropy": 0.026292564055058566
+        },
+        {
+          "token": ",",
+          "top1_logprob": -0.17878926,
+          "top_logprobs": [
+            -0.17878926,
+            -2.1787891,
+            -3.6787891,
+            -4.678789,
+            -5.178789
+          ],
+          "gap": 1.9999998399999999,
+          "entropy": 0.5571268501363956
+        },
+        {
+          "token": " number",
+          "top1_logprob": -1.0474703,
+          "top_logprobs": [
+            -0.5474704,
+            -1.0474703,
+            -3.5474703,
+            -3.5474703,
+            -4.5474706
+          ],
+          "gap": 0.49999990000000005,
+          "entropy": 0.9364720356579678
+        },
+        {
+          "token": " of",
+          "top1_logprob": -0.001048611,
+          "top_logprobs": [
+            -0.001048611,
+            -7.1260486,
+            -9.001049,
+            -10.126049,
+            -10.626049
+          ],
+          "gap": 7.124999989,
+          "entropy": 0.008492839872878261
+        },
+        {
+          "token": " distinct",
+          "top1_logprob": -0.011348106,
+          "top_logprobs": [
+            -0.011348106,
+            -4.5113482,
+            -8.761348,
+            -9.011348,
+            -12.761348
+          ],
+          "gap": 4.500000094,
+          "entropy": 0.06326234669449143
+        },
+        {
+          "token": " server",
+          "top1_logprob": -0.25207403,
+          "top_logprobs": [
+            -0.25207403,
+            -1.502074,
+            -10.252074,
+            -10.252074,
+            -10.377074
+          ],
+          "gap": 1.24999997,
+          "entropy": 0.5313986675035062
+        },
+        {
+          "token": " IDs",
+          "top1_logprob": -0.09654001,
+          "top_logprobs": [
+            -0.09654001,
+            -3.09654,
+            -3.09654,
+            -6.59654,
+            -8.59654
+          ],
+          "gap": 2.99999999,
+          "entropy": 0.378168075596928
+        },
+        {
+          "token": " appearing",
+          "top1_logprob": -3.5420794,
+          "top_logprobs": [
+            -0.54207945,
+            -1.5420794,
+            -3.0420794,
+            -3.0420794,
+            -3.5420794,
+            -3.5420794
+          ],
+          "gap": 0.99999995,
+          "entropy": 1.1496707696975237
+        },
+        {
+          "token": " in",
+          "top1_logprob": -0.08448264,
+          "top_logprobs": [
+            -0.08448264,
+            -2.5844827,
+            -6.0844827,
+            -6.0844827,
+            -7.0844827
+          ],
+          "gap": 2.50000006,
+          "entropy": 0.30612900311531055
+        },
+        {
+          "token": " logs",
+          "top1_logprob": -0.013045087,
+          "top_logprobs": [
+            -0.013045087,
+            -5.0130453,
+            -5.5130453,
+            -8.013045,
+            -8.013045
+          ],
+          "gap": 5.000000213,
+          "entropy": 0.07226510159358727
+        },
+        {
+          "token": " with",
+          "top1_logprob": -0.70607966,
+          "top_logprobs": [
+            -0.70607966,
+            -1.2060797,
+            -2.2060797,
+            -2.7060797,
+            -4.2060795
+          ],
+          "gap": 0.5000000400000001,
+          "entropy": 1.1991237937950359
+        },
+        {
+          "token": " time",
+          "top1_logprob": -0.06532594,
+          "top_logprobs": [
+            -0.06532594,
+            -3.065326,
+            -5.0653257,
+            -5.0653257,
+            -5.5653257
+          ],
+          "gap": 3.00000006,
+          "entropy": 0.2893019782665828
+        },
+        {
+          "token": " in",
+          "top1_logprob": -0.25846326,
+          "top_logprobs": [
+            -0.25846326,
+            -1.7584633,
+            -3.2584634,
+            -4.7584634,
+            -5.7584634
+          ],
+          "gap": 1.5000000400000002,
+          "entropy": 0.6852244070692594
+        },
+        {
+          "token": " [",
+          "top1_logprob": -0.10978007,
+          "top_logprobs": [
+            -0.10978007,
+            -2.60978,
+            -4.1097803,
+            -5.1097803,
+            -5.6097803
+          ],
+          "gap": 2.4999999300000004,
+          "entropy": 0.4066101801164994
+        },
+        {
+          "token": "q",
+          "top1_logprob": -0.21528576,
+          "top_logprobs": [
+            -0.21528576,
+            -1.7152858,
+            -4.715286,
+            -5.715286,
+            -7.715286
+          ],
+          "gap": 1.50000004,
+          "entropy": 0.5462095643343498
+        },
+        {
+          "token": "-x",
+          "top1_logprob": -0.28175288,
+          "top_logprobs": [
+            -0.28175288,
+            -1.4067528,
+            -8.469253,
+            -9.031753,
+            -9.781753
+          ],
+          "gap": 1.12499992,
+          "entropy": 0.5604515955636166
+        },
+        {
+          "token": ",",
+          "top1_logprob": -0.014215632,
+          "top_logprobs": [
+            -0.014215632,
+            -4.2642155,
+            -10.264215,
+            -12.264215,
+            -12.264215
+          ],
+          "gap": 4.249999868,
+          "entropy": 0.0744484105790092
+        },
+        {
+          "token": " q",
+          "top1_logprob": -2.7775379e-05,
+          "top_logprobs": [
+            -2.7775379e-05,
+            -10.750028,
+            -13.750028,
+            -14.000028,
+            -14.000028
+          ],
+          "gap": 10.750000224621001,
+          "entropy": 0.0002926711997038624
+        },
+        {
+          "token": "].\n\n",
+          "top1_logprob": -0.10722178,
+          "top_logprobs": [
+            -0.10722178,
+            -2.6072218,
+            -4.1072216,
+            -4.6072216,
+            -6.6072216
+          ],
+          "gap": 2.50000002,
+          "entropy": 0.4109647418587849
+        },
+        {
+          "token": "Thus",
+          "top1_logprob": -1.6637958,
+          "top_logprobs": [
+            -1.6637958,
+            -1.6637958,
+            -1.6637958,
+            -2.163796,
+            -2.663796
+          ],
+          "gap": 0.0,
+          "entropy": 1.5487428213157295
+        },
+        {
+          "token": " we",
+          "top1_logprob": -1.3706571,
+          "top_logprobs": [
+            -1.3706571,
+            -1.3706571,
+            -1.8706571,
+            -1.8706571,
+            -2.870657
+          ],
+          "gap": 0.0,
+          "entropy": 1.508279177672166
+        },
+        {
+          "token": " need",
+          "top1_logprob": -0.24241215,
+          "top_logprobs": [
+            -0.24241215,
+            -2.742412,
+            -2.742412,
+            -3.242412,
+            -4.742412
+          ],
+          "gap": 2.49999985,
+          "entropy": 0.7007448727611825
+        },
+        {
+          "token": " a",
+          "top1_logprob": -3.114415,
+          "top_logprobs": [
+            -0.11441492,
+            -3.114415,
+            -4.1144147,
+            -4.6144147,
+            -4.6144147
+          ],
+          "gap": 3.00000008,
+          "entropy": 0.38235248372834707
+        },
+        {
+          "token": " data",
+          "top1_logprob": -0.59163445,
+          "top_logprobs": [
+            -0.59163445,
+            -1.0916345,
+            -3.0916345,
+            -4.0916343,
+            -4.5916343
+          ],
+          "gap": 0.50000005,
+          "entropy": 0.9479620142608227
+        },
+        {
+          "token": " structure",
+          "top1_logprob": -0.00012790339,
+          "top_logprobs": [
+            -0.00012790339,
+            -9.250128,
+            -11.500128,
+            -12.000128,
+            -12.750128
+          ],
+          "gap": 9.25000009661,
+          "entropy": 0.0012314168395051832
+        },
+        {
+          "token": " to",
+          "top1_logprob": -0.6521001,
+          "top_logprobs": [
+            -0.6521001,
+            -1.6521001,
+            -1.6521001,
+            -2.6521,
+            -5.1521
+          ],
+          "gap": 1.0,
+          "entropy": 1.1937107478000024
+        },
+        {
+          "token": " answer",
+          "top1_logprob": -0.22322719,
+          "top_logprobs": [
+            -0.22322719,
+            -2.2232273,
+            -3.7232273,
+            -4.223227,
+            -4.223227
+          ],
+          "gap": 2.00000011,
+          "entropy": 0.6190776312835792
+        },
+        {
+          "token": " number",
+          "top1_logprob": -2.8619542,
+          "top_logprobs": [
+            -1.3619542,
+            -1.8619542,
+            -2.3619542,
+            -2.3619542,
+            -2.3619542,
+            -2.8619542
+          ],
+          "gap": 0.5,
+          "entropy": 1.6698615929877394
+        },
+        {
+          "token": " of",
+          "top1_logprob": -0.0008162504,
+          "top_logprobs": [
+            -0.0008162504,
+            -8.250816,
+            -8.375816,
+            -8.875816,
+            -9.125816
+          ],
+          "gap": 8.2499997496,
+          "entropy": 0.007056827459543158
+        },
+        {
+          "token": " distinct",
+          "top1_logprob": -0.004112122,
+          "top_logprobs": [
+            -0.004112122,
+            -5.5041122,
+            -11.754112,
+            -12.004112,
+            -12.254112
+          ],
+          "gap": 5.500000077999999,
+          "entropy": 0.026706648960341105
+        },
+        {
+          "token": " values",
+          "top1_logprob": -1.0455835,
+          "top_logprobs": [
+            -1.0455835,
+            -1.0455835,
+            -2.0455835,
+            -2.5455835,
+            -3.0455835
+          ],
+          "gap": 0.0,
+          "entropy": 1.3599398800081957
+        },
+        {
+          "token": " in",
+          "top1_logprob": -0.7546856,
+          "top_logprobs": [
+            -0.7546856,
+            -0.7546856,
+            -3.7546856,
+            -4.2546854,
+            -4.7546854
+          ],
+          "gap": 0.0,
+          "entropy": 0.8975944965574468
+        },
+        {
+          "token": " a",
+          "top1_logprob": -0.33687422,
+          "top_logprobs": [
+            -0.33687422,
+            -1.8368742,
+            -2.8368742,
+            -3.8368742,
+            -4.336874
+          ],
+          "gap": 1.4999999800000001,
+          "entropy": 0.8338856660758792
+        },
+        {
+          "token": " time",
+          "top1_logprob": -2.8963182,
+          "top_logprobs": [
+            -0.3963181,
+            -1.8963181,
+            -2.3963182,
+            -2.8963182,
+            -4.896318
+          ],
+          "gap": 1.5,
+          "entropy": 0.9655245931417854
+        },
+        {
+          "token": " range",
+          "top1_logprob": -1.110426,
+          "top_logprobs": [
+            -1.110426,
+            -1.110426,
+            -1.610426,
+            -3.110426,
+            -3.110426
+          ],
+          "gap": 0.0,
+          "entropy": 1.350369430319205
+        },
+        {
+          "token": " (",
+          "top1_logprob": -1.2541853,
+          "top_logprobs": [
+            -1.2541853,
+            -1.2541853,
+            -2.7541852,
+            -2.7541852,
+            -3.2541852
+          ],
+          "gap": 0.0,
+          "entropy": 1.3125472313727498
+        },
+        {
+          "token": "over",
+          "top1_logprob": -3.1425564,
+          "top_logprobs": [
+            -1.6425564,
+            -1.6425564,
+            -2.1425564,
+            -2.6425564,
+            -2.6425564,
+            -3.1425564
+          ],
+          "gap": 0.0,
+          "entropy": 1.6565714656447008
+        },
+        {
+          "token": " logs",
+          "top1_logprob": -0.16563289,
+          "top_logprobs": [
+            -0.16563289,
+            -2.665633,
+            -4.1656327,
+            -4.1656327,
+            -5.1656327
+          ],
+          "gap": 2.50000011,
+          "entropy": 0.46065053009988494
+        },
+        {
+          "token": ").",
+          "top1_logprob": -2.458672,
+          "top_logprobs": [
+            -0.45867217,
+            -1.9586722,
+            -2.458672,
+            -3.458672,
+            -3.458672
+          ],
+          "gap": 1.50000003,
+          "entropy": 0.9971639327221611
+        },
+        {
+          "token": " logs",
+          "top1_logprob": -3.0887284,
+          "top_logprobs": [
+            -2.0887284,
+            -2.0887284,
+            -2.0887284,
+            -2.0887284,
+            -2.0887284,
+            -3.0887284
+          ],
+          "gap": 0.0,
+          "entropy": 1.7489664174236172
+        },
+        {
+          "token": " are",
+          "top1_logprob": -0.7878637,
+          "top_logprobs": [
+            -0.7878637,
+            -1.7878637,
+            -2.2878637,
+            -2.2878637,
+            -3.2878637
+          ],
+          "gap": 1.0,
+          "entropy": 1.2951049972570339
+        },
+        {
+          "token": " not",
+          "top1_logprob": -1.7592404,
+          "top_logprobs": [
+            -1.7592404,
+            -1.7592404,
+            -2.2592404,
+            -2.2592404,
+            -2.2592404
+          ],
+          "gap": 0.0,
+          "entropy": 1.5783355362812235
+        },
+        {
+          "token": " sorted",
+          "top1_logprob": -0.054130264,
+          "top_logprobs": [
+            -0.054130264,
+            -3.0541303,
+            -6.05413,
+            -6.55413,
+            -8.554131
+          ],
+          "gap": 3.0000000360000003,
+          "entropy": 0.21930291409333472
+        },
+        {
+          "token": " by",
+          "top1_logprob": -0.47890455,
+          "top_logprobs": [
+            -0.47890455,
+            -1.9789045,
+            -2.4789045,
+            -3.4789045,
+            -3.4789045
+          ],
+          "gap": 1.49999995,
+          "entropy": 0.997163908620758
+        },
+        {
+          "token": " time",
+          "top1_logprob": -0.0015142414,
+          "top_logprobs": [
+            -0.0015142414,
+            -7.0015144,
+            -8.501514,
+            -9.001514,
+            -10.001514
+          ],
+          "gap": 7.0000001586,
+          "entropy": 0.010948267135011267
+        },
+        {
+          "token": ";",
+          "top1_logprob": -0.9396962,
+          "top_logprobs": [
+            -0.9396962,
+            -1.9396962,
+            -2.4396963,
+            -2.4396963,
+            -2.9396963
+          ],
+          "gap": 1.0,
+          "entropy": 1.3384794288703856
+        },
+        {
+          "token": " we",
+          "top1_logprob": -0.4238862,
+          "top_logprobs": [
+            -0.4238862,
+            -1.4238862,
+            -3.4238863,
+            -3.9238863,
+            -3.9238863
+          ],
+          "gap": 1.0,
+          "entropy": 0.8836893949289536
+        },
+        {
+          "token": " can",
+          "top1_logprob": -0.11285631,
+          "top_logprobs": [
+            -0.11285631,
+            -3.1128564,
+            -3.6128564,
+            -4.1128564,
+            -4.6128564
+          ],
+          "gap": 3.00000009,
+          "entropy": 0.44482441682729573
+        },
+        {
+          "token": " sort",
+          "top1_logprob": -0.03775275,
+          "top_logprobs": [
+            -0.03775275,
+            -3.5377529,
+            -5.5377526,
+            -6.5377526,
+            -7.5377526
+          ],
+          "gap": 3.50000015,
+          "entropy": 0.1728019661098419
+        },
+        {
+          "token": " them",
+          "top1_logprob": -0.47652906,
+          "top_logprobs": [
+            -0.47652906,
+            -1.4765291,
+            -1.9765291,
+            -4.976529,
+            -6.476529
+          ],
+          "gap": 1.00000004,
+          "entropy": 0.9511471473789705
+        },
+        {
+          "token": " by",
+          "top1_logprob": -0.04725375,
+          "top_logprobs": [
+            -0.04725375,
+            -3.5472538,
+            -4.5472536,
+            -6.5472536,
+            -6.5472536
+          ],
+          "gap": 3.50000005,
+          "entropy": 0.2111501891514318
+        },
+        {
+          "token": " time",
+          "top1_logprob": -0.0013925865,
+          "top_logprobs": [
+            -0.0013925865,
+            -6.7513924,
+            -9.501392,
+            -10.001392,
+            -10.251392
+          ],
+          "gap": 6.749999813500001,
+          "entropy": 0.010744062272345159
+        },
+        {
+          "token": ".",
+          "top1_logprob": -0.9771552,
+          "top_logprobs": [
+            -0.9771552,
+            -0.9771552,
+            -2.4771552,
+            -2.9771552,
+            -3.4771552
+          ],
+          "gap": 0.0,
+          "entropy": 1.224352902120233
+        },
+        {
+          "token": " Then",
+          "top1_logprob": -0.79204977,
+          "top_logprobs": [
+            -0.79204977,
+            -1.2920498,
+            -2.79205,
+            -2.79205,
+            -3.29205
+          ],
+          "gap": 0.50000003,
+          "entropy": 1.2083972178638953
+        },
+        {
+          "token": " queries",
+          "top1_logprob": -2.4937437,
+          "top_logprobs": [
+            -0.49374372,
+            -1.9937437,
+            -1.9937437,
+            -2.4937437,
+            -4.993744
+          ],
+          "gap": 1.4999999800000001,
+          "entropy": 1.0870501225849711
+        },
+        {
+          "token": " can",
+          "top1_logprob": -2.2287626,
+          "top_logprobs": [
+            -1.7287627,
+            -1.7287627,
+            -1.7287627,
+            -2.2287626,
+            -2.7287626
+          ],
+          "gap": 0.0,
+          "entropy": 1.5487428595553334
+        },
+        {
+          "token": " be",
+          "top1_logprob": -0.08051767,
+          "top_logprobs": [
+            -0.08051767,
+            -2.5805178,
+            -7.580518,
+            -9.080518,
+            -9.080518
+          ],
+          "gap": 2.50000013,
+          "entropy": 0.27501600608371385
+        },
+        {
+          "token": " processed",
+          "top1_logprob": -0.48082393,
+          "top_logprobs": [
+            -0.48082393,
+            -1.480824,
+            -1.980824,
+            -4.980824,
+            -6.480824
+          ],
+          "gap": 1.00000007,
+          "entropy": 0.9511471347997013
+        },
+        {
+          "token": " offline",
+          "top1_logprob": -0.11466634,
+          "top_logprobs": [
+            -0.11466634,
+            -3.1146665,
+            -4.6146665,
+            -4.6146665,
+            -4.6146665
+          ],
+          "gap": 3.00000016,
+          "entropy": 0.35620324569776984
+        },
+        {
+          "token": " sorted",
+          "top1_logprob": -1.3208417,
+          "top_logprobs": [
+            -1.3208417,
+            -1.3208417,
+            -1.8208417,
+            -2.3208418,
+            -2.8208418
+          ],
+          "gap": 0.0,
+          "entropy": 1.4769486307271915
+        },
+        {
+          "token": " by",
+          "top1_logprob": -0.016751343,
+          "top_logprobs": [
+            -0.016751343,
+            -5.5167513,
+            -5.5167513,
+            -6.0167513,
+            -6.5167513
+          ],
+          "gap": 5.499999957,
+          "entropy": 0.0808459325546318
+        },
+        {
+          "token": " query",
+          "top1_logprob": -1.1416947,
+          "top_logprobs": [
+            -1.1416947,
+            -1.1416947,
+            -2.1416945,
+            -2.6416945,
+            -3.6416945
+          ],
+          "gap": 0.0,
+          "entropy": 1.3228384688695038
+        },
+        {
+          "token": " time",
+          "top1_logprob": -0.66868675,
+          "top_logprobs": [
+            -0.66868675,
+            -1.1686867,
+            -2.6686869,
+            -3.6686869,
+            -3.6686869
+          ],
+          "gap": 0.4999999500000001,
+          "entropy": 1.0844478006761096
+        },
+        {
+          "token": ".\n\n",
+          "top1_logprob": -1.2551212,
+          "top_logprobs": [
+            -1.2551212,
+            -1.2551212,
+            -1.7551212,
+            -2.7551212,
+            -3.2551212
+          ],
+          "gap": 0.0,
+          "entropy": 1.393328443533547
+        },
+        {
+          "token": "We",
+          "top1_logprob": -0.65578425,
+          "top_logprobs": [
+            -0.65578425,
+            -2.6557841,
+            -2.6557841,
+            -3.1557841,
+            -3.1557841
+          ],
+          "gap": 1.99999985,
+          "entropy": 1.024379161800699
+        },
+        {
+          "token": " need",
+          "top1_logprob": -0.6093056,
+          "top_logprobs": [
+            -0.6093056,
+            -1.6093056,
+            -1.6093056,
+            -4.1093054,
+            -4.6093054
+          ],
+          "gap": 0.9999999999999999,
+          "entropy": 1.0916634163867036
+        },
+        {
+          "token": " to",
+          "top1_logprob": -0.21375802,
+          "top_logprobs": [
+            -0.21375802,
+            -2.713758,
+            -3.213758,
+            -3.713758,
+            -3.713758
+          ],
+          "gap": 2.49999998,
+          "entropy": 0.6505449311647695
+        },
+        {
+          "token": " answer",
+          "top1_logprob": -1.1554489,
+          "top_logprobs": [
+            -1.1554489,
+            -1.6554489,
+            -1.6554489,
+            -2.155449,
+            -2.655449
+          ],
+          "gap": 0.5,
+          "entropy": 1.497931101951405
+        },
+        {
+          "token": " distinct",
+          "top1_logprob": -1.5450704,
+          "top_logprobs": [
+            -1.0450704,
+            -1.5450704,
+            -1.5450704,
+            -2.5450704,
+            -3.0450704
+          ],
+          "gap": 0.5,
+          "entropy": 1.4157748680271671
+        },
+        {
+          "token": " count",
+          "top1_logprob": -0.4062762,
+          "top_logprobs": [
+            -0.4062762,
+            -1.4062762,
+            -2.9062762,
+            -4.906276,
+            -4.906276
+          ],
+          "gap": 1.0,
+          "entropy": 0.843939913580919
+        },
+        {
+          "token": " in",
+          "top1_logprob": -1.0422968,
+          "top_logprobs": [
+            -1.0422968,
+            -1.0422968,
+            -2.042297,
+            -3.042297,
+            -3.042297
+          ],
+          "gap": 0.0,
+          "entropy": 1.3148204701193427
+        },
+        {
+          "token": " a",
+          "top1_logprob": -1.7927377,
+          "top_logprobs": [
+            -0.2927377,
+            -1.7927377,
+            -2.7927377,
+            -5.2927375,
+            -5.2927375
+          ],
+          "gap": 1.5,
+          "entropy": 0.7371623595697862
+        },
+        {
+          "token": " sliding",
+          "top1_logprob": -0.022388324,
+          "top_logprobs": [
+            -0.022388324,
+            -4.0223885,
+            -6.0223885,
+            -7.0223885,
+            -7.5223885
+          ],
+          "gap": 4.000000176,
+          "entropy": 0.11853316499144688
+        },
+        {
+          "token": " time",
+          "top1_logprob": -2.58959,
+          "top_logprobs": [
+            -0.08959014,
+            -2.58959,
+            -4.58959,
+            -9.08959,
+            -9.58959
+          ],
+          "gap": 2.49999986,
+          "entropy": 0.32435601042712936
+        },
+        {
+          "token": " window",
+          "top1_logprob": -0.0047180043,
+          "top_logprobs": [
+            -0.0047180043,
+            -5.504718,
+            -7.504718,
+            -10.004718,
+            -10.504718
+          ],
+          "gap": 5.4999999957000005,
+          "entropy": 0.031941852495997416
+        },
+        {
+          "token": " of",
+          "top1_logprob": -0.43297997,
+          "top_logprobs": [
+            -0.43297997,
+            -1.93298,
+            -2.43298,
+            -2.93298,
+            -4.43298
+          ],
+          "gap": 1.5000000299999998,
+          "entropy": 0.9835004464188469
+        },
+        {
+          "token": " length",
+          "top1_logprob": -0.5148326,
+          "top_logprobs": [
+            -0.5148326,
+            -2.0148325,
+            -2.0148325,
+            -2.5148325,
+            -3.0148325
+          ],
+          "gap": 1.4999998999999997,
+          "entropy": 1.197429905201256
+        },
+        {
+          "token": " x",
+          "top1_logprob": -0.0022816835,
+          "top_logprobs": [
+            -0.0022816835,
+            -6.5022817,
+            -8.502282,
+            -9.002282,
+            -9.502282
+          ],
+          "gap": 6.5000000165000005,
+          "entropy": 0.015201636418397517
+        },
+        {
+          "token": " (",
+          "top1_logprob": -0.26468584,
+          "top_logprobs": [
+            -0.26468584,
+            -2.7646859,
+            -3.2646859,
+            -3.2646859,
+            -3.2646859
+          ],
+          "gap": 2.50000006,
+          "entropy": 0.7387005164272044
+        },
+        {
+          "token": "but",
+          "top1_logprob": -1.8157065,
+          "top_logprobs": [
+            -1.8157065,
+            -1.8157065,
+            -1.8157065,
+            -2.3157065,
+            -2.8157065
+          ],
+          "gap": 0.0,
+          "entropy": 1.5487428468087998
+        },
+        {
+          "token": " inclusive",
+          "top1_logprob": -2.725668,
+          "top_logprobs": [
+            -1.7256681,
+            -2.225668,
+            -2.225668,
+            -2.725668,
+            -2.725668,
+            -2.725668
+          ],
+          "gap": 0.49999990000000016,
+          "entropy": 1.7145939331203421
+        },
+        {
+          "token": ").",
+          "top1_logprob": -1.470949,
+          "top_logprobs": [
+            -1.470949,
+            -1.970949,
+            -2.4709492,
+            -2.9709492,
+            -2.9709492
+          ],
+          "gap": 0.5,
+          "entropy": 1.4378312559443465
+        },
+        {
+          "token": " Since",
+          "top1_logprob": -1.5179763,
+          "top_logprobs": [
+            -1.5179763,
+            -1.5179763,
+            -2.0179763,
+            -2.0179763,
+            -2.5179763
+          ],
+          "gap": 0.0,
+          "entropy": 1.5477356348950881
+        },
+        {
+          "token": " x",
+          "top1_logprob": -0.8136422,
+          "top_logprobs": [
+            -0.8136422,
+            -1.3136423,
+            -1.8136423,
+            -3.3136423,
+            -4.313642
+          ],
+          "gap": 0.5000001,
+          "entropy": 1.2062045208645606
+        },
+        {
+          "token": " constant",
+          "top1_logprob": -3.634653,
+          "top_logprobs": [
+            -0.13465306,
+            -3.134653,
+            -3.634653,
+            -3.634653,
+            -4.634653
+          ],
+          "gap": 2.9999999400000004,
+          "entropy": 0.4807846201263949
+        },
+        {
+          "token": " across",
+          "top1_logprob": -1.1229008,
+          "top_logprobs": [
+            -1.1229008,
+            -1.1229008,
+            -1.6229008,
+            -2.622901,
+            -3.622901
+          ],
+          "gap": 0.0,
+          "entropy": 1.3583292748062288
+        },
+        {
+          "token": " queries",
+          "top1_logprob": -0.16048731,
+          "top_logprobs": [
+            -0.16048731,
+            -1.9104873,
+            -9.035487,
+            -10.410487,
+            -10.785487
+          ],
+          "gap": 1.74999999,
+          "entropy": 0.42101848781351486
+        },
+        {
+          "token": " (",
+          "top1_logprob": -2.7267456,
+          "top_logprobs": [
+            -0.7267455,
+            -1.7267455,
+            -2.2267456,
+            -2.7267456,
+            -2.7267456
+          ],
+          "gap": 1.0,
+          "entropy": 1.2896477426623214
+        },
+        {
+          "token": "though",
+          "top1_logprob": -2.9091775,
+          "top_logprobs": [
+            -0.9091775,
+            -1.4091775,
+            -2.4091775,
+            -2.9091775,
+            -2.9091775
+          ],
+          "gap": 0.5,
+          "entropy": 1.3035787710206934
+        },
+        {
+          "token": " variable",
+          "top1_logprob": -5.3736854,
+          "top_logprobs": [
+            -0.8736855,
+            -2.3736854,
+            -2.3736854,
+            -2.8736854,
+            -2.8736854,
+            -5.3736854
+          ],
+          "gap": 1.4999998999999997,
+          "entropy": 1.2765555014253374
+        },
+        {
+          "token": " for",
+          "top1_logprob": -4.273385,
+          "top_logprobs": [
+            -0.7733848,
+            -2.7733848,
+            -2.7733848,
+            -2.7733848,
+            -3.2733848,
+            -4.273385
+          ],
+          "gap": 2.0,
+          "entropy": 1.1571763216311461
+        },
+        {
+          "token": " each",
+          "top1_logprob": -0.04763221,
+          "top_logprobs": [
+            -0.04763221,
+            -4.547632,
+            -4.547632,
+            -5.047632,
+            -6.047632
+          ],
+          "gap": 4.49999979,
+          "entropy": 0.1749668821260862
+        },
+        {
+          "token": " query",
+          "top1_logprob": -0.07541192,
+          "top_logprobs": [
+            -0.07541192,
+            -4.075412,
+            -4.075412,
+            -5.075412,
+            -5.075412
+          ],
+          "gap": 4.00000008,
+          "entropy": 0.2525900693618721
+        },
+        {
+          "token": " start",
+          "top1_logprob": -4.290423,
+          "top_logprobs": [
+            -0.79042304,
+            -2.790423,
+            -2.790423,
+            -3.290423,
+            -3.290423,
+            -4.290423
+          ],
+          "gap": 1.9999999600000002,
+          "entropy": 1.1036760981080618
+        },
+        {
+          "token": "?",
+          "top1_logprob": -4.3515167,
+          "top_logprobs": [
+            -0.8515168,
+            -1.8515167,
+            -2.8515167,
+            -2.8515167,
+            -2.8515167,
+            -4.3515167
+          ],
+          "gap": 0.9999998999999999,
+          "entropy": 1.3026482247790225
+        },
+        {
+          "token": " Actually",
+          "top1_logprob": -0.11229487,
+          "top_logprobs": [
+            -0.11229487,
+            -3.612295,
+            -4.6122947,
+            -4.6122947,
+            -4.6122947
+          ],
+          "gap": 3.50000013,
+          "entropy": 0.3019798552033253
+        },
+        {
+          "token": " start",
+          "top1_logprob": -2.3546522,
+          "top_logprobs": [
+            -0.85465217,
+            -1.3546522,
+            -2.3546522,
+            -2.3546522,
+            -3.3546522
+          ],
+          "gap": 0.50000003,
+          "entropy": 1.310135354527075
+        },
+        {
+          "token": " =",
+          "top1_logprob": -0.07349614,
+          "top_logprobs": [
+            -0.07349614,
+            -3.573496,
+            -4.0734963,
+            -4.5734963,
+            -5.0734963
+          ],
+          "gap": 3.49999986,
+          "entropy": 0.31054077056621276
+        },
+        {
+          "token": " q",
+          "top1_logprob": -0.20403719,
+          "top_logprobs": [
+            -0.20403719,
+            -1.7040372,
+            -6.204037,
+            -8.704037,
+            -8.704037
+          ],
+          "gap": 1.50000001,
+          "entropy": 0.4917160556691656
+        },
+        {
+          "token": " -",
+          "top1_logprob": -0.16351767,
+          "top_logprobs": [
+            -0.16351767,
+            -1.9135177,
+            -5.9135175,
+            -8.163518,
+            -9.913518
+          ],
+          "gap": 1.75000003,
+          "entropy": 0.43986852610276117
+        },
+        {
+          "token": " x",
+          "top1_logprob": -3.0993935e-05,
+          "top_logprobs": [
+            -3.0993935e-05,
+            -10.7500305,
+            -12.0000305,
+            -13.2500305,
+            -15.0000305
+          ],
+          "gap": 10.749999506064999,
+          "entropy": 0.00036182755388099294
+        },
+        {
+          "token": ").",
+          "top1_logprob": -1.5288529,
+          "top_logprobs": [
+            -0.5288529,
+            -1.5288529,
+            -2.028853,
+            -4.028853,
+            -5.028853
+          ],
+          "gap": 1.0,
+          "entropy": 1.0157901924799426
+        },
+        {
+          "token": " So",
+          "top1_logprob": -0.37365636,
+          "top_logprobs": [
+            -0.37365636,
+            -2.3736563,
+            -2.8736563,
+            -3.3736563,
+            -3.3736563
+          ],
+          "gap": 1.99999994,
+          "entropy": 0.8635137575230842
+        },
+        {
+          "token": " windows",
+          "top1_logprob": -3.0866485,
+          "top_logprobs": [
+            -0.58664834,
+            -2.0866485,
+            -3.0866485,
+            -3.0866485,
+            -3.0866485
+          ],
+          "gap": 1.50000016,
+          "entropy": 1.0315993446142213
+        },
+        {
+          "token": " of",
+          "top1_logprob": -2.6305788,
+          "top_logprobs": [
+            -1.6305788,
+            -1.6305788,
+            -1.6305788,
+            -2.1305788,
+            -2.6305788
+          ],
+          "gap": 0.0,
+          "entropy": 1.5487428468087998
+        },
+        {
+          "token": " variable",
+          "top1_logprob": -1.8049158,
+          "top_logprobs": [
+            -1.3049158,
+            -1.8049158,
+            -1.8049158,
+            -1.8049158,
+            -2.804916
+          ],
+          "gap": 0.5,
+          "entropy": 1.5217584139198463
+        },
+        {
+          "token": " start",
+          "top1_logprob": -0.31652737,
+          "top_logprobs": [
+            -0.31652737,
+            -1.8165274,
+            -3.3165274,
+            -4.3165274,
+            -4.8165274
+          ],
+          "gap": 1.50000003,
+          "entropy": 0.7304851628481402
+        },
+        {
+          "token": " and",
+          "top1_logprob": -1.575942,
+          "top_logprobs": [
+            -0.575942,
+            -1.575942,
+            -2.575942,
+            -3.575942,
+            -3.575942
+          ],
+          "gap": 1.0,
+          "entropy": 1.056521124419499
+        },
+        {
+          "token": " end",
+          "top1_logprob": -0.6425922,
+          "top_logprobs": [
+            -0.6425922,
+            -1.1425922,
+            -2.1425922,
+            -4.1425924,
+            -5.6425924
+          ],
+          "gap": 0.5,
+          "entropy": 1.040565007810829
+        },
+        {
+          "token": ",",
+          "top1_logprob": -1.778873,
+          "top_logprobs": [
+            -1.278873,
+            -1.778873,
+            -1.778873,
+            -2.278873,
+            -2.778873
+          ],
+          "gap": 0.5,
+          "entropy": 1.4979311171670195
+        },
+        {
+          "token": " but",
+          "top1_logprob": -0.2709834,
+          "top_logprobs": [
+            -0.2709834,
+            -2.2709835,
+            -3.2709835,
+            -3.2709835,
+            -4.270983
+          ],
+          "gap": 2.0000001,
+          "entropy": 0.7385216344550471
+        },
+        {
+          "token": " same",
+          "top1_logprob": -1.1528343,
+          "top_logprobs": [
+            -1.1528343,
+            -1.6528343,
+            -2.1528344,
+            -2.6528344,
+            -2.6528344
+          ],
+          "gap": 0.5,
+          "entropy": 1.4378312801694595
+        },
+        {
+          "token": " length",
+          "top1_logprob": -0.26004016,
+          "top_logprobs": [
+            -0.26004016,
+            -1.7600402,
+            -3.2600403,
+            -4.7600403,
+            -5.2600403
+          ],
+          "gap": 1.50000004,
+          "entropy": 0.695079780461911
+        },
+        {
+          "token": " x",
+          "top1_logprob": -0.2549419,
+          "top_logprobs": [
+            -0.2549419,
+            -2.254942,
+            -2.754942,
+            -4.254942,
+            -4.254942
+          ],
+          "gap": 2.0000001,
+          "entropy": 0.7226973681457082
+        },
+        {
+          "token": ":",
+          "top1_logprob": -4.0873528,
+          "top_logprobs": [
+            -0.5873529,
+            -1.5873529,
+            -2.0873528,
+            -3.5873528,
+            -4.0873528,
+            -4.0873528
+          ],
+          "gap": 1.0,
+          "entropy": 1.156371744854491
+        },
+        {
+          "token": " window",
+          "top1_logprob": -2.0742342,
+          "top_logprobs": [
+            -1.5742342,
+            -1.5742342,
+            -2.0742342,
+            -2.0742342,
+            -2.0742342
+          ],
+          "gap": 0.0,
+          "entropy": 1.5783355362812237
+        },
+        {
+          "token": " is",
+          "top1_logprob": -2.5600111,
+          "top_logprobs": [
+            -1.0600111,
+            -1.5600111,
+            -2.0600111,
+            -2.5600111,
+            -2.5600111
+          ],
+          "gap": 0.5,
+          "entropy": 1.4378313043945712
+        },
+        {
+          "token": " [",
+          "top1_logprob": -0.031149935,
+          "top_logprobs": [
+            -0.031149935,
+            -5.03115,
+            -5.53115,
+            -5.53115,
+            -6.03115
+          ],
+          "gap": 5.000000065,
+          "entropy": 0.10915900963135988
+        },
+        {
+          "token": "q",
+          "top1_logprob": -0.03537763,
+          "top_logprobs": [
+            -0.03537763,
+            -4.0353775,
+            -5.0353775,
+            -5.5353775,
+            -6.0353775
+          ],
+          "gap": 3.99999987,
+          "entropy": 0.17100872768307687
+        },
+        {
+          "token": " -",
+          "top1_logprob": -0.6042732,
+          "top_logprobs": [
+            -0.6042732,
+            -0.7917732,
+            -9.401148,
+            -9.588648,
+            -9.932398
+          ],
+          "gap": 0.1875,
+          "entropy": 0.6907506509967273
+        },
+        {
+          "token": " x",
+          "top1_logprob": -1.4781843e-05,
+          "top_logprobs": [
+            -1.4781843e-05,
+            -11.250014,
+            -14.000014,
+            -14.750014,
+            -15.750014
+          ],
+          "gap": 11.249999218157,
+          "entropy": 0.0001804166935083475
+        },
+        {
+          "token": ",",
+          "top1_logprob": -0.0002495931,
+          "top_logprobs": [
+            -0.0002495931,
+            -8.50025,
+            -10.50025,
+            -12.25025,
+            -12.50025
+          ],
+          "gap": 8.5000004069,
+          "entropy": 0.0023627931860629235
+        },
+        {
+          "token": " q",
+          "top1_logprob": -6.3180723e-06,
+          "top_logprobs": [
+            -6.3180723e-06,
+            -13.500007,
+            -13.750007,
+            -14.250007,
+            -14.250007
+          ],
+          "gap": 13.5000006819277,
+          "entropy": 5.5378960012435165e-05
+        },
+        {
+          "token": "].\n\n",
+          "top1_logprob": -1.0841032,
+          "top_logprobs": [
+            -1.0841032,
+            -1.5841032,
+            -1.5841032,
+            -1.5841032,
+            -3.084103
+          ],
+          "gap": 0.5,
+          "entropy": 1.4829649516577812
+        },
+        {
+          "token": "Thus",
+          "top1_logprob": -0.76162076,
+          "top_logprobs": [
+            -0.76162076,
+            -1.2616208,
+            -2.7616208,
+            -2.7616208,
+            -3.7616208
+          ],
+          "gap": 0.50000004,
+          "entropy": 1.171772370556092
+        },
+        {
+          "token": " we",
+          "top1_logprob": -0.44541276,
+          "top_logprobs": [
+            -0.44541276,
+            -1.9454128,
+            -2.4454126,
+            -3.4454126,
+            -3.9454126
+          ],
+          "gap": 1.50000004,
+          "entropy": 0.9617224014425866
+        },
+        {
+          "token": " need",
+          "top1_logprob": -0.8559538,
+          "top_logprobs": [
+            -0.8559538,
+            -0.8559538,
+            -2.3559537,
+            -3.8559537,
+            -4.3559537
+          ],
+          "gap": 0.0,
+          "entropy": 1.0903275142312572
+        },
+        {
+          "token": " to",
+          "top1_logprob": -0.20240268,
+          "top_logprobs": [
+            -0.20240268,
+            -2.7024026,
+            -3.2024026,
+            -3.7024026,
+            -4.2024026
+          ],
+          "gap": 2.49999992,
+          "entropy": 0.6178348653677459
+        },
+        {
+          "token": " answer",
+          "top1_logprob": -0.6250787,
+          "top_logprobs": [
+            -0.6250787,
+            -2.1250787,
+            -2.1250787,
+            -2.1250787,
+            -3.1250787
+          ],
+          "gap": 1.5,
+          "entropy": 1.250903980435032
+        },
+        {
+          "token": ":",
+          "top1_logprob": -3.4152956,
+          "top_logprobs": [
+            -0.9152955,
+            -1.4152955,
+            -1.4152955,
+            -3.4152956,
+            -3.4152956
+          ],
+          "gap": 0.5,
+          "entropy": 1.2937264282972023
+        },
+        {
+          "token": " for",
+          "top1_logprob": -0.6813246,
+          "top_logprobs": [
+            -0.6813246,
+            -1.6813246,
+            -2.1813245,
+            -2.1813245,
+            -3.1813245
+          ],
+          "gap": 1.0,
+          "entropy": 1.2951050251234537
+        },
+        {
+          "token": " each",
+          "top1_logprob": -0.011712829,
+          "top_logprobs": [
+            -0.011712829,
+            -6.011713,
+            -6.011713,
+            -6.011713,
+            -6.511713
+          ],
+          "gap": 6.000000171,
+          "entropy": 0.06280793712736549
+        },
+        {
+          "token": " query",
+          "top1_logprob": -0.09118802,
+          "top_logprobs": [
+            -0.09118802,
+            -3.091188,
+            -3.591188,
+            -5.591188,
+            -5.591188
+          ],
+          "gap": 2.9999999799999997,
+          "entropy": 0.36018762112255415
+        },
+        {
+          "token": " with",
+          "top1_logprob": -2.080338,
+          "top_logprobs": [
+            -1.0803379,
+            -2.080338,
+            -2.080338,
+            -2.080338,
+            -2.580338
+          ],
+          "gap": 1.0000000999999998,
+          "entropy": 1.4626482513269223
+        },
+        {
+          "token": " right",
+          "top1_logprob": -1.6245675,
+          "top_logprobs": [
+            -1.1245675,
+            -1.1245675,
+            -1.6245675,
+            -2.1245675,
+            -4.6245675
+          ],
+          "gap": 0.0,
+          "entropy": 1.358695057461006
+        },
+        {
+          "token": " endpoint",
+          "top1_logprob": -0.0062132766,
+          "top_logprobs": [
+            -0.0062132766,
+            -5.506213,
+            -7.006213,
+            -7.006213,
+            -8.506213
+          ],
+          "gap": 5.4999997234,
+          "entropy": 0.04284379091682828
+        },
+        {
+          "token": " q",
+          "top1_logprob": -1.1038071,
+          "top_logprobs": [
+            -1.1038071,
+            -1.1038071,
+            -1.6038071,
+            -2.103807,
+            -5.603807
+          ],
+          "gap": 0.0,
+          "entropy": 1.335317989833331
+        },
+        {
+          "token": ",",
+          "top1_logprob": -0.21978116,
+          "top_logprobs": [
+            -0.21978116,
+            -1.7197812,
+            -4.219781,
+            -6.219781,
+            -7.719781
+          ],
+          "gap": 1.50000004,
+          "entropy": 0.5618144000475042
+        },
+        {
+          "token": " count",
+          "top1_logprob": -0.813114,
+          "top_logprobs": [
+            -0.813114,
+            -2.313114,
+            -2.313114,
+            -2.313114,
+            -2.813114
+          ],
+          "gap": 1.5,
+          "entropy": 1.2967521347351447
+        },
+        {
+          "token": " distinct",
+          "top1_logprob": -0.06057862,
+          "top_logprobs": [
+            -0.06057862,
+            -3.5605786,
+            -3.5605786,
+            -7.060579,
+            -7.560579
+          ],
+          "gap": 3.49999998,
+          "entropy": 0.26900705670821995
+        },
+        {
+          "token": " server",
+          "top1_logprob": -0.009225361,
+          "top_logprobs": [
+            -0.009225361,
+            -5.0092254,
+            -6.5092254,
+            -7.5092254,
+            -8.509225
+          ],
+          "gap": 5.000000039,
+          "entropy": 0.057857404560746825
+        },
+        {
+          "token": " IDs",
+          "top1_logprob": -0.12086131,
+          "top_logprobs": [
+            -0.12086131,
+            -2.6208613,
+            -3.6208613,
+            -4.6208615,
+            -6.1208615
+          ],
+          "gap": 2.49999999,
+          "entropy": 0.45231255569332535
+        },
+        {
+          "token": " among",
+          "top1_logprob": -0.5399597,
+          "top_logprobs": [
+            -0.5399597,
+            -1.5399597,
+            -2.5399597,
+            -2.5399597,
+            -4.53996
+          ],
+          "gap": 1.0,
+          "entropy": 1.0979045866913972
+        },
+        {
+          "token": " logs",
+          "top1_logprob": -0.0228651,
+          "top_logprobs": [
+            -0.0228651,
+            -5.0228653,
+            -5.0228653,
+            -5.5228653,
+            -6.0228653
+          ],
+          "gap": 5.000000200000001,
+          "entropy": 0.122514754542368
+        },
+        {
+          "token": " with",
+          "top1_logprob": -0.25927597,
+          "top_logprobs": [
+            -0.25927597,
+            -1.7592759,
+            -3.259276,
+            -4.759276,
+            -5.259276
+          ],
+          "gap": 1.49999993,
+          "entropy": 0.6950798179459012
+        },
+        {
+          "token": " time",
+          "top1_logprob": -0.09970574,
+          "top_logprobs": [
+            -0.09970574,
+            -3.0997057,
+            -4.0997057,
+            -4.0997057,
+            -4.0997057
+          ],
+          "gap": 2.99999996,
+          "entropy": 0.433756400609313
+        },
+        {
+          "token": " between",
+          "top1_logprob": -3.5801415,
+          "top_logprobs": [
+            -0.58014166,
+            -1.0801417,
+            -3.0801415,
+            -3.5801415,
+            -4.5801415
+          ],
+          "gap": 0.50000004,
+          "entropy": 0.9796221493371449
+        },
+        {
+          "token": " q",
+          "top1_logprob": -0.5383496,
+          "top_logprobs": [
+            -0.5383496,
+            -2.0383496,
+            -2.0383496,
+            -2.0383496,
+            -4.0383496
+          ],
+          "gap": 1.5,
+          "entropy": 1.1833538323986428
+        },
+        {
+          "token": " -",
+          "top1_logprob": -0.49848616,
+          "top_logprobs": [
+            -0.49848616,
+            -0.93598616,
+            -9.818799,
+            -10.0766115,
+            -10.1391115
+          ],
+          "gap": 0.4375,
+          "entropy": 0.6711856768875144
+        },
+        {
+          "token": " x",
+          "top1_logprob": -1.8358061e-05,
+          "top_logprobs": [
+            -1.8358061e-05,
+            -11.250018,
+            -12.625018,
+            -13.625018,
+            -14.875018
+          ],
+          "gap": 11.249999641939,
+          "entropy": 0.00022734202717229155
+        },
+        {
+          "token": " and",
+          "top1_logprob": -0.05292199,
+          "top_logprobs": [
+            -0.05292199,
+            -3.052922,
+            -6.052922,
+            -6.552922,
+            -8.552922
+          ],
+          "gap": 3.00000001,
+          "entropy": 0.21930291250673306
+        },
+        {
+          "token": " q",
+          "top1_logprob": -9.2978924e-05,
+          "top_logprobs": [
+            -9.2978924e-05,
+            -9.7500925,
+            -10.5000925,
+            -13.0000925,
+            -13.2500925
+          ],
+          "gap": 9.749999521075999,
+          "entropy": 0.000999980971631456
+        },
+        {
+          "token": " inclusive",
+          "top1_logprob": -0.42427632,
+          "top_logprobs": [
+            -0.42427632,
+            -1.4242764,
+            -2.4242764,
+            -4.4242764,
+            -5.4242764
+          ],
+          "gap": 1.0000000800000002,
+          "entropy": 0.9119437626495667
+        },
+        {
+          "token": ".\n\n",
+          "top1_logprob": -0.05169936,
+          "top_logprobs": [
+            -0.05169936,
+            -3.0516994,
+            -6.051699,
+            -7.551699,
+            -9.0517
+          ],
+          "gap": 3.0000000399999998,
+          "entropy": 0.21255884403249392
+        },
+        {
+          "token": "We",
+          "top1_logprob": -0.7558995,
+          "top_logprobs": [
+            -0.7558995,
+            -1.7558994,
+            -2.7558994,
+            -2.7558994,
+            -3.2558994
+          ],
+          "gap": 0.9999999000000002,
+          "entropy": 1.190380534512716
+        },
+        {
+          "token": " need",
+          "top1_logprob": -3.644788,
+          "top_logprobs": [
+            -0.14478809,
+            -2.644788,
+            -3.644788,
+            -3.644788,
+            -5.6447883
+          ],
+          "gap": 2.49999991,
+          "entropy": 0.5197164457725945
+        },
+        {
+          "token": " to",
+          "top1_logprob": -0.14403085,
+          "top_logprobs": [
+            -0.14403085,
+            -3.1440308,
+            -4.144031,
+            -4.144031,
+            -4.144031
+          ],
+          "gap": 2.99999995,
+          "entropy": 0.4337563671678766
+        },
+        {
+          "token": " process",
+          "top1_logprob": -1.3149201,
+          "top_logprobs": [
+            -1.3149201,
+            -1.3149201,
+            -1.8149201,
+            -1.8149201,
+            -2.81492
+          ],
+          "gap": 0.0,
+          "entropy": 1.508279177672166
+        },
+        {
+          "token": " up",
+          "top1_logprob": -1.2549992,
+          "top_logprobs": [
+            -0.75499916,
+            -1.2549992,
+            -1.7549992,
+            -3.7549992,
+            -4.254999
+          ],
+          "gap": 0.5000000400000001,
+          "entropy": 1.1708180571642486
+        },
+        {
+          "token": " to",
+          "top1_logprob": -4.136477e-05,
+          "top_logprobs": [
+            -4.136477e-05,
+            -11.250041,
+            -12.000041,
+            -13.250041,
+            -13.500041
+          ],
+          "gap": 11.24999963523,
+          "entropy": 0.000284172010193495
+        },
+        {
+          "token": " ",
+          "top1_logprob": -0.0014521064,
+          "top_logprobs": [
+            -0.0014521064,
+            -7.751452,
+            -8.001452,
+            -8.501452,
+            -8.751452
+          ],
+          "gap": 7.749999893599999,
+          "entropy": 0.01025517616104994
+        },
+        {
+          "token": "1",
+          "top1_logprob": -0.0009379755,
+          "top_logprobs": [
+            -0.0009379755,
+            -7.000938,
+            -10.750938,
+            -12.500938,
+            -14.000938
+          ],
+          "gap": 7.000000024499999,
+          "entropy": 0.007603130668247846
+        },
+        {
+          "token": "0",
+          "top1_logprob": -1.1369872,
+          "top_logprobs": [
+            -0.38698727,
+            -1.1369872,
+            -9.636988,
+            -11.386988,
+            -12.636988
+          ],
+          "gap": 0.7499999300000001,
+          "entropy": 0.628315983720416
+        },
+        {
+          "token": "^",
+          "top1_logprob": -0.048635587,
+          "top_logprobs": [
+            -0.048635587,
+            -3.0486355,
+            -11.2986355,
+            -11.5486355,
+            -11.7986355
+          ],
+          "gap": 2.999999913,
+          "entropy": 0.19122898932828758
+        },
+        {
+          "token": "5",
+          "top1_logprob": -9.42901e-05,
+          "top_logprobs": [
+            -9.42901e-05,
+            -10.250094,
+            -10.500094,
+            -10.750094,
+            -12.250094
+          ],
+          "gap": 10.2499997099,
+          "entropy": 0.001029739874569893
+        },
+        {
+          "token": " queries",
+          "top1_logprob": -0.13101748,
+          "top_logprobs": [
+            -0.13101748,
+            -2.1310174,
+            -7.1310177,
+            -8.131018,
+            -8.131018
+          ],
+          "gap": 1.9999999200000003,
+          "entropy": 0.37673058661772607
+        },
+        {
+          "token": " efficiently",
+          "top1_logprob": -2.9541137,
+          "top_logprobs": [
+            -0.95411366,
+            -1.4541137,
+            -1.9541137,
+            -2.4541137,
+            -2.9541137,
+            -2.9541137
+          ],
+          "gap": 0.50000004,
+          "entropy": 1.5303367048440955
+        },
+        {
+          "token": ".",
+          "top1_logprob": -1.3962035,
+          "top_logprobs": [
+            -0.8962035,
+            -1.3962035,
+            -2.3962035,
+            -2.3962035,
+            -2.3962035
+          ],
+          "gap": 0.4999999999999999,
+          "entropy": 1.3968120859282798
+        },
+        {
+          "token": " Typically",
+          "top1_logprob": -4.555047,
+          "top_logprobs": [
+            -1.5550472,
+            -2.055047,
+            -2.055047,
+            -2.055047,
+            -2.555047,
+            -4.555047
+          ],
+          "gap": 0.4999998000000001,
+          "entropy": 1.6155432543104553
+        },
+        {
+          "token": " we",
+          "top1_logprob": -0.3165819,
+          "top_logprobs": [
+            -0.3165819,
+            -1.816582,
+            -3.816582,
+            -3.816582,
+            -4.3165817
+          ],
+          "gap": 1.5000000999999998,
+          "entropy": 0.7395204816159842
+        },
+        {
+          "token": " can",
+          "top1_logprob": -0.105898894,
+          "top_logprobs": [
+            -0.105898894,
+            -2.6058989,
+            -4.605899,
+            -5.105899,
+            -5.605899
+          ],
+          "gap": 2.500000006,
+          "entropy": 0.3809901134200111
+        },
+        {
+          "token": " use",
+          "top1_logprob": -0.46473765,
+          "top_logprobs": [
+            -0.46473765,
+            -1.9647377,
+            -2.4647377,
+            -2.4647377,
+            -4.464738
+          ],
+          "gap": 1.50000005,
+          "entropy": 1.0413050940065485
+        },
+        {
+          "token": " Mo",
+          "top1_logprob": -0.26413292,
+          "top_logprobs": [
+            -0.26413292,
+            -1.764133,
+            -3.264133,
+            -4.764133,
+            -5.264133
+          ],
+          "gap": 1.50000008,
+          "entropy": 0.6950797825811792
+        },
+        {
+          "token": "'s",
+          "top1_logprob": -0.002526427,
+          "top_logprobs": [
+            -0.002526427,
+            -6.0025263,
+            -10.502526,
+            -11.252526,
+            -13.002526
+          ],
+          "gap": 5.999999873,
+          "entropy": 0.017817169952265677
+        },
+        {
+          "token": " algorithm",
+          "top1_logprob": -0.00012003655,
+          "top_logprobs": [
+            -0.00012003655,
+            -10.25012,
+            -10.50012,
+            -11.50012,
+            -11.75012
+          ],
+          "gap": 10.249999963450001,
+          "entropy": 0.0009415832318036073
+        },
+        {
+          "token": " on",
+          "top1_logprob": -0.5773573,
+          "top_logprobs": [
+            -0.5773573,
+            -2.0773573,
+            -2.0773573,
+            -2.5773573,
+            -3.5773573
+          ],
+          "gap": 1.5,
+          "entropy": 1.157218666547427
+        },
+        {
+          "token": " time",
+          "top1_logprob": -0.2222697,
+          "top_logprobs": [
+            -0.2222697,
+            -2.2222698,
+            -3.7222698,
+            -4.2222695,
+            -4.2222695
+          ],
+          "gap": 2.0000001,
+          "entropy": 0.6190776349016749
+        },
+        {
+          "token": " axis",
+          "top1_logprob": -1.4198782,
+          "top_logprobs": [
+            -0.41987827,
+            -1.4198782,
+            -3.9198782,
+            -3.9198782,
+            -4.4198785
+          ],
+          "gap": 0.9999999300000001,
+          "entropy": 0.8202861534066869
+        },
+        {
+          "token": ",",
+          "top1_logprob": -1.3827951,
+          "top_logprobs": [
+            -1.3827951,
+            -1.3827951,
+            -2.382795,
+            -2.382795,
+            -2.382795
+          ],
+          "gap": 0.0,
+          "entropy": 1.4881701163156007
+        },
+        {
+          "token": " O",
+          "top1_logprob": -2.8368206,
+          "top_logprobs": [
+            -0.83682054,
+            -0.83682054,
+            -2.8368206,
+            -3.8368206,
+            -4.8368206
+          ],
+          "gap": 0.0,
+          "entropy": 1.0138936911429246
+        },
+        {
+          "token": "((",
+          "top1_logprob": -0.00010978573,
+          "top_logprobs": [
+            -0.00010978573,
+            -9.50011,
+            -10.50011,
+            -12.50011,
+            -13.50011
+          ],
+          "gap": 9.500000214269999,
+          "entropy": 0.0011726816073512414
+        },
+        {
+          "token": "logs",
+          "top1_logprob": -2.1545196,
+          "top_logprobs": [
+            -0.15451945,
+            -2.1545196,
+            -4.1545196,
+            -6.1545196,
+            -6.1545196
+          ],
+          "gap": 2.00000015,
+          "entropy": 0.4697428548079744
+        },
+        {
+          "token": "+",
+          "top1_logprob": -0.3799765,
+          "top_logprobs": [
+            -0.3799765,
+            -1.3799765,
+            -3.8799765,
+            -3.8799765,
+            -4.3799763
+          ],
+          "gap": 1.0,
+          "entropy": 0.8202861540461156
+        },
+        {
+          "token": "queries",
+          "top1_logprob": -0.0013453251,
+          "top_logprobs": [
+            -0.0013453251,
+            -7.501345,
+            -8.001346,
+            -8.001346,
+            -10.001346
+          ],
+          "gap": 7.4999996749,
+          "entropy": 0.011225496705427416
+        },
+        {
+          "token": ")*",
+          "top1_logprob": -0.6994379,
+          "top_logprobs": [
+            -0.6994379,
+            -0.6994379,
+            -5.449438,
+            -6.699438,
+            -7.449438
+          ],
+          "gap": 0.0,
+          "entropy": 0.7310195288424716
+        },
+        {
+          "token": "sqrt",
+          "top1_logprob": -0.062220585,
+          "top_logprobs": [
+            -0.062220585,
+            -2.8122206,
+            -9.062221,
+            -9.312221,
+            -10.812221
+          ],
+          "gap": 2.750000015,
+          "entropy": 0.22949069580604065
+        },
+        {
+          "token": "(N",
+          "top1_logprob": -1.4114908,
+          "top_logprobs": [
+            -0.41149083,
+            -1.4114908,
+            -3.411491,
+            -4.411491,
+            -4.411491
+          ],
+          "gap": 0.99999997,
+          "entropy": 0.8309398106978154
+        },
+        {
+          "token": ")).",
+          "top1_logprob": -0.37528896,
+          "top_logprobs": [
+            -0.37528896,
+            -1.875289,
+            -1.875289,
+            -5.875289,
+            -6.875289
+          ],
+          "gap": 1.50000004,
+          "entropy": 0.8561119001291655
+        },
+        {
+          "token": " However",
+          "top1_logprob": -2.272523,
+          "top_logprobs": [
+            -0.77252287,
+            -1.7725229,
+            -2.272523,
+            -3.272523,
+            -3.272523
+          ],
+          "gap": 1.00000003,
+          "entropy": 1.1966941032703273
+        },
+        {
+          "token": " we",
+          "top1_logprob": -1.4395523,
+          "top_logprobs": [
+            -1.4395523,
+            -1.4395523,
+            -1.9395523,
+            -1.9395523,
+            -2.9395523
+          ],
+          "gap": 0.0,
+          "entropy": 1.5082791697105478
+        },
+        {
+          "token": " have",
+          "top1_logprob": -1.3562074,
+          "top_logprobs": [
+            -0.8562073,
+            -1.3562074,
+            -1.8562074,
+            -2.3562074,
+            -3.8562074
+          ],
+          "gap": 0.5000001,
+          "entropy": 1.3237749928862832
+        },
+        {
+          "token": " time",
+          "top1_logprob": -2.3422914,
+          "top_logprobs": [
+            -1.3422914,
+            -2.3422914,
+            -2.3422914,
+            -2.8422914,
+            -3.3422914
+          ],
+          "gap": 1.0000000000000002,
+          "entropy": 1.379575322730311
+        },
+        {
+          "token": " up",
+          "top1_logprob": -1.2946022,
+          "top_logprobs": [
+            -1.2946022,
+            -1.2946022,
+            -1.7946022,
+            -2.2946022,
+            -2.7946022
+          ],
+          "gap": 0.0,
+          "entropy": 1.4769486468853208
+        },
+        {
+          "token": " to",
+          "top1_logprob": -0.00021908268,
+          "top_logprobs": [
+            -0.00021908268,
+            -8.625219,
+            -11.625219,
+            -12.750219,
+            -13.000219
+          ],
+          "gap": 8.62499991732,
+          "entropy": 0.001912331715670158
+        },
+        {
+          "token": " ",
+          "top1_logprob": -0.024237514,
+          "top_logprobs": [
+            -0.024237514,
+            -4.0242376,
+            -6.0242376,
+            -6.5242376,
+            -8.024238
+          ],
+          "gap": 4.000000086,
+          "entropy": 0.12074575587306394
+        },
+        {
+          "token": "1",
+          "top1_logprob": -2.8490615e-05,
+          "top_logprobs": [
+            -2.8490615e-05,
+            -10.875029,
+            -12.000029,
+            -13.875029,
+            -14.125029
+          ],
+          "gap": 10.875000509385,
+          "entropy": 0.00032972148594973845
+        },
+        {
+          "token": "0",
+          "top1_logprob": -0.47417092,
+          "top_logprobs": [
+            -0.47417092,
+            -0.9741709,
+            -9.974171,
+            -11.349171,
+            -11.849171
+          ],
+          "gap": 0.49999997999999996,
+          "entropy": 0.6635524402909061
+        },
+        {
+          "token": "^",
+          "top1_logprob": -1.3470559e-05,
+          "top_logprobs": [
+            -1.3470559e-05,
+            -12.000013,
+            -12.750013,
+            -13.250013,
+            -14.000013
+          ],
+          "gap": 11.999999529440998,
+          "entropy": 0.00015733783707126003
+        },
+        {
+          "token": "6",
+          "top1_logprob": -0.0015172171,
+          "top_logprobs": [
+            -0.0015172171,
+            -6.5015173,
+            -12.251517,
+            -12.501517,
+            -13.001517
+          ],
+          "gap": 6.5000000829,
+          "entropy": 0.011405026622208533
+        },
+        {
+          "token": " and",
+          "top1_logprob": -2.1528041,
+          "top_logprobs": [
+            -0.6528042,
+            -1.6528041,
+            -2.1528041,
+            -3.1528041,
+            -3.1528041
+          ],
+          "gap": 0.9999999,
+          "entropy": 1.1966941786976024
+        },
+        {
+          "token": " logs",
+          "top1_logprob": -0.16124244,
+          "top_logprobs": [
+            -0.16124244,
+            -3.6612425,
+            -4.1612425,
+            -4.1612425,
+            -4.6612425
+          ],
+          "gap": 3.50000006,
+          "entropy": 0.35540576066747037
+        },
+        {
+          "token": " length",
+          "top1_logprob": -0.9004228,
+          "top_logprobs": [
+            -0.9004228,
+            -0.9004228,
+            -2.4004228,
+            -3.9004228,
+            -4.400423
+          ],
+          "gap": 0.0,
+          "entropy": 1.090327483488241
+        },
+        {
+          "token": " ",
+          "top1_logprob": -1.0487406,
+          "top_logprobs": [
+            -0.54874057,
+            -1.0487406,
+            -3.5487406,
+            -4.5487404,
+            -5.0487404
+          ],
+          "gap": 0.5000000299999999,
+          "entropy": 0.863823832509477
+        },
+        {
+          "token": "1",
+          "top1_logprob": -4.9709037e-05,
+          "top_logprobs": [
+            -4.9709037e-05,
+            -10.25005,
+            -11.68755,
+            -12.62505,
+            -15.12505
+          ],
+          "gap": 10.250000290963,
+          "entropy": 0.000553460527462682
+        },
+        {
+          "token": "e",
+          "top1_logprob": -1.8047829,
+          "top_logprobs": [
+            -0.1797829,
+            -1.8047829,
+            -11.554783,
+            -11.804783,
+            -12.804783
+          ],
+          "gap": 1.625,
+          "entropy": 0.4473290033258202
+        },
+        {
+          "token": "5",
+          "top1_logprob": -1.5616295e-05,
+          "top_logprobs": [
+            -1.5616295e-05,
+            -11.937515,
+            -12.312515,
+            -13.750015,
+            -13.937515
+          ],
+          "gap": 11.937499383705,
+          "entropy": 0.0001734284419708373
+        },
+        {
+          "token": ",",
+          "top1_logprob": -1.0174019,
+          "top_logprobs": [
+            -1.0174019,
+            -1.0174019,
+            -1.5174019,
+            -3.517402,
+            -4.5174017
+          ],
+          "gap": 0.0,
+          "entropy": 1.2260912851533694
+        },
+        {
+          "token": " queries",
+          "top1_logprob": -0.2343269,
+          "top_logprobs": [
+            -0.2343269,
+            -2.7343268,
+            -3.7343268,
+            -4.234327,
+            -4.234327
+          ],
+          "gap": 2.4999998999999997,
+          "entropy": 0.5369568336179962
+        },
+        {
+          "token": " ",
+          "top1_logprob": -0.39001396,
+          "top_logprobs": [
+            -0.39001396,
+            -1.3900139,
+            -3.390014,
+            -3.390014,
+            -6.390014
+          ],
+          "gap": 0.99999994,
+          "entropy": 0.8488257113748224
+        },
+        {
+          "token": "1",
+          "top1_logprob": -1.3351351e-05,
+          "top_logprobs": [
+            -1.3351351e-05,
+            -11.625013,
+            -12.812513,
+            -13.812513,
+            -15.375013
+          ],
+          "gap": 11.624999648648998,
+          "entropy": 0.00016882200801813594
+        },
+        {
+          "token": "e",
+          "top1_logprob": -4.3510445e-05,
+          "top_logprobs": [
+            -4.3510445e-05,
+            -10.250044,
+            -12.750044,
+            -13.250044,
+            -14.500044
+          ],
+          "gap": 10.250000489555001,
+          "entropy": 0.0004705626551597921
+        },
+        {
+          "token": "5",
+          "top1_logprob": -7.152532e-06,
+          "top_logprobs": [
+            -7.152532e-06,
+            -13.000007,
+            -13.500007,
+            -13.500007,
+            -13.875007
+          ],
+          "gap": 12.999999847468,
+          "entropy": 8.541784876846141e-05
+        },
+        {
+          "token": ".",
+          "top1_logprob": -1.127605,
+          "top_logprobs": [
+            -1.127605,
+            -1.127605,
+            -1.627605,
+            -2.627605,
+            -3.627605
+          ],
+          "gap": 0.0,
+          "entropy": 1.358329305820241
+        },
+        {
+          "token": " Mo",
+          "top1_logprob": -0.31123653,
+          "top_logprobs": [
+            -0.31123653,
+            -2.3112366,
+            -3.3112366,
+            -3.8112366,
+            -4.3112364
+          ],
+          "gap": 2.00000007,
+          "entropy": 0.6955101234588333
+        },
+        {
+          "token": "'s",
+          "top1_logprob": -0.06983429,
+          "top_logprobs": [
+            -0.06983429,
+            -4.069834,
+            -4.569834,
+            -4.569834,
+            -4.569834
+          ],
+          "gap": 3.99999971,
+          "entropy": 0.26262514669069137
+        },
+        {
+          "token": " algorithm",
+          "top1_logprob": -0.25448388,
+          "top_logprobs": [
+            -0.25448388,
+            -3.254484,
+            -3.254484,
+            -3.254484,
+            -3.754484
+          ],
+          "gap": 3.00000012,
+          "entropy": 0.6346162511654285
+        },
+        {
+          "token": " could",
+          "top1_logprob": -1.8137852,
+          "top_logprobs": [
+            -1.8137852,
+            -1.8137852,
+            -1.8137852,
+            -2.313785,
+            -2.313785
+          ],
+          "gap": 0.0,
+          "entropy": 1.5821539142234238
+        },
+        {
+          "token": " be",
+          "top1_logprob": -0.7215829,
+          "top_logprobs": [
+            -0.7215829,
+            -0.7215829,
+            -4.221583,
+            -5.721583,
+            -5.721583
+          ],
+          "gap": 0.0,
+          "entropy": 0.7994347071409851
+        },
+        {
+          "token": " okay",
+          "top1_logprob": -0.27148703,
+          "top_logprobs": [
+            -0.27148703,
+            -2.271487,
+            -2.771487,
+            -3.771487,
+            -4.771487
+          ],
+          "gap": 1.99999997,
+          "entropy": 0.7318492750725974
+        },
+        {
+          "token": " with",
+          "top1_logprob": -3.282443,
+          "top_logprobs": [
+            -0.7824431,
+            -1.782443,
+            -2.782443,
+            -2.782443,
+            -2.782443,
+            -3.282443
+          ],
+          "gap": 0.9999999,
+          "entropy": 1.3647039004628494
+        },
+        {
+          "token": " O",
+          "top1_logprob": -0.41529557,
+          "top_logprobs": [
+            -0.41529557,
+            -1.9152956,
+            -2.4152956,
+            -3.4152956,
+            -3.9152956
+          ],
+          "gap": 1.50000003,
+          "entropy": 0.9617223504126616
+        },
+        {
+          "token": "((",
+          "top1_logprob": -0.005038896,
+          "top_logprobs": [
+            -0.005038896,
+            -5.5050387,
+            -7.0050387,
+            -11.005039,
+            -11.505039
+          ],
+          "gap": 5.499999804,
+          "entropy": 0.03402772308251416
+        },
+        {
+          "token": "logs",
+          "top1_logprob": -3.0844839,
+          "top_logprobs": [
+            -0.08448385,
+            -3.0844839,
+            -4.5844836,
+            -4.5844836,
+            -5.0844836
+          ],
+          "gap": 3.00000005,
+          "entropy": 0.3381684572332807
+        },
+        {
+          "token": "+",
+          "top1_logprob": -0.08072784,
+          "top_logprobs": [
+            -0.08072784,
+            -2.5807278,
+            -7.580728,
+            -7.580728,
+            -9.080728
+          ],
+          "gap": 2.4999999600000002,
+          "entropy": 0.27813909164253026
+        },
+        {
+          "token": "queries",
+          "top1_logprob": -0.0061968095,
+          "top_logprobs": [
+            -0.0061968095,
+            -5.756197,
+            -6.256197,
+            -7.256197,
+            -9.256197
+          ],
+          "gap": 5.750000190500001,
+          "entropy": 0.04209196076245783
+        },
+        {
+          "token": ")*",
+          "top1_logprob": -0.316707,
+          "top_logprobs": [
+            -0.316707,
+            -1.316707,
+            -5.816707,
+            -8.316707,
+            -10.316707
+          ],
+          "gap": 1.0,
+          "entropy": 0.6032534203281004
+        },
+        {
+          "token": "sqrt",
+          "top1_logprob": -0.06283907,
+          "top_logprobs": [
+            -0.06283907,
+            -2.812839,
+            -8.0628395,
+            -8.5628395,
+            -8.8128395
+          ],
+          "gap": 2.74999993,
+          "entropy": 0.23320058052507042
+        },
+        {
+          "token": "(log",
+          "top1_logprob": -0.27570975,
+          "top_logprobs": [
+            -0.27570975,
+            -2.2757096,
+            -2.7757096,
+            -3.2757096,
+            -4.2757096
+          ],
+          "gap": 1.99999985,
+          "entropy": 0.7945296245415124
+        },
+        {
+          "token": "s",
+          "top1_logprob": -0.001865791,
+          "top_logprobs": [
+            -0.001865791,
+            -7.751866,
+            -9.001865,
+            -9.001865,
+            -9.001865
+          ],
+          "gap": 7.7500002089999995,
+          "entropy": 0.00746563421806009
+        },
+        {
+          "token": "))",
+          "top1_logprob": -0.29969823,
+          "top_logprobs": [
+            -0.29969823,
+            -1.7996982,
+            -3.2996984,
+            -3.2996984,
+            -4.7996984
+          ],
+          "gap": 1.49999997,
+          "entropy": 0.8004136081618769
+        },
+        {
+          "token": " ~",
+          "top1_logprob": -0.29388082,
+          "top_logprobs": [
+            -0.29388082,
+            -2.293881,
+            -2.793881,
+            -3.793881,
+            -4.293881
+          ],
+          "gap": 2.00000018,
+          "entropy": 0.7530852068132362
+        },
+        {
+          "token": " ",
+          "top1_logprob": -0.3940764,
+          "top_logprobs": [
+            -0.3940764,
+            -1.8940763,
+            -2.8940763,
+            -3.3940763,
+            -3.3940763
+          ],
+          "gap": 1.4999999000000002,
+          "entropy": 0.9368666783203184
+        },
+        {
+          "token": "1",
+          "top1_logprob": -0.20220938,
+          "top_logprobs": [
+            -0.20220938,
+            -2.2022095,
+            -2.7022095,
+            -5.7022095,
+            -6.7022095
+          ],
+          "gap": 2.00000012,
+          "entropy": 0.6167923382263247
+        },
+        {
+          "token": "e",
+          "top1_logprob": -0.10026352,
+          "top_logprobs": [
+            -0.10026352,
+            -2.3502636,
+            -10.850264,
+            -11.850264,
+            -11.850264
+          ],
+          "gap": 2.25000008,
+          "entropy": 0.31514555442644504
+        },
+        {
+          "token": "5",
+          "top1_logprob": -0.00023862852,
+          "top_logprobs": [
+            -0.00023862852,
+            -8.500238,
+            -11.500238,
+            -11.500238,
+            -12.000238
+          ],
+          "gap": 8.49999937148,
+          "entropy": 0.0022655835084284775
+        },
+        {
+          "token": " *",
+          "top1_logprob": -0.89940673,
+          "top_logprobs": [
+            -0.52440673,
+            -0.89940673,
+            -6.774407,
+            -9.649406,
+            -10.774406
+          ],
+          "gap": 0.375,
+          "entropy": 0.684859289162419
+        },
+        {
+          "token": " ",
+          "top1_logprob": -0.6085012,
+          "top_logprobs": [
+            -0.6085012,
+            -1.1085012,
+            -2.1085012,
+            -6.1085014,
+            -6.6085014
+          ],
+          "gap": 0.5000000000000001,
+          "entropy": 0.9754833042252313
+        },
+        {
+          "token": "3",
+          "top1_logprob": -0.00054523384,
+          "top_logprobs": [
+            -0.00054523384,
+            -7.750545,
+            -9.5005455,
+            -11.2505455,
+            -11.7505455
+          ],
+          "gap": 7.74999976616,
+          "entropy": 0.004812475106345966
+        },
+        {
+          "token": "1",
+          "top1_logprob": -0.0045606648,
+          "top_logprobs": [
+            -0.0045606648,
+            -5.5045605,
+            -7.7545605,
+            -10.00456,
+            -12.25456
+          ],
+          "gap": 5.499999835200001,
+          "entropy": 0.030765705793346778
+        },
+        {
+          "token": "6",
+          "top1_logprob": -0.0006439996,
+          "top_logprobs": [
+            -0.0006439996,
+            -7.375644,
+            -11.000644,
+            -15.063144,
+            -15.375644
+          ],
+          "gap": 7.3750000004,
+          "entropy": 0.00545401039791868
+        },
+        {
+          "token": " ~",
+          "top1_logprob": -0.5107589,
+          "top_logprobs": [
+            -0.5107589,
+            -1.0107589,
+            -3.5107589,
+            -6.010759,
+            -7.010759
+          ],
+          "gap": 0.4999999999999999,
+          "entropy": 0.7997250209876815
+        },
+        {
+          "token": " ",
+          "top1_logprob": -0.01938073,
+          "top_logprobs": [
+            -0.01938073,
+            -4.0193806,
+            -7.0193806,
+            -9.519381,
+            -9.519381
+          ],
+          "gap": 3.99999987,
+          "entropy": 0.09871878963186238
+        },
+        {
+          "token": "3",
+          "top1_logprob": -3.397407e-05,
+          "top_logprobs": [
+            -3.397407e-05,
+            -11.750034,
+            -12.000034,
+            -12.375034,
+            -12.625034
+          ],
+          "gap": 11.75000002593,
+          "entropy": 0.0002817477964042921
+        },
+        {
+          "token": "e",
+          "top1_logprob": -0.067158565,
+          "top_logprobs": [
+            -0.067158565,
+            -3.3171585,
+            -3.5671585,
+            -9.192159,
+            -9.567159
+          ],
+          "gap": 3.249999935,
+          "entropy": 0.2851832585458205
+        },
+        {
+          "token": "7",
+          "top1_logprob": -5.2808322e-05,
+          "top_logprobs": [
+            -5.2808322e-05,
+            -10.000052,
+            -13.250052,
+            -13.750052,
+            -14.000052
+          ],
+          "gap": 9.999999191678,
+          "entropy": 0.0005526802235363158
+        },
+        {
+          "token": ",",
+          "top1_logprob": -1.2939612,
+          "top_logprobs": [
+            -0.79396117,
+            -1.2939612,
+            -2.793961,
+            -3.293961,
+            -3.293961
+          ],
+          "gap": 0.50000003,
+          "entropy": 1.1614697422705489
+        },
+        {
+          "token": " might",
+          "top1_logprob": -2.5028205,
+          "top_logprobs": [
+            -1.0028205,
+            -2.0028205,
+            -2.0028205,
+            -2.5028205,
+            -2.5028205
+          ],
+          "gap": 1.0,
+          "entropy": 1.4242181474788387
+        },
+        {
+          "token": " be",
+          "top1_logprob": -0.08126486,
+          "top_logprobs": [
+            -0.08126486,
+            -2.581265,
+            -7.081265,
+            -7.581265,
+            -7.581265
+          ],
+          "gap": 2.50000014,
+          "entropy": 0.28358599351398434
+        },
+        {
+          "token": " borderline",
+          "top1_logprob": -1.3522134,
+          "top_logprobs": [
+            -0.35221332,
+            -1.3522134,
+            -4.3522134,
+            -4.8522134,
+            -4.8522134
+          ],
+          "gap": 1.00000008,
+          "entropy": 0.726671139534309
+        },
+        {
+          "token": " but",
+          "top1_logprob": -0.026747854,
+          "top_logprobs": [
+            -0.026747854,
+            -4.0267477,
+            -5.5267477,
+            -6.0267477,
+            -7.5267477
+          ],
+          "gap": 3.9999998459999997,
+          "entropy": 0.13703019126504395
+        },
+        {
+          "token": " likely",
+          "top1_logprob": -2.535786,
+          "top_logprobs": [
+            -0.5357859,
+            -2.535786,
+            -3.035786,
+            -3.035786,
+            -3.035786
+          ],
+          "gap": 2.0000001,
+          "entropy": 0.9647481157952795
+        },
+        {
+          "token": " okay",
+          "top1_logprob": -0.1981077,
+          "top_logprobs": [
+            -0.1981077,
+            -2.1981077,
+            -3.6981077,
+            -4.1981077,
+            -4.1981077
+          ],
+          "gap": 2.0,
+          "entropy": 0.6190776384933537
+        },
+        {
+          "token": " in",
+          "top1_logprob": -0.03486062,
+          "top_logprobs": [
+            -0.03486062,
+            -4.0348606,
+            -4.5348606,
+            -7.0348606,
+            -7.0348606
+          ],
+          "gap": 3.99999998,
+          "entropy": 0.16266790168321804
+        },
+        {
+          "token": " Python",
+          "top1_logprob": -0.018605944,
+          "top_logprobs": [
+            -0.018605944,
+            -4.5186057,
+            -5.0186057,
+            -8.018606,
+            -8.518606
+          ],
+          "gap": 4.499999756,
+          "entropy": 0.10472188619641193
+        },
+        {
+          "token": " if",
+          "top1_logprob": -1.5929337,
+          "top_logprobs": [
+            -1.0929337,
+            -1.5929337,
+            -1.5929337,
+            -2.0929337,
+            -2.5929337
+          ],
+          "gap": 0.5,
+          "entropy": 1.4979311171670195
+        },
+        {
+          "token": " well",
+          "top1_logprob": -3.5723946,
+          "top_logprobs": [
+            -0.07239467,
+            -3.5723946,
+            -4.072395,
+            -4.572395,
+            -5.072395
+          ],
+          "gap": 3.49999993,
+          "entropy": 0.3105407405164028
+        },
+        {
+          "token": " optimized",
+          "top1_logprob": -0.27515215,
+          "top_logprobs": [
+            -0.27515215,
+            -1.7751522,
+            -3.2751522,
+            -4.275152,
+            -4.275152
+          ],
+          "gap": 1.50000005,
+          "entropy": 0.7512083528880429
+        },
+        {
+          "token": "?",
+          "top1_logprob": -0.721794,
+          "top_logprobs": [
+            -0.721794,
+            -1.221794,
+            -1.721794,
+            -4.221794,
+            -5.221794
+          ],
+          "gap": 0.5,
+          "entropy": 1.1111643854104818
+        },
+        {
+          "token": " Could",
+          "top1_logprob": -1.8865368,
+          "top_logprobs": [
+            -0.8865369,
+            -1.8865368,
+            -1.8865368,
+            -2.3865368,
+            -2.8865368
+          ],
+          "gap": 0.9999999,
+          "entropy": 1.379575353309273
+        },
+        {
+          "token": " do",
+          "top1_logprob": -4.3198614,
+          "top_logprobs": [
+            -0.81986153,
+            -0.81986153,
+            -3.8198614,
+            -3.8198614,
+            -4.3198614
+          ],
+          "gap": 0.0,
+          "entropy": 0.945900474805313
+        },
+        {
+          "token": " better",
+          "top1_logprob": -0.6532328,
+          "top_logprobs": [
+            -0.6532328,
+            -2.1532328,
+            -2.1532328,
+            -3.1532328,
+            -3.6532328
+          ],
+          "gap": 1.5,
+          "entropy": 1.1050876678867116
+        },
+        {
+          "token": " with",
+          "top1_logprob": -0.56538004,
+          "top_logprobs": [
+            -0.56538004,
+            -1.5653801,
+            -2.06538,
+            -2.56538,
+            -4.56538
+          ],
+          "gap": 1.00000006,
+          "entropy": 1.1563946318206928
+        },
+        {
+          "token": " offline",
+          "top1_logprob": -0.93287665,
+          "top_logprobs": [
+            -0.93287665,
+            -1.4328766,
+            -2.4328766,
+            -2.4328766,
+            -2.9328766
+          ],
+          "gap": 0.49999994999999997,
+          "entropy": 1.351260699963949
+        },
+        {
+          "token": " BIT",
+          "top1_logprob": -3.0040276,
+          "top_logprobs": [
+            -1.5040276,
+            -1.5040276,
+            -2.0040276,
+            -2.5040276,
+            -2.5040276,
+            -3.0040276
+          ],
+          "gap": 0.0,
+          "entropy": 1.6565714656447008
+        },
+        {
+          "token": ".\n\n",
+          "top1_logprob": -4.72833,
+          "top_logprobs": [
+            -1.7283301,
+            -1.7283301,
+            -2.2283301,
+            -2.2283301,
+            -2.2283301,
+            -4.72833
+          ],
+          "gap": 0.0,
+          "entropy": 1.6268219948931115
+        },
+        {
+          "token": "Alternative",
+          "top1_logprob": -0.8403922,
+          "top_logprobs": [
+            -0.8403922,
+            -1.8403921,
+            -2.340392,
+            -2.840392,
+            -2.840392
+          ],
+          "gap": 0.9999999,
+          "entropy": 1.2896478372197573
+        },
+        {
+          "token": ":",
+          "top1_logprob": -0.08235453,
+          "top_logprobs": [
+            -0.08235453,
+            -2.5823545,
+            -7.0823545,
+            -7.5823545,
+            -8.082355
+          ],
+          "gap": 2.49999997,
+          "entropy": 0.2820748950182037
+        },
+        {
+          "token": " Use",
+          "top1_logprob": -1.4379776,
+          "top_logprobs": [
+            -0.9379776,
+            -1.4379776,
+            -1.9379776,
+            -2.9379776,
+            -2.9379776
+          ],
+          "gap": 0.5,
+          "entropy": 1.348804855000376
+        },
+        {
+          "token": " BIT",
+          "top1_logprob": -4.5147533,
+          "top_logprobs": [
+            -1.5147533,
+            -2.0147533,
+            -2.0147533,
+            -2.0147533,
+            -2.5147533,
+            -4.5147533
+          ],
+          "gap": 0.5000000000000002,
+          "entropy": 1.6155432270765278
+        },
+        {
+          "token": " +",
+          "top1_logprob": -3.04523,
+          "top_logprobs": [
+            -1.5452299,
+            -1.5452299,
+            -2.04523,
+            -2.54523,
+            -2.54523,
+            -3.04523
+          ],
+          "gap": 0.0,
+          "entropy": 1.6565714440321144
+        },
+        {
+          "token": " offline",
+          "top1_logprob": -1.0699975,
+          "top_logprobs": [
+            -0.5699976,
+            -1.0699975,
+            -3.5699975,
+            -4.569998,
+            -4.569998
+          ],
+          "gap": 0.49999989999999994,
+          "entropy": 0.880382001029357
+        }
+      ],
+      "provider_response_id": "chatcmpl-82c37e7e-2a16-41f1-b83e-dcd82bc75221",
+      "system_fingerprint": ""
+    }
+  ]
+}

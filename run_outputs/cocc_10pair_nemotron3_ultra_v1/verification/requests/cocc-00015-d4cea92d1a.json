@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00015-d4cea92d1a",
+  "problem_id": "3032",
+  "item_id": "3032:clean_control",
+  "verifier_ref": "cocc:3032:clean_control",
+  "expected_answer": "",
+  "observed_answer": "```python\nfrom typing import List\n\nclass Solution:\n    def getMaxFunctionValue(self, receiver: List[int], k: int) -> int:\n        n = len(receiver)\n        # LOG: 35 because k <= 1e10 < 2^34, so 35 bits is enough (0..34)\n        LOG = 35\n        \n        # Binary lifting tables\n        # jump[i][j] = node reached from i after 2^j steps\n        # sum_table[i][j] = sum of node IDs on the path of length 2^j from i (excluding start node i, including all receivers)\n        jump = [[0] * LOG for _ in range(n)]\n        sum_table = [[0] * LOG for _ in range(n)]\n        \n        # Initialize for 2^0 = 1 step\n        for i in range(n):\n            jump[i][0] = receiver[i]\n            sum_table[i][0] = receiver[i]\n        \n        # Build tables\n        for j in range(1, LOG):\n            for i in range(n):\n                mid = jump[i][j - 1]\n                jump[i][j] = jump[mid][j - 1]\n                sum_table[i][j] = sum_table[i][j - 1] + sum_table[mid][j - 1]\n        \n        ans = 0\n        # For each starting node x, compute f(x) = x + sum of k receivers\n        for x in range(n):\n            cur = x\n            total = x  # include starting player's id\n            remaining = k\n            bit = 0\n            while remaining > 0:\n                if remaining & 1:\n                    total += sum_table[cur][bit]\n                    cur = jump[cur][bit]\n                remaining >>= 1\n                bit += 1\n            if total > ans:\n                ans = total\n        return ans\n```",
+  "event_token": 416,
+  "event_turn": 0
+}

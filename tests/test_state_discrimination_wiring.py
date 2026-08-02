@@ -9,6 +9,8 @@ from pathlib import Path
 
 import pytest
 
+from scripts.score_sessions_prama import _assign_stratified_splits
+
 from aptadynamic_llm.evaluation.state_discrimination_metrics import auroc
 from scripts.evaluate_state_discrimination import load_examples, load_labels
 from scripts.score_sessions_prama import main as score_main, stage_sessions
@@ -65,3 +67,26 @@ def test_scorer_rejects_mixed_model_corpus(tmp_path):
         (tmp_path / f"s{index}.json").write_text(json.dumps(payload), encoding="utf-8")
     with pytest.raises(ValueError, match="exactly one non-empty model"):
         stage_sessions(tmp_path, min_sessions=0)
+
+
+def test_grouped_split_never_leaks_prompt_ids():
+    rows = [
+        {"session_id": f"s{index}", "prompt_id": f"p{index // 2}", "label": index % 2, "split": ""}
+        for index in range(16)
+    ]
+    _assign_stratified_splits(rows, seed=1337, test_fraction=0.25)
+    by_prompt: dict[str, set[str]] = {}
+    for row in rows:
+        by_prompt.setdefault(row["prompt_id"], set()).add(row["split"])
+    assert all(len(splits) == 1 for splits in by_prompt.values())
+    assert {row["label"] for row in rows if row["split"] == "train"} == {0, 1}
+    assert {row["label"] for row in rows if row["split"] == "test"} == {0, 1}
+
+
+def test_explicit_split_rejects_prompt_leakage():
+    rows = [
+        {"session_id": "a", "prompt_id": "shared", "label": 0, "split": "train"},
+        {"session_id": "b", "prompt_id": "shared", "label": 1, "split": "test"},
+    ]
+    with pytest.raises(ValueError, match="prompt groups cross"):
+        _assign_stratified_splits(rows, seed=1337, test_fraction=0.25)

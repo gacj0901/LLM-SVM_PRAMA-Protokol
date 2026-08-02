@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00009-b12bf2c456",
+  "problem_id": "2855",
+  "item_id": "2855:clean_control",
+  "verifier_ref": "cocc:2855:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to find the maximum number of jumps to go from index 0 to index n-1 given constraints on difference between nums values. n ≤ 1000, so O(n^2) is fine.\n\nWe can treat DP: dp[i] = maximum jumps to reach i from index 0 (or -inf if unreachable). dp[0] = 0 (zero jumps initially? Actually number of jumps performed so far: at index 0, zero jumps; when we jump to j, dp[j] = max(dp[i] + 1) for i < j satisfying condition.\n\nAnswer = dp[n-1] if reachable else -1.\n\nConstraints: numbers can be large but difference computed fits within int64, but Python ints unlimited.\n\nImplementation details: For each i from 0 to n-2: if dp[i] != -inf, then for each j > i: if abs(nums[j] - nums[i]) <= target: dp[j] = max(dp[j], dp[i] + 1). This is O(n^2). dp initialization: dp[0] = 0; others = -inf (or -1 to represent unreachable but we need to differentiate unreachable from zero jumps? Actually dp[j] counts number of jumps to reach j; can be zero only at start. For unreachable we can set -inf. Use -10**9 sentinel.\n\nEdge Cases: It might be impossible to reach n-1. So final answer dp[n-1] if > -inf else -1.\n\nTesting with examples.\n\nBut careful: dp[0] = 0 (0 jumps at start). If we jump directly from 0 to n-1: dp[n-1] = dp[0] + 1 = 1. This is correct: number of jumps made.\n\nNow check example 1: [1,3,6,4,1,2], target=2. Let's compute manually.\n\ni=0: dp[0]=0. j=1: diff=2 => <=2: dp[1] = max(-inf,0+1)=1. j=2: diff=5>2 skip. j=3: diff=3>2 skip. j=4: diff=0<=2 => dp[4]=1. j=5: diff=1<=2 => dp[5]=1.\n\ni=1: dp[1]=1. j=2:",
+  "event_token": 512,
+  "event_turn": 0
+}

@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00022-7d14c01928",
+  "problem_id": "2754",
+  "item_id": "2754:clean_control",
+  "verifier_ref": "cocc:2754:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to find maximum product of any non-empty subset of array nums. The constraints: length up to 13, each element in [-9,9]. Simple solution: iterate all non-empty subsets (2^13 = 8192) compute product and track max. But we must handle integer overflow? Product fits within Python int (unbounded). However note that we have negative numbers and zeros.\n\nSince n <= 13, brute force is trivial. However, given constraints small, we can just compute subsets using bitmask.\n\nBut maybe they'd expect more clever solution? Use DP? Not needed. However we need to be careful with zero: product zero may be best if all numbers zero or negative and odd count of negative without any positive? Actually if all numbers negative and odd count, the maximum product is the largest (least negative) single element? Let's test: [-1] => -1. [-2,-3] => 6 (both). [-2,-3,-4] => product of two largest magnitude? Actually best is (-2)*(-3)=6 or (-3)*(-4)=12? Wait -2*-3=6; -2*-4=8; -3*-4=12; product of all three = -24 negative; best is 12 (two largest magnitude negatives). For odd number of negatives, dropping the negative with smallest absolute value (i.e., closest to zero) yields max product (since product of all negatives is negative, dropping one negative makes product positive and as large as possible). Also zeros: if there are zeros and all other numbers produce negative product, maybe zero is better than negative. Eg [-1,0] => max product is 0 (choose zero) vs -1 (choose -1) vs product of both = 0? Actually -1*0=0, also zero. So answer zero.\n\nBut brute force works fine.\n\nEdge case: product may be zero for subsets containing zero; we need to consider that.\n\nComplexities: O(2^n * n). n <=13 => fine.\n\nThus implement:\n\nclass Solution:\n    def maxStrength(self, nums: List[int]) -> int:\n        n = len(nums)\n        max_prod = -float('inf')\n        for mask in range(1, 1<<n):\n            prod = 1\n            for i in range(n):\n                if mask & (1<<i):\n                    prod *= nums[i]\n",
+  "event_token": 512,
+  "event_turn": 0
+}

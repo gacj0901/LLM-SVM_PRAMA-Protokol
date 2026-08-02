@@ -27,6 +27,7 @@ def load_sessions(root: str) -> pd.DataFrame:
             continue
         sid = d.get("session_id", f.stem)
         model = d.get("model", "")
+        prompt_id = d.get("prompt_id", "")
         for turn_index, turn in enumerate(turns):
             toks = turn.get("tokens") or []
             fr = turn.get("finish_reason", "")
@@ -37,6 +38,7 @@ def load_sessions(root: str) -> pd.DataFrame:
                     "generation_id": generation_id,
                     "turn_index": turn_index,
                     "model": model,
+                    "prompt_id": prompt_id,
                     "pos": i,
                     "surprisal": -t["top1_logprob"],
                     "entropy": t.get("entropy", 0.0),

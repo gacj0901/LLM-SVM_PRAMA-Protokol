@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00053-799b3b1834",
+  "problem_id": "2866",
+  "item_id": "2866:clean_control",
+  "verifier_ref": "cocc:2866:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to find the longest subarray where:\n\n1. The first element (nums[l]) is even.\n2. The subarray is alternating in parity: i.e., consecutive elements have alternating even/odd.\n3. All elements in the subarray are <= threshold.\n\nWe can solve this by scanning through the array and trying to extend subarrays from each valid starting point (where nums[i] is even and <= threshold).\n\nApproach:\n- Initialize `max_len = 0`.\n- Iterate over each index `i` from 0 to n-1:\n  - If `nums[i]` is even and <= threshold, it can be a start of a valid subarray.\n    - Set `current_len = 1` (since we have at least the starting element).\n    - Update `max_len = max(max_len, current_len)`.\n    - Then, try to extend the subarray from `i+1` onward:\n      - For each `j` from `i+1` to n-1:\n        - Check if `nums[j]` <= threshold.\n        - Check if `nums[j]` has opposite parity to `nums[j-1]` (to maintain alternating parity).\n        - If both conditions are satisfied, increment `current_len` and update `max_len`.\n        - Otherwise, break out of the inner loop (since the subarray must be contiguous and conditions failed).\n- Return `max_len`.\n\nThis approach works because:\n- We only start at even numbers (satisfying condition 1).\n- We ensure all elements are <= threshold (condition 3).\n- We enforce alternating parity by checking each consecutive pair (condition 2).\n- Since n <= 100, O(n^2) is acceptable.\n\nLet's test with the examples:\n\nExample 1: nums = [3,2,5,4], threshold = 5\n- i=0: 3 is odd -> skip.\n- i=1: 2 is even and <=5 -> start.\n  - current_len=1, max_len=1.\n  - j=2: 5<=5, parity(2)=even, parity(5)=odd -> alternate -> current_len=2, max_len=2.\n  - j=3: 4<=5, parity(5)=odd, parity(4)=even -> alternate -> current_len=3, max_len=3.\n- i=2: 5 is odd -> skip.\n- i=3: 4",
+  "event_token": 512,
+  "event_turn": 0
+}

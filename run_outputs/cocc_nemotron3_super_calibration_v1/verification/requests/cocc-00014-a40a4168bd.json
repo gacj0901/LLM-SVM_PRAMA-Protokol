@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00014-a40a4168bd",
+  "problem_id": "2953",
+  "item_id": "2953:clean_control",
+  "verifier_ref": "cocc:2953:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to implement function countPairs that counts pairs (i,j) where i<j and (x_i xor x_j)+(y_i xor y_j) == k.\n\nGiven constraints: n up to 50000; k up to 100; x,y up to 1e6 (20 bits). Brute O(n^2) too large (2.5B). We need O(n * something small). Since k is small, we can possibly iterate possible splits of k into a + b where a = (x_i xor x_j) and b = (y_i xor y_j). For each point (x,y), we need to count previous points where x xor x' = a and y xor y' = b for some a+b=k.\n\nSo for each point we can iterate a from 0..k; b = k - a; compute x_target = x xor a; y_target = y xor b; then count how many previous points have coordinates (x_target, y_target). Use hashmap of counts for seen points.\n\nComplexities: O(n * (k+1)) = up to 50000*101 ~ 5 million, fine.\n\nEdge Cases: Use dictionary mapping (x,y) to count of occurrences seen so far.\n\nImplementation:\n\nInitialize ans=0; seen = defaultdict(int).\n\nFor each (x,y) in coordinates:\n\n    for a in range(k+1):\n        b = k - a\n        x_target = x ^ a\n        y_target = y ^ b\n        ans += seen[(x_target, y_target)]\n\n    seen[(x,y)] += 1\n\nReturn ans.\n\nCheck examples.\n\nExample1: coordinates list: [ [1,2], [4,2], [1,3], [5,2] ], k=5.\n\nInitialize ans=0, seen empty.\n\nFirst (1,2): iterate a: x^a, y^(5-a). For each a compute target and get count from seen (none). No additions. Then add (1,2) to seen.\n\nSecond (4,2): compute contributions:\na=0,b=5: x_target=4^0=4, y_target=2^5=7 => seen[(4,7)] =0\na=1,b=4: x_target=4^1=5, y_target=2^4=6 =>0\na=2,b=3:",
+  "event_token": 512,
+  "event_turn": 0
+}

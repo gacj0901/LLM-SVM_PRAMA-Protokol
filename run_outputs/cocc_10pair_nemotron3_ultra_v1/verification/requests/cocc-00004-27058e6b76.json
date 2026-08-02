@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00004-27058e6b76",
+  "problem_id": "2808",
+  "item_id": "2808:clean_control",
+  "verifier_ref": "cocc:2808:clean_control",
+  "expected_answer": "",
+  "observed_answer": "```python\nfrom typing import List\nimport math\n\nclass Solution:\n    def paintWalls(self, cost: List[int], time: List[int]) -> int:\n        \"\"\"\n        Dynamic Programming approach.\n        This problem is equivalent to: select a subset of walls to be painted by the paid painter\n        such that the total time provided by these paid walls (sum of time[i] + 1) covers all n walls.\n        We want to minimize the total cost of the selected walls.\n\n        Let dp[t] be the minimum cost to achieve a total \"coverage\" of t units of time.\n        Each wall i, if painted by the paid painter, provides coverage of time[i] + 1\n        (1 for itself, time[i] for the free painter to work concurrently).\n        We need total coverage >= n.\n\n        We initialize dp array of size n+1 with infinity, dp[0] = 0.\n        For each wall, we update dp backwards.\n        The answer is dp[n].\n        \"\"\"\n        n = len(cost)\n        # dp[t] = min cost to get coverage t\n        # We need coverage >= n. Max coverage needed is n.\n        # Coverage values can exceed n, but we cap at n.\n        dp = [math.inf] * (n + 1)\n        dp[0] = 0\n        \n        for i in range(n):\n            c = cost[i]\n            # coverage provided by painting wall i with paid painter\n            # 1 for the wall itself + time[i] for free painter's parallel work\n            cov = time[i] + 1\n            \n            # Iterate backwards to avoid reusing the same item multiple times in one iteration (0/1 knapsack)\n            for t in range(n, -1, -1):\n                if dp[t] != math.inf:\n                    new_t = min(n, t + cov)\n                    dp[new_t] = min(dp[new_t], dp[t] + c)\n                    \n        return dp[n]\n```",
+  "event_token": 428,
+  "event_turn": 0
+}

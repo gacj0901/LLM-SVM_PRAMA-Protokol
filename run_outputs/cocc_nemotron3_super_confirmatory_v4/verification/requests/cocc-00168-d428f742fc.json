@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00168-d428f742fc",
+  "problem_id": "2848",
+  "item_id": "2848:negation_objective:36",
+  "verifier_ref": "cocc:2848:negation_objective",
+  "expected_answer": "",
+  "observed_answer": "We need to read the problem: \"non-special permutations\" where for any adjacent pair (i,i+1) in the permutation, neither divides the other: i.e., nums[i] % nums[i+1] != 0 and nums[i+1] % nums[i] != 0. Count permutations that satisfy that property.\n\nConstraints: n up to 14, distinct positive integers up to 1e9. We can solve by DP over subsets (bitmask DP). Since n ≤ 14, total subsets = 2^n ≤ 16384, doable.\n\nWe need to count number of permutations (arrangements) of all elements where adjacent pairs satisfy condition. Equivalent to counting Hamiltonian paths in a directed (or undirected) graph where an edge exists between i and j if they are NOT divisible each other.\n\nSince permutations are sequences, we consider ordering; adjacency condition symmetric? Let's check: condition: nums[i] % nums[i+1] != 0 and nums[i+1] % nums[i] != 0. If a pair (a,b) satisfies that, then both conditions hold; it's symmetric: If a % b != 0 and b % a != 0, then same for (b,a). So edge is undirected; we can treat adjacency compatibility matrix.\n\nGoal: Count permutations of all n elements where each adjacent pair is compatible (edge exists). This is counting Hamiltonian paths (not cycles) in an undirected graph; the total number of permutations = number of Hamiltonian paths.\n\nWe can DP[mask][last] = number of ways to arrange subset mask ending at element last (where mask includes last). Then transition: For each next not in mask, if compatible[last][next], DP[mask| (1<<next)][next] += DP[mask][last].\n\nInitialize DP[1<<i][i] = 1 for each i.\n\nResult = sum_{last} DP[(1<<n)-1][last].\n\nReturn result mod? Not specified; likely answer fits in int (max permutations = 14! ~ 87B, fits within 64-bit). In Python no overflow concerns.\n\nComplexities: O(n^2 * 2^n) = at most ~14^2 * 16384 ~ 3.2M, fine.\n\nEdge Cases: Ensure we handle when n=0? Not needed as n>=2.\n\nExamples: [2,",
+  "event_token": 512,
+  "event_turn": 0
+}

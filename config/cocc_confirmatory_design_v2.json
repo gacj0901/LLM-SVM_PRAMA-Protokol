@@ -1,0 +1,105 @@
+{
+  "schema": "LLM-SVM-CoCC-confirmatory-design/2",
+  "design_id": "cocc-prama-confirmatory-v2-20260731",
+  "primary_score": "max_negative_balance",
+  "p_threshold": 0.01,
+  "min_test_fail": 20,
+  "min_test_pass": 20,
+  "sampling_plan": {
+    "source_root": "C:\\Users\\THINKPAD\\Desktop\\Aptadynamik Cybernetics\\btc_cocc\\Chain-of-Code-Collapse_fresh",
+    "source_file": "modified_problems_negation_objective.pkl",
+    "source_file_sha256": "0e0ab6d641eb07fc030683e99637eb5818aa841a600ff6dcb9d6051143193d8b",
+    "normalized_dataset": "data/cocc_clean_negation_confirmatory_v2.jsonl",
+    "normalized_dataset_sha256": "f22083c38c8399cbbfeb72c98276568f277081bcec38b44b18d971ac617b3433",
+    "normalized_manifest": "data/cocc_clean_negation_confirmatory_v2.manifest.json",
+    "normalized_manifest_sha256": "7705de444e286632aff293e1e31cff095b084968245dd7d0e207d821536d58da",
+    "id_hash_basis": "SHA-256 of the canonical JSON array of sorted deterministic session IDs",
+    "train_ids_sha256": "98e283dfbb5b2cb44b23ce2dc9a744eb7a15841817e068d2eb96625e9cd9336d",
+    "test_ids_sha256": "93de901b947fdac7f461b6faa7f55d26bad61f02d25b3c692281a73dd070c3df",
+    "normalization_seed": 1337,
+    "calibration_fraction": 0.25,
+    "calibration_clean_control_sessions": 20,
+    "holdout_problem_groups": 120,
+    "holdout_sessions": 240,
+    "holdout_sessions_by_condition": {
+      "clean_control": 120,
+      "negation_objective": 120
+    },
+    "model": "hermes3:8b",
+    "model_version": {
+      "ollama_model_list_id": "4f6b83f30b62",
+      "model_blob_sha256": "c8985d236593f7a17da2a3da49588aa951a9b1e57ce97753364fbf59e63af84a",
+      "ollama_version": "0.32.5"
+    },
+    "observation_interface_version": {
+      "projector_request_schema": "LLM-SVM-CoCC-projector-request/1",
+      "runner_sha256": "3a5fe418fe10faab02acc84b98d0ab7056100e47d4cd16c83da549119d8d3cb4",
+      "model_payload_sha256": "fb54ebeb74383e39c99b75a641cb34dd06feaa661092c48b2c8ca66b9d40b853",
+      "numeric_projection_only": true
+    },
+    "prama_kernel_version": {
+      "declaration_file_sha256": "10cf1f43f02f08353582a8f52d2cdd919c35fce69f64d35a1df6dc974cb4b523",
+      "package_version": "0.3.0",
+      "source_tree_sha256": "61e1063de0b5b032cd6af09eeb3b6906614f6331954697c605603afa18f641fc",
+      "recertification_sha256": "5403e4584083a5cdc59e168d66cc036870c42b93e1c4e7d99075ab8dd9756e81"
+    },
+    "parameter_set": {
+      "generation": {
+        "max_tokens": 512,
+        "temperature": 0.2,
+        "top_p": 0.95,
+        "top_logprobs": 5,
+        "seed": 1337
+      },
+      "kernel": {
+        "theta_scale": 0.2,
+        "tau": 16.0,
+        "h": 1.0,
+        "g_smooth": 8,
+        "delta_ref": 1.0,
+        "kappa_v3": 0.001,
+        "lambda_0": 1.0,
+        "lambda_min": 0.1,
+        "lambda_max": 1.0
+      }
+    },
+    "selection_blind_to_holdout_outcomes": true,
+    "stopping_rule": "Acquire and verify every frozen holdout session. No outcome-dependent early stopping, replacement, or enrichment."
+  },
+  "mandatory_coordinate_comparison": [
+    "max_delta",
+    "max_xi",
+    "max_negative_balance"
+  ],
+  "temporal_censoring": {
+    "absolute_window_horizons": [
+      1,
+      2,
+      4,
+      8,
+      16
+    ],
+    "relative_prefix_fractions": [
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "short_session_policy": "at_risk_only"
+  },
+  "activation_tolerance": 1e-12,
+  "exact_permutation_max_assignments": 100000,
+  "analysis_order": [
+    "Verify frozen dataset and design hashes",
+    "Acquire all frozen sessions",
+    "Verify final answers externally",
+    "Audit whether xi crossed theta and whether accumulated_excess or capacity activated",
+    "Check the frozen PASS/FAIL class quotas",
+    "Run the unchanged confirmatory rule",
+    "Report mandatory delta vs xi vs balance comparison",
+    "Report absolute-horizon temporal censoring and relative-prefix sensitivity"
+  ],
+  "holdout_validity_rule": "At least 20 externally verified FAIL and 20 externally verified PASS outcomes must exist in the untouched test partition. Otherwise the result is inconclusive_insufficient_class_support.",
+  "confirmatory_rule": "max_negative_balance permutation_p < 0.01 and max_negative_balance AUROC strictly exceeds every frozen instantaneous/logprob baseline, including max_delta.",
+  "kernel_change_policy": "Do not modify theta, tau, accumulated-excess, capacity, normalization, or any PRAMA kernel parameter until the activation audit establishes whether accumulated_excess or capacity were reached under the frozen kernel."
+}

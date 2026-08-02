@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00003-f92144c6f7",
+  "problem_id": "2784",
+  "item_id": "2784:clean_control",
+  "verifier_ref": "cocc:2784:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to compute sum over all non-empty subsets (groups) of the value (max)^2 * min.\n\nGiven array nums length up to 1e5; values up to 1e9. Need O(N log N) solution.\n\nInterpretation: For each subset S, power = (max_S)^2 * min_S.\n\nGoal: sum_{S nonempty} max_S^2 * min_S.\n\nWe can think of contributions per each possible pair (min, max) with min <= max: each subset where the min is exactly some value m and max is exactly some value M, and all elements are between m and M inclusive (since any element less than m would change min, any element greater than M would change max). So contributions: For each ordered pair (m, M) with m <= M: number of subsets whose min = m and max = M multiplied by M^2 * m.\n\nThus sum = sum_{m<=M} (M^2 * m) * count_{S: min=m, max=M}.\n\nWe need to compute count_{S: min=m, max=M}. Given the multiset of numbers in nums (maybe duplicates). The problem constraints: nums length up to 1e5; values up to 1e9.\n\nWe need to compute contributions efficiently using sorting.\n\nLet's sort the array: sorted a[0..n-1] non-decreasing.\n\nFor each index i (as candidate for min) and j (as candidate for max), with i <= j, we want count of subsets whose min = a[i] (value) and max = a[j]. The min must be exactly a[i] (lowest element in subset), max exactly a[j] (largest). The subset can include any selection of elements from between i and j inclusive, but must include at least one element equal to a[i] (to ensure min = a[i]) and at least one element equal to a[j] (to ensure max = a[j]). Also cannot include any element < a[i] (none exist left of i) or > a[j] (none right of j). Duplicates of min and max values may appear; we must handle carefully.\n\nSimplify using sorted with potential duplicates. Approach: for each pair (i, j) with i <= j, define left = i, right = j. The elements inside [i, j] inclusive. Let countMin = number of occurrences of value a[i] within [i",
+  "event_token": 512,
+  "event_turn": 0
+}

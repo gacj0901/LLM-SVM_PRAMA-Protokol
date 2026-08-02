@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00124-12c093f88a",
+  "problem_id": "3213",
+  "item_id": "3213:clean_control",
+  "verifier_ref": "cocc:3213:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to find the number of subarrays where the maximum element appears at least k times. Let M = max(nums). Need to count subarrays where count of M within the subarray >= k.\n\nApproach: We can consider positions of M occurrences. Since only M matters (others can be anything), we just need subarrays that contain at least k occurrences of M.\n\nGiven an array, total number of subarrays = n*(n+1)/2. The subarrays that satisfy condition are those where we have at least k M's. Equivalent to: For each subarray we can compute #M inside; want #M >= k.\n\nWe can use sliding window to count subarrays with less than k M's (or at most k-1). Then answer = total subarrays - subarrays with at most (most) M's.\n\nWe need count of subarrays where number of M's <= k-1. Use two pointers sliding window: maintain left pointer l, iterate right pointer r from 0 to n-1, add element if it's M. While countM > k-1 (i.e., >= k) we need to shrink from left: decrement countM if nums[l] == M, l++. Then for each r, number of subarrays ending at r with at most k-1 M's is (r - l + 1). Sum over r gives total subarrays with at most k-1 M's.\n\nAnswer = total subarrays - subarrays_with_at_most_k_minus_1.\n\nEdge case: if total occurrences of M < k => answer = 0 (since cannot have >=k). However our formula will work: subarrays_with_at_most_k-1 M's = total subarrays (since countM never exceeds k-1). So answer = total - total = 0.\n\nImplementation details: O(n) time.\n\nTesting with examples:\n\nnums = [1,3,2,3,3], k=2, M=3, positions: 1,3,4. total=5*6/2=15. Count subarrays with at most 1 M.\n\nCompute sliding:\n\nInitialize l=0, count=0, res=0.\nr=0: nums0=1(not M) -> count=0 <=1; res+= (0-0+1)=1 -> res=1.\nr=1: nums1=3 => count=1 <=1; res+= (1-0+",
+  "event_token": 512,
+  "event_turn": 0
+}

@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00015-8e848f17e2",
+  "problem_id": "2979",
+  "item_id": "2979:clean_control",
+  "verifier_ref": "cocc:2979:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to maximize gold from offers where each offer covers a contiguous segment [start, end] and yields gold_i. We can't overlap: no house may be sold more than once; houses unsold ok.\n\nThis is essentially weighted interval scheduling: each offer is an interval with weight gold_i. Want max total weight for set of non-overlapping intervals.\n\nn up to 1e5, offers up to 1e5, gold <= 1e3.\n\nWe can solve with DP sorted by end time. For each offer i sorted by end, dp[i] = max gold achievable considering offers up to i (by end). dp[i] = max(dp[i-1], gold_i + dp[prev]), where prev = largest index j < i with end_j < start_i (strictly less because no overlapping house). Since interval includes start to end inclusive, we require end_j < start_i to avoid overlapping any house.\n\nWe need to compute prev quickly: either binary search on ends list.\n\nAlternatively, DP over houses: dp[pos] = max gold for houses up to position pos-1? Actually we can treat dp[i] = max gold using houses up to index i (inclusive). For each house i, we consider offers ending at i. dp[i] = max(dp[i-1], max_{offer ending at i} (gold + dp[start-1])).\n\nBecause n up to 1e5, offers up to 1e5, we can process offers grouped by end.\n\nAlgorithm:\n\n- Create array best_end = [[] for _ in range(n)], where best_end[e] holds tuples (start, gold) for offers ending at e.\n- dp array length n+1: dp[0] = 0 meaning no houses considered.\n- For i from 0 to n-1:\n    dp[i+1] = dp[i]   # not selling house i\n    For each (s, g) in best_end[i]:\n        candidate = dp[s] + g   # dp[s] is max gold using houses up to s-1 (since dp index shift)\n        dp[i+1] = max(dp[i+1], candidate)\n- Answer dp[n].\n\nWhy dp[s]? Since houses are 0-indexed; dp[x] = max gold using houses < x (i.e., first x houses, indices 0..x-1). So if we take an offer [s, e], we add gold to dp[s] (houses before",
+  "event_token": 512,
+  "event_turn": 0
+}

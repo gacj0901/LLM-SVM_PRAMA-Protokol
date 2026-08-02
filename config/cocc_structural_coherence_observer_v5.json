@@ -1,0 +1,81 @@
+{
+  "schema": "LLM-SVM-CoCC-structural-coherence-contract/5",
+  "status": "FROZEN_EXPLORATORY_REPROJECTION",
+  "observer_id": "structural_coherence_v5_causal_inherence_transport",
+  "model_specific_parameters": false,
+  "requires_external_calibration": false,
+  "contains_outcome_labels": false,
+  "contains_prompt_or_answer": false,
+  "base_geometry_contract": "config/cocc_operator_geometry_observer_v1.json",
+  "base_geometry_contract_sha256": "dfc9c0740b845381cea7b8aa9733764e2c1c885e9b46a85e98e17f01d63c0ba7",
+  "channels": {
+    "movement": {
+      "definition": "trailing path length in structural state space",
+      "activity_threshold_source": "base_geometry_contract.classification.minimum_path_length"
+    },
+    "net_transport_ratio": {
+      "definition": "net displacement/path length when movement exceeds threshold",
+      "interpretation": "path directness, not coherence",
+      "range": "[0,1] or null"
+    },
+    "inertial_echo_recurrence": {
+      "definition": "movement-unconditioned trailing persistence of state similarity",
+      "trailing_window_tau": 1.0,
+      "relative_radius": 0.5,
+      "scale_epsilon": 1e-12,
+      "interpretation": "return or regional permanence; cannot establish coherent recurrence"
+    },
+    "recurrence_persistence": {
+      "definition": "inertial_echo_recurrence when movement exceeds threshold; otherwise zero",
+      "range": "[0,1]"
+    },
+    "transported_inherence_evidence": {
+      "definition": "similarity of transitions produced from recurrently equivalent source states; local transition continuity is used only when no recurrent source is available",
+      "operator_similarity": "exp(-rms(v_current-v_prior)/causal_velocity_scale) * min(norms)/max(norms)",
+      "range": "[0,1] or null"
+    },
+    "transport_coherence": {
+      "definition": "causal memory state integrating transported_inherence_evidence only during sufficient movement",
+      "recursion": "C_t=alpha*C_(t-1)+(1-alpha)*evidence_t",
+      "memory_tau": 1.0,
+      "alpha": "exp(-1/(memory_tau*tau_windows))",
+      "no_evidence_update": "carry previous coherence state without treating absence as failure",
+      "range": "[0,1] or null"
+    },
+    "variation_capacity": {
+      "definition": "normalized effective rank of active structural update vectors in the causal geometry window",
+      "reference_window_tau": 2.0,
+      "contraction": "max(0,1-current_capacity/causal_reference_peak)",
+      "range": "[0,1] or null",
+      "claim_boundary": "proxy for realized variation, not the complete counterfactual viability kernel"
+    }
+  },
+  "state_machine": {
+    "states": ["VIABLE", "STAGNANT", "IMITATIVE_ECHO", "RECURRENT", "CRYSTALLIZING", "CRYSTALLIZED", "COHERENCE_LOSS", "UNRESOLVED"],
+    "preclassification_state": null,
+    "tau_windows": 16,
+    "minimum_recurrence_persistence": 0.3,
+    "minimum_transport_coherence": 0.5,
+    "minimum_variation_contraction": 0.25,
+    "crystallizing_duration_tau": 1.0,
+    "STAGNANT": "geometry_ready AND movement <= movement threshold",
+    "IMITATIVE_ECHO": "active AND inertial echo high AND transport coherence low",
+    "COHERENCE_LOSS": "active AND transport coherence low AND inertial echo not high",
+    "RECURRENT": "active AND coherence high AND recurrence persistence high AND variation not contracting",
+    "CRYSTALLIZING": "active AND coherence high AND recurrence persistence high AND variation contraction > 0.25",
+    "CRYSTALLIZED": "CRYSTALLIZING continuously for at least 1.0*tau",
+    "VIABLE": "active AND coherence high AND neither recurrent nor crystallizing",
+    "UNRESOLVED": "active but transport coherence has no supporting transition evidence"
+  },
+  "kernel_boundary": {
+    "delta_xi_accumulated_excess_capacity_unchanged": true,
+    "diagnostic_only": true
+  },
+  "claim_boundary": [
+    "Coherence is modeled as a remembered causal state, not as net displacement or energy supply.",
+    "The observer estimates preservation of transition relations in numeric structural state space; it does not inspect semantics.",
+    "Realized variation capacity is not identical to the full set of counterfactual viable futures.",
+    "Version 5 was specified after inspecting v4 minimal-perturbation results and remains exploratory.",
+    "Saved numeric observations are reused; no LLM receives observer information."
+  ]
+}

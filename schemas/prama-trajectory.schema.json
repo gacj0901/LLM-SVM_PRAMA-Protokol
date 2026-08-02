@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aptadynamik.org/schemas/llm-structural/prama-trajectory.schema.json",
+  "title": "Recertified window-scale PRAMA trajectory",
+  "allOf": [{"$ref": "common-definitions.schema.json#/$defs/envelope"}],
+  "type": "object",
+  "required": [
+    "turn_index", "window_index", "delta", "xi", "accumulated_excess", "capacity",
+    "theta", "balance", "trend", "input_transform", "input_channel_status",
+    "coordinate_origin", "kernel_identity", "valid"
+  ],
+  "properties": {
+    "artifact_type": {"const": "prama_trajectory"},
+    "turn_index": {"type": "integer", "minimum": 0},
+    "window_index": {"type": "integer", "minimum": 0},
+    "delta": {"type": ["number", "null"]},
+    "xi": {"type": ["number", "null"]},
+    "accumulated_excess": {"type": ["number", "null"]},
+    "capacity": {"type": ["number", "null"]},
+    "theta": {"type": ["number", "null"]},
+    "balance": {"type": ["number", "null"]},
+    "trend": {"type": ["number", "null"]},
+    "input_transform": {"const": "signed_unit_affine_v1"},
+    "input_channel_status": {"const": "OBSERVED"},
+    "coordinate_origin": {"const": "DERIVED_KERNEL_STATE"},
+    "valid": {"type": "boolean"},
+    "kernel_identity": {
+      "type": "object",
+      "required": [
+        "package", "version", "source_tree_sha256", "commit", "kernel_api", "config_sha256",
+        "recertification_sha256", "bin_scale"
+      ],
+      "properties": {
+        "package": {"const": "prama-protokol"},
+        "version": {"type": "string", "minLength": 1},
+        "source_tree_sha256": {"$ref": "common-definitions.schema.json#/$defs/sha256"},
+        "commit": {"type": ["string", "null"], "minLength": 7},
+        "kernel_api": {"const": "project_v3"},
+        "config_sha256": {"$ref": "common-definitions.schema.json#/$defs/sha256"},
+        "recertification_sha256": {"$ref": "common-definitions.schema.json#/$defs/sha256"},
+        "bin_scale": {"const": "window"}
+      }
+    }
+  }
+}

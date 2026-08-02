@@ -1,0 +1,111 @@
+{
+  "schema": "LLM-SVM-CoCC-next-confirmatory-protocol-draft/2",
+  "protocol_id": "cocc-prama-mistral-medium-3.5-high-ceiling-draft-20260731",
+  "status": "DRAFT_NOT_FROZEN",
+  "supersedes": "config/cocc_next_confirmatory_protocol.draft.json",
+  "supersession_reason": "The 512- and 1024-token calibration ceilings truncated 20/20 clean controls. Before any 2048/4096 acquisition and before holdout access, the user selected the provider's official 16384-token high-reasoning example as one non-timid calibration ceiling.",
+  "scientific_target": "Anticipation of externally verified code failure independently of provider generation-cap truncation.",
+  "model_binding": {
+    "provider": "nvidia_nim",
+    "provider_endpoint": "https://integrate.api.nvidia.com/v1",
+    "requested_model": "mistralai/mistral-medium-3.5-128b",
+    "resolved_model": "mistralai/mistral-medium-3.5-128b",
+    "system_fingerprint": null,
+    "immutable_weight_digest": null,
+    "official_api_reference": "https://docs.api.nvidia.com/nim/reference/mistralai-mistral-medium-3-5-128b-infer",
+    "official_build_example": "https://build.nvidia.com/mistralai/mistral-medium-3.5-128b"
+  },
+  "generation_budget_calibration": {
+    "partition": "calibration",
+    "required_perturbation_type": "clean_control",
+    "outcome_labels_allowed": false,
+    "holdout_access_allowed": false,
+    "minimum_clean_control_sessions": 20,
+    "candidate_max_tokens": [
+      16384
+    ],
+    "maximum_observed_length_rate": 0.05,
+    "selection_rule": "select_16384_only_if_observed_length_rate_at_or_below_threshold",
+    "candidate_order_rule": "Run exactly one complete calibration-only candidate at 16384 tokens.",
+    "failure_rule": "If 16384 does not meet the threshold, do not freeze or run the holdout; revise prospectively.",
+    "abandoned_unacquired_candidates": [
+      2048,
+      4096
+    ],
+    "historical_diagnostic_candidates_not_eligible_for_selection": [
+      512,
+      1024
+    ],
+    "max_tokens_semantics": "generation_ceiling_not_target_length",
+    "selector": "scripts/select_cocc_generation_budget.py",
+    "selected_budget_artifact": null,
+    "selected_max_tokens": null
+  },
+  "generation_parameters_to_freeze_after_budget_selection": {
+    "temperature": 0.7,
+    "top_p": 1.0,
+    "top_logprobs": 5,
+    "seed": 1337,
+    "reasoning_effort": "high"
+  },
+  "calibration_acquisition_control": {
+    "timeout_seconds": 1800,
+    "explicit_max_attempts": 1,
+    "sdk_internal_retries": 0,
+    "resume_policy": "Reuse validated completed raw.json files and acquire only missing sessions.",
+    "reason": "A high output ceiling requires enough wall-clock allowance to terminate naturally; one explicit attempt avoids duplicate long generations and manual --resume handles missing sessions."
+  },
+  "primary_early_warning_analysis": {
+    "score": "max_negative_balance",
+    "time_basis": "absolute_window_horizon_from_generation_start",
+    "allowed_absolute_window_horizons": [
+      1,
+      2,
+      4,
+      8,
+      16
+    ],
+    "primary_absolute_window_horizon": null,
+    "horizon_selection_rule": "Choose one operational latency target before freeze without inspecting holdout outcomes.",
+    "risk_set": "sessions_with_at_least_h_windows",
+    "short_session_policy": "censored_before_h_and_excluded_from_h_risk_set",
+    "minimum_at_risk_fail": 20,
+    "minimum_at_risk_pass": 20,
+    "minimum_at_risk_problem_clusters": 20,
+    "other_absolute_horizons": "mandatory_secondary",
+    "relative_prefix_analysis": "exploratory_only_not_eligible_for_confirmatory_claims"
+  },
+  "mandatory_generation_cap_audit": {
+    "execution_order": "before_interpreting_any_accumulative_score",
+    "tables": [
+      "finish_reason_by_outcome",
+      "finish_reason_by_perturbation_type"
+    ],
+    "continuous_summaries": [
+      "token_count_by_outcome",
+      "n_windows_by_outcome"
+    ],
+    "clean_control_maximum_length_rate": 0.05,
+    "violation_verdict": "inconclusive_generation_cap_violation",
+    "no_replacement_after_holdout_start": true
+  },
+  "mandatory_coordinate_comparison": [
+    "max_delta",
+    "max_xi",
+    "max_negative_balance"
+  ],
+  "holdout_policy": {
+    "execute_all_frozen_sessions": true,
+    "replacement_allowed": false,
+    "outcome_dependent_stopping_allowed": false,
+    "same_generation_budget_for_every_session": true
+  },
+  "freeze_requirements": [
+    "Complete the single 16384-token calibration candidate.",
+    "Bind the resulting selection artifact SHA-256.",
+    "Set exactly one primary absolute window horizon.",
+    "Bind dataset, calibration, runner, verifier, projector, evaluator and PRAMA kernel hashes.",
+    "Freeze cluster-aware inference, Monte Carlo seeds/draws/fallbacks and minimum effect of interest.",
+    "Verify no holdout outcome was accessed during model, budget or horizon selection."
+  ]
+}

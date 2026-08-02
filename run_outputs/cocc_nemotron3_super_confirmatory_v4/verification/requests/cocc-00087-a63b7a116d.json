@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00087-a63b7a116d",
+  "problem_id": "3031",
+  "item_id": "3031:clean_control",
+  "verifier_ref": "cocc:3031:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to implement function constructProductMatrix which returns product matrix where each entry = product of all other elements mod 12345.\n\nConstraints: n*m <= 10^5 (total number of cells). So we can compute total product and then each p[i][j] = total_product * inv(grid[i][j]) mod 12345? Not exactly because we need modulo and 12345 is not prime (12345 = 3 * 5 * 823). Actually, 12345 = 3 * 5 * 823. 823 is prime? Let’s factor: 823 is prime. So mod is not prime; modular inverse may not exist for numbers not coprime with mod.\n\nThus need a different approach: Since total product may be huge, but we only need modulo 12345. Could compute product of all numbers modulo 12345 (call total_mod). Then p[i][j] = (total_mod * inv_mod(grid[i][j] % 12345)) % 12345 if gcd(grid[i][j], 12345) == 1, else need to compute product of all others directly? Since n*m <= 1e5, we can compute product of all numbers except self for each element by dividing product by grid[i][j] only if we can handle zero division or non-invertible. Since mod is small (12345), we could compute prefix and suffix products across flattened array, similar to product of array except self but with modulo.\n\nSimplify: Flatten grid into 1D array of size N = n*m. Compute prefix product array pre[i] = product of a[0..i-1] modulo MOD; suffix[i] = product of a[i+1..N-1] modulo MOD. Then answer[i] = (pre[i] * suffix[i]) % MOD. This is O(N) time, O(N) extra space. N <= 1e5, fine.\n\nBut careful: product may overflow but we apply modulo at each multiplication.\n\nEdge Cases: Since product of all elements may be zero modulo MOD due to factors of MOD (i.e., multiple of 3,5,823). The prefix-suffix product method works fine as we compute modulo at each step.\n\nThus solution: flatten",
+  "event_token": 512,
+  "event_turn": 0
+}

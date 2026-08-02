@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00055-375eec078a",
+  "problem_id": "2869",
+  "item_id": "2869:clean_control",
+  "verifier_ref": "cocc:2869:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to find maximum possible length of a non-decreasing subarray in nums3 where each element can be chosen either from nums1[i] or nums2[i]. Equivalent: For each index i, we have two possible values: a[i] = nums1[i], b[i] = nums2[i]. We want to assign each index a value (choose one of two) to maximize the length of the longest contiguous subarray where assigned values are non-decreasing.\n\nWe need to compute maximum possible length of a subarray [l, r] where we can assign values from each position to satisfy non-decreasing condition.\n\nThis looks like a DP problem similar to longest increasing subsequence with two choices per position, but we need contiguous subarray.\n\nObservation: For a given subarray, we need to know if there exists a choice assignment such that the sequence is non-decreasing. Equivalent to: there exists a sequence of choices c[i] ∈ {0,1} (0 picks nums1[i], 1 picks nums2[i]) such that for all i from l to r-1, chosen[i] <= chosen[i+1].\n\nWe can think of DP that tracks, for each position i, the longest valid subarray ending at i, given we chose either nums1[i] or nums2[i] at i. This is similar to computing longest non-decreasing subarray when each element has two possible values. We want maximum length over any ending index and choice.\n\nDefine dp0[i] = length of longest non-decreasing subarray ending at i if we choose nums1[i] at position i.\nSimilarly dp1[i] = length if we choose nums2[i] at position i.\n\nTransition: dp0[i] = 1 + max over possible previous choice j in {0,1} such that chosen value at i-1 <= nums1[i]; i.e., if nums1[i-1] <= nums1[i] then we can extend dp0[i-1]; if nums2[i-1] <= nums1[i] then we can extend dp1[i-1]; dp0[i] = 1 + max of those applicable previous dp values; if none applicable then dp0[i] = 1 (starting new subarray at i). Similarly dp1[i] based on nums2[i].\n\nThen answer = max over i and both dp values.\n\nThis works because we consider contiguous subarray ending at i; we want max length of any subarray. This DP yields longest",
+  "event_token": 512,
+  "event_turn": 0
+}

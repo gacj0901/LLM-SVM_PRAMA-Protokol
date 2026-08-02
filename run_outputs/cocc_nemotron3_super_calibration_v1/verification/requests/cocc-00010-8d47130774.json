@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00010-8d47130774",
+  "problem_id": "2868",
+  "item_id": "2868:clean_control",
+  "verifier_ref": "cocc:2868:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to count number of subarrays where for all pairs, absolute difference ≤ 2. Equivalent: The subarray must have max - min ≤ 2.\n\nThus counting subarrays where max - min ≤ 2.\n\nWe can use sliding window: maintain left pointer, for each right index, expand window, maintain min and max (via deque or multiset). Since constraints n up to 1e5, O(n log n) is fine using two monotonic deques (maintaining min and max). Actually we can maintain two deques to get current min and max in O(1) per step: monotonic increasing deque for min, decreasing deque for max.\n\nStandard sliding window count of subarrays satisfying condition: For each right index, we find minimal left such that window [left, right] is valid; then number of subarrays ending at right that are valid = right - left + 1. Sum over right.\n\nThus algorithm:\n\nInitialize left = 0, answer = 0.\nMaintain deques minDeque (increasing) storing indices, maxDeque (decreasing) storing indices.\nFor each right from 0 to n-1:\n   Insert nums[right] into deques:\n       while minDeque not empty and nums[right] < nums[minDeque[-1]]: pop back; then append right.\n       while maxDeque not empty and nums[right] > nums[maxDeque[-1]]: pop back; then append right.\n   Now while current window invalid: (nums[maxDeque[0]] - nums[minDeque[0]] > 2):\n        // need to move left forward.\n        if minDeque[0] < left: pop left? Actually we need to pop from front if index < left.\n        We'll increment left, and remove indices that are out of window:\n            left += 1\n            while minDeque and minDeque[0] < left: popleft\n            while maxDeque and maxDeque[0] < left: popleft\n   After while loop, window [left, right] is valid.\n   Add (right - left + 1) to answer.\n\nReturn answer.\n\nComplexities O(n).\n\nLet's test with examples.\n\nEdge Cases: duplicates, etc.\n\nWe'll produce final solution.\n\nMake sure to import collections.deque.\n\nNow implement.\n\nPotential issues: the while condition for invalid window: need to recompute after left increments.",
+  "event_token": 512,
+  "event_turn": 0
+}

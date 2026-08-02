@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00014-a40a4168bd",
+  "problem_id": "2953",
+  "item_id": "2953:clean_control",
+  "verifier_ref": "cocc:2953:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to implement function countPairs that counts pairs (i,j) where i<j and (x_i XOR x_j) + (y_i XOR y_j) == k.\n\nGiven constraints: n up to 50000. k up to 100.\n\nWe need to compute number of pairs with sum of XOR's equal to k.\n\nSimplify: Let d = (x_i XOR x_j) + (y_i XOR y_j). We need d == k.\n\nWe can treat each point (x,y). For each pair, we can compute x_xor = x_i XOR x_j, y_xor = y_i XOR y_j; need x_xor + y_xor = k.\n\nGiven x_i, y_i up to 1e6 ~ 20 bits (actually up to ~2^20). So x_i and y_i up to 20 bits.\n\nk small <=100.\n\nWe could think of enumerating possible x_xor values from 0 to k (since y_xor = k - x_xor must be >=0). So we need pairs where x_i XOR x_j = a and y_i XOR y_j = k-a.\n\nSo for each a from 0 to k, we need to count pairs where x_i XOR x_j = a and y_i XOR y_j = k-a.\n\nHow can we efficiently count pairs with given XOR values? Typically, for counting pairs with a given XOR for a single dimension, we can use a hashmap of frequencies of seen values, and for each point, look up value ^ a (i.e., we need partner with x = x_i XOR a). Similarly for 2 dims we need both dimensions.\n\nOne approach: Because k small, we can for each point, iterate over all possible a from 0 to k, compute target_x = x_i XOR a, target_y = y_i XOR (k - a), and then count number of previously seen points with coordinates (target_x, target_y). Then we increment answer.\n\nComplexity O(n * (k+1)). n up to 50000, k <=100 -> ~5 million operations, fine.\n\nWe need to be careful with potential overflow? Not relevant.\n\nThus algorithm: Initialize dict freq = {} mapping (x,y) to count of points seen so far. ans = 0. For each",
+  "event_token": 512,
+  "event_turn": 0
+}

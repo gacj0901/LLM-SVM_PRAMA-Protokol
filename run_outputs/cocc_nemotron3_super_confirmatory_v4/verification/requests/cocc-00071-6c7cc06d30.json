@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00071-6c7cc06d30",
+  "problem_id": "2915",
+  "item_id": "2915:clean_control",
+  "verifier_ref": "cocc:2915:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to count subarrays where the number of elements congruent to k modulo modulo (i.e., nums[i] % modulo == k) has a count cnt such that cnt % modulo == k.\n\nLet’s define a binary array: b[i] = 1 if nums[i] % modulo == k, else 0.\n\nThen for a subarray [l, r], cnt = sum_{i=l}^r b[i].\n\nWe need: (sum_{i=l}^r b[i]) % modulo == k.\n\nSo we need to count number of subarrays where sum of b in subarray ≡ k (mod modulo).\n\nLet prefix sum array P where P[0] = 0, and P[i] = sum_{j=0}^{i-1} b[j] (i.e., prefix sum up to but not including i). Then sum of b[l..r] = P[r+1] - P[l].\n\nWe need (P[r+1] - P[l]) % modulo == k.\n\nWhich is equivalent to: P[r+1] % modulo ≡ (P[l] + k) % modulo.\n\nThus, for each index i (as r+1), we want to count number of previous prefix indices j (as l) such that P[i] % modulo == (P[j] + k) % modulo.\n\nOr rearranged: P[j] % modulo == (P[i] - k) % modulo.\n\nWe can maintain a frequency map of prefix sum mod modulo values seen so far.\n\nInitialize freq[0] = 1 (for P[0] = 0).\n\nIterate i from 1 to n (inclusive), compute current prefix sum mod m = P[i] % modulo.\n\nWe need to add freq[ (current - k) % modulo ] to answer.\n\nThen increment freq[current].\n\nReturn ans.\n\nEdge Cases: modulo can be up to 1e9, but we only store frequencies of remainders we encounter, at most n+1 distinct values.\n\nComplexities: O(n) time, O(n) space.\n\nLet's test on examples.\n\nExample1: nums=[3,2,4], modulo=2, k=1.\nb: [3%2==1?1, 2%2==0?0, 4%2==0?0] => [1,0,0]\nPrefix sums: P[0]=0\ni=1: P[1]=1 -> cur=1",
+  "event_token": 512,
+  "event_turn": 0
+}

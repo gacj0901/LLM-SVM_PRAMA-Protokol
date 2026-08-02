@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00056-d4fbc0aa59",
+  "problem_id": "2870",
+  "item_id": "2870:clean_control",
+  "verifier_ref": "cocc:2870:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to find the maximum length of alternating subarrays. The definition says: subarray s of length m > 1 is alternating if:\n- s_1 = s_0 + 1.\n- s looks like [s_0, s_1, s_0, s_1, ..., s_(m-1) % 2]. That is, pattern repeats: s_0, s_0+1, s_0, s_0+1, ...\nThus differences between consecutive elements alternate: +1, -1, +1, -1, ... Starting with +1.\n\nSo essentially we need subarrays where for all i from start to end-1:\nif (i-start) is even: nums[i+1] - nums[i] == 1\nif odd: nums[i+1] - nums[i] == -1\n\nEquivalently: nums[i+1] - nums[i] = (-1)^{i-start} * 1? Actually pattern: diff[0] = +1, diff[1] = -1, diff[2] = +1, ... So diff[j] = (+1) if j even else -1, where j = i - start.\n\nThus we can iterate over array, try to extend alternating pattern.\n\nConstraints are small (n <= 100), so O(n^2) is fine. But we can also do O(n) scanning.\n\nWe need maximum length m > 1; if none, return -1.\n\nApproach: Iterate start index i from 0 to n-2. For each i, we try to see if nums[i+1] - nums[i] == 1. If not, cannot start alternating subarray at i (since first diff must be +1). If yes, we have length at least 2. Then we can extend: set expected diff = -1 for next step, then flip each step. Continue while j < n-1 and nums[j+1] - nums[j] == expected_diff. Whenever condition holds, increase length, flip expected_diff (multiply by -1). Continue until break. Record max length.\n\nAfter scanning all i, return max_len if max_len >= 2 else -1.\n\nEdge Cases: The pattern may also start later; we covered all starts.\n\nComplexities: O(n^2) worst-case but n <=100 fine.\n\nTest examples:\n\nnums = [2,3,4,3,4",
+  "event_token": 512,
+  "event_turn": 0
+}

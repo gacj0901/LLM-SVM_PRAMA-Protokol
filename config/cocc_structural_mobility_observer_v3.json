@@ -1,0 +1,72 @@
+{
+  "schema": "LLM-SVM-CoCC-structural-mobility-contract/3",
+  "status": "FROZEN_EXPLORATORY_REPROJECTION",
+  "observer_id": "structural_mobility_v3",
+  "model_specific_parameters": false,
+  "requires_external_calibration": false,
+  "contains_outcome_labels": false,
+  "contains_prompt_or_answer": false,
+  "base_geometry_contract": "config/cocc_operator_geometry_observer_v1.json",
+  "base_geometry_contract_sha256": "dfc9c0740b845381cea7b8aa9733764e2c1c885e9b46a85e98e17f01d63c0ba7",
+  "channels": {
+    "transport_efficiency": {
+      "definition": "net_displacement/(path_length+epsilon)",
+      "range": "[0,1]",
+      "dimensionless": true
+    },
+    "recurrence_persistence": {
+      "definition": "trailing mean of current-state distance-weighted recurrence",
+      "trailing_window_tau": 1.0,
+      "local_scale": "median positive admissible pair distance in the causal geometry window",
+      "relative_radius": 0.5,
+      "pair_similarity": "max(0,1-rms_distance/(relative_radius*causal_local_scale))",
+      "scale_epsilon": 1e-12,
+      "range": "[0,1]",
+      "dimensionless": true
+    },
+    "crystallized_fraction": {
+      "definition": "causal count of CRYSTALLIZED geometry-ready windows divided by elapsed geometry-ready windows",
+      "range": "[0,1]",
+      "dimensionless": true
+    },
+    "crystallization_onset": {
+      "definition": "first absolute window entering CRYSTALLIZED",
+      "range": "nonnegative integer or null"
+    }
+  },
+  "state_machine": {
+    "states": [
+      "MOBILE",
+      "RECURRENT",
+      "CRYSTALLIZING",
+      "CRYSTALLIZED"
+    ],
+    "tau_windows": 16,
+    "minimum_recurrence_persistence": 0.3,
+    "maximum_transport_efficiency": 0.25,
+    "crystallizing_duration_tau": 1.0,
+    "RECURRENT": "geometry_ready AND recurrence_persistence > 0.3",
+    "CRYSTALLIZING": "RECURRENT AND transport_efficiency < 0.25",
+    "CRYSTALLIZED": "CRYSTALLIZING continuously for at least 1.0*tau",
+    "reset": "any window not satisfying CRYSTALLIZING resets crystallizing duration to zero",
+    "uses_recurrent_dwell": false
+  },
+  "session_endpoints": [
+    "minimum_transport_efficiency",
+    "recurrence_persistence_area",
+    "maximum_recurrence_persistence",
+    "crystallized_fraction",
+    "crystallization_onset"
+  ],
+  "kernel_boundary": {
+    "delta_xi_accumulated_excess_capacity_unchanged": true,
+    "diagnostic_only": true
+  },
+  "claim_boundary": [
+    "Version 3 was specified after exploratory inspection of versions 1 and 2 and remains exploratory.",
+    "Recurrent dwell is retained only in the inherited diagnostic record and cannot affect the state machine.",
+    "Continuous coordinates remain separately reportable; the categorical state never substitutes for them.",
+    "All distances are normalized by a causal local scale and all thresholds are identical across models.",
+    "Saved numeric observations are reused; no LLM receives observer information."
+  ]
+}

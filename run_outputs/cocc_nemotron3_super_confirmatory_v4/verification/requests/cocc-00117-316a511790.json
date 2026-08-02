@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00117-316a511790",
+  "problem_id": "3195",
+  "item_id": "3195:clean_control",
+  "verifier_ref": "cocc:3195:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to find minimum adjacent swaps to group all 1s to the right and all 0s to the left.\n\nWe can think in terms of moving each 1 to the right of all 0s. The minimum number of adjacent swaps equals the total number of inversions where a 1 appears before a 0 (i.e., count of pairs (i, j) with i < j, s[i] == '1', s[j] == '0'). Because each such inversion needs to be resolved by swapping the 1 past that 0, and each adjacent swap can fix exactly one inversion.\n\nAlternatively, we can count zeros to the right of each 1 and sum them, or count how many zeros have been seen so far when iterating from left to right, and each time we see a '1', add the number of zeros encountered so far (since each zero to its left will need to be swapped past it eventually? Actually to group 1s to the right, we need to move 1s right past zeros that are to their left? Wait, consider \"10\": we need one swap to get \"01\". The 1 is at index0, zero at index1. Inversions where 1 before 0: (0,1) => 1 inversion. Sum zeros seen so far when we encounter a 1? Let's test: iterate left to right, keep count of zeros seen. When we see a '1', we add zeros_seen to answer. For \"10\": zeros_seen initially 0, at i=0 char='1', ans+=0 =>0; zeros_seen unchanged. i=1 char='0', zeros_seen++ =>1. Final ans=0, which is wrong. So that's not correct.\n\nInstead, we can iterate from right to left, counting ones seen so far, and when we see a '0', add ones_seen to answer. Because each zero needs to move left past all ones to its left? Let's test: For \"10\": iterate right to left: i=1 char='0', ones_seen=0 => ans+=0; ones_seen unchanged. i=0 char='1', ones_seen++ =>1. Final ans=0, wrong again.\n\nAlternatively, think of moving all 1s to the right: we can consider final arrangement: all zeros then all ones. The number of swaps needed equals sum over each 1",
+  "event_token": 512,
+  "event_turn": 0
+}

@@ -15,6 +15,19 @@ Engine: [`prama-protokol`](https://github.com/gacj0901/prama-protokol)
 > claims require the committed pre-registration in
 > [`PREREGISTRATION_P1.md`](PREREGISTRATION_P1.md).
 
+## Structural artifact contract v0.2
+
+The implementable multi-channel contract is
+[`docs/LLM_STRUCTURAL_STATE_ARTIFACT_CONTRACT_v0.2.md`](docs/LLM_STRUCTURAL_STATE_ARTIFACT_CONTRACT_v0.2.md).
+Its JSON Schemas live in [`schemas/`](schemas/) and its runtime boundary in
+`aptadynamic_llm.artifact_schema`.
+
+The evaluated model receives task content only. `aptadynamic_llm.model_payload`
+fails closed if provider payloads contain monitor labels, experimental condition
+IDs, PRAMA/structural state, interface metadata, system roles, or tool roles.
+Experimental metadata and response timing are attached only after the provider
+response has completed.
+
 ## The question
 
 Does a generation session sustain itself, or merely appear to? Event = token; the
@@ -80,9 +93,10 @@ This is a wiring test, not confirmatory evidence.
 ## E-P1 pipeline (Hermes 3 8B through Ollama)
 
 ```bash
-# Pilot corpus. The prompt suite is an explicit, versioned JSON/JSONL/TXT file.
+# Uncensored redesign pilot: 40 distinct, bounded structured-analysis prompts.
 python scripts/collect_ollama.py --pilot --model hermes3:8b --n 40 \
-  --seed-per-index --prompts prompts_ep1.jsonl --out data_pilot
+  --num-predict 2048 --seed-per-index \
+  --prompts examples/prompts_ep1_v2.jsonl --out data_pilot_v2
 
 # After freezing the pilot-derived num_predict cap in PREREGISTRATION_P1.md:
 python scripts/collect_ollama.py --confirmatory --model hermes3:8b --n 400 \

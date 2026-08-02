@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00010-d428f742fc",
+  "problem_id": "2848",
+  "item_id": "2848:negation_objective:36",
+  "verifier_ref": "cocc:2848:negation_objective",
+  "expected_answer": "",
+  "observed_answer": "```python\nfrom typing import List\nfrom functools import lru_cache\n\nclass Solution:\n    def specialPerm(self, nums: List[int]) -> int:\n        n = len(nums)\n        # Precompute adjacency: adj[i][j] = True if nums[i] % nums[j] == 0 or nums[j] % nums[i] == 0\n        adj = [[False] * n for _ in range(n)]\n        for i in range(n):\n            for j in range(n):\n                if i != j:\n                    a, b = nums[i], nums[j]\n                    if a % b == 0 or b % a == 0:\n                        adj[i][j] = True\n        \n        # DP over subsets: dp[mask][last] = number of ways to form permutation ending with 'last'\n        # using elements in 'mask'\n        @lru_cache(maxsize=None)\n        def dfs(mask: int, last: int) -> int:\n            if mask == (1 << n) - 1:\n                return 1\n            total = 0\n            for nxt in range(n):\n                if not (mask >> nxt) & 1:\n                    if adj[last][nxt]:\n                        total += dfs(mask | (1 << nxt), nxt)\n            return total\n        \n        # Start with each element as the first element\n        res = 0\n        for i in range(n):\n            res += dfs(1 << i, i)\n        \n        return res % (10**9 + 7)\n```\n```",
+  "event_token": 333,
+  "event_turn": 0
+}

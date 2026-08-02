@@ -1,0 +1,61 @@
+{
+  "schema": "LLM-SVM-CoCC-operator-geometry-contract/1",
+  "status": "FROZEN_EXPLORATORY_REPROJECTION",
+  "observer_id": "operator_geometry_v1",
+  "model_specific_parameters": false,
+  "requires_external_calibration": false,
+  "contains_outcome_labels": false,
+  "contains_prompt_or_answer": false,
+  "input": {
+    "channel": "numeric_token_logprob_windows_plus_existing_prama_coordinates",
+    "window_size_tokens": 16,
+    "gap_normalization": "gap/(gap+gap_scale)",
+    "gap_scale": 1.0,
+    "entropy_normalization": "token_entropy/log(candidate_count)",
+    "xi_normalization": "clip(xi/theta,0,1)"
+  },
+  "state_vector": [
+    "entropy_norm",
+    "gap_confidence",
+    "rigidity",
+    "uncertainty",
+    "delta",
+    "xi_occupancy"
+  ],
+  "geometry": {
+    "distance": "rms_euclidean_on_unit_cube",
+    "trailing_window": 16,
+    "minimum_points": 8,
+    "recurrence_lag_exclusion": 2,
+    "recurrence_radius": 0.1,
+    "causal": true
+  },
+  "modes": {
+    "load": "mean(entropy_norm,1-gap_confidence,uncertainty,delta,xi_occupancy)",
+    "load_change_deadband": 0.02,
+    "positive": "EXPANSION",
+    "deadband": "CONSERVATION",
+    "negative": "RELEASE"
+  },
+  "classification": {
+    "label": "CRYSTALLIZED_RECIRCULATION",
+    "minimum_path_length": 0.5,
+    "maximum_transport_efficiency": 0.25,
+    "minimum_recurrence_rate": 0.3,
+    "minimum_recurrent_dwell": 4,
+    "strict_inequalities": true
+  },
+  "kernel_boundary": {
+    "modifies_delta": false,
+    "modifies_xi": false,
+    "modifies_accumulated_excess": false,
+    "modifies_capacity": false,
+    "diagnostic_only": true
+  },
+  "claim_boundary": [
+    "This observer was specified after inspecting the three-model prospective summary and is exploratory only.",
+    "Parameters are identical across models, providers, tasks and outcomes.",
+    "No geometry channel is fed back into the universal PRAMA kernel.",
+    "Reprojection uses saved numeric observations and does not call an LLM."
+  ]
+}

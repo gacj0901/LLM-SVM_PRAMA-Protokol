@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00126-020fdb6c97",
+  "problem_id": "3220",
+  "item_id": "3220:clean_control",
+  "verifier_ref": "cocc:3220:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to implement solution for problem: given array batteryPercentages length n (0-indexed). For i from 0..n-1: if batteryPercentages[i] > 0: increment count (tested devices). Then for all j from i+1 to n-1: batteryPercentages[j] = max(0, batteryPercentages[j] - 1). Continue.\n\nGoal: return number of tested devices after processing all i in order.\n\nConstraints: n up to 100, values up to 100; simple O(n^2) simulation works.\n\nBut there might be more efficient solution: count of positive after subtracting number of previously tested devices? Since each time we test a device at index i, we decrement all later devices by 1. So batteryPercentages[j] gets decreased by number of tests performed before j (i.e., number of indices i < j where batteryPercentages[i] > 0 after previous reductions?). Actually we test a device i only if its current value after previous decrements >0. At time of testing i, its value = original batteryPercentages[i] - number_of_previously_tested_devices_before_i (since each previous test decrements all later devices, including i) but not below 0. So we can compute count as number of i where batteryPercentages[i] - tested_so_far > 0. Because each test increments tested_so_far (cnt) and reduces all later by 1. So we can just simulate with a variable tested = 0; for each value v in batteryPercentages: if v - tested > 0: tested += 1. Finally return tested. That's O(n). Actually we must ensure not to go below zero; but condition v - tested > 0 is enough, because if v - tested <=0 then battery is zero or negative after previous decrements, so we skip.\n\nCheck with examples: [1,1,2,1,3]; tested=0; v=1 => 1-0>0 -> tested=1; v=1 =>1-1=0 not >0 -> skip; v=2=>2-1=1>0 -> tested=2; v=1=>1-2=-1 not >0 -> skip; v=3=>3-2=1>0 -> tested=3 => answer 3 matches.\n\nSecond: [0,1,2]; tested=0; v=0",
+  "event_token": 512,
+  "event_turn": 0
+}

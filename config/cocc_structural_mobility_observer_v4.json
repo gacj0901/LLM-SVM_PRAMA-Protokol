@@ -1,0 +1,86 @@
+{
+  "schema": "LLM-SVM-CoCC-structural-mobility-contract/4",
+  "status": "FROZEN_EXPLORATORY_REPROJECTION",
+  "observer_id": "structural_mobility_v4_movement_conditioned",
+  "model_specific_parameters": false,
+  "requires_external_calibration": false,
+  "contains_outcome_labels": false,
+  "contains_prompt_or_answer": false,
+  "base_geometry_contract": "config/cocc_operator_geometry_observer_v1.json",
+  "base_geometry_contract_sha256": "dfc9c0740b845381cea7b8aa9733764e2c1c885e9b46a85e98e17f01d63c0ba7",
+  "channels": {
+    "path_length": {
+      "definition": "sum of causal state-vector step distances in the trailing geometry window",
+      "activity_threshold_source": "base_geometry_contract.classification.minimum_path_length"
+    },
+    "transport_efficiency_active": {
+      "definition": "net_displacement/path_length only when path_length exceeds the activity threshold; otherwise null",
+      "range": "[0,1] or null",
+      "dimensionless": true
+    },
+    "recurrence_persistence_raw": {
+      "definition": "trailing mean of current-state distance-weighted recurrence, retained as a diagnostic of return or regional permanence",
+      "trailing_window_tau": 1.0,
+      "local_scale": "median positive admissible pair distance in the causal geometry window",
+      "relative_radius": 0.5,
+      "pair_similarity": "max(0,1-rms_distance/(relative_radius*causal_local_scale))",
+      "scale_epsilon": 1e-12,
+      "range": "[0,1]",
+      "dimensionless": true
+    },
+    "mobile_recurrence_persistence": {
+      "definition": "activity_indicator * recurrence_persistence_raw",
+      "activity_indicator": "1 iff geometry_ready and path_length > activity threshold; otherwise 0",
+      "range": "[0,1]",
+      "dimensionless": true
+    },
+    "stagnant_fraction": {
+      "definition": "causal count of STAGNANT geometry-ready windows divided by elapsed geometry-ready windows",
+      "range": "[0,1]"
+    },
+    "crystallized_fraction": {
+      "definition": "causal count of CRYSTALLIZED geometry-ready windows divided by elapsed geometry-ready windows",
+      "range": "[0,1]"
+    }
+  },
+  "state_machine": {
+    "states": ["VIABLE", "STAGNANT", "RECURRENT", "CRYSTALLIZING", "CRYSTALLIZED"],
+    "preclassification_state": null,
+    "tau_windows": 16,
+    "minimum_mobile_recurrence_persistence": 0.3,
+    "maximum_transport_efficiency": 0.25,
+    "crystallizing_duration_tau": 1.0,
+    "STAGNANT": "geometry_ready AND path_length <= activity threshold",
+    "RECURRENT": "active AND mobile_recurrence_persistence > 0.3 AND transport_efficiency_active >= 0.25",
+    "CRYSTALLIZING": "active AND mobile_recurrence_persistence > 0.3 AND transport_efficiency_active < 0.25",
+    "CRYSTALLIZED": "CRYSTALLIZING continuously for at least 1.0*tau",
+    "VIABLE": "active AND not RECURRENT AND not CRYSTALLIZING",
+    "reset": "STAGNANT, VIABLE, or RECURRENT resets crystallizing duration to zero",
+    "precedence": ["STAGNANT", "CRYSTALLIZED", "CRYSTALLIZING", "RECURRENT", "VIABLE"]
+  },
+  "session_endpoints": [
+    "stagnant_fraction",
+    "stagnation_onset",
+    "minimum_transport_efficiency_active",
+    "mobile_recurrence_persistence_area",
+    "maximum_mobile_recurrence_persistence",
+    "crystallized_fraction",
+    "crystallization_onset"
+  ],
+  "diagnostic_only_fields": [
+    "recurrence_persistence_raw",
+    "transport_efficiency"
+  ],
+  "kernel_boundary": {
+    "delta_xi_accumulated_excess_capacity_unchanged": true,
+    "diagnostic_only": true
+  },
+  "claim_boundary": [
+    "Version 4 was specified after the minimal-structural perturbation v3 results and remains exploratory.",
+    "Static stagnation and movement-conditioned recurrence are distinct, non-ordinal degradation modes.",
+    "Raw recurrence can reflect regional permanence and cannot by itself activate recurrence or crystallization.",
+    "Transport efficiency is invalid for classification and contrasts when path length does not exceed the activity threshold.",
+    "Parameters are identical across models, tasks, arms, providers, and outcomes.",
+    "Saved numeric observations are reused; no LLM receives observer information."
+  ]
+}

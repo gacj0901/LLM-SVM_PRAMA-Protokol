@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00052-3141d381a8",
+  "problem_id": "2857",
+  "item_id": "2857:clean_control",
+  "verifier_ref": "cocc:2857:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to implement function distanceTraveled. Problem summary: given initial mainTank liters, and additionalTank liters. For each 5 liters of fuel used from main tank, if additional tank >=1, then transfer 1 liter from additional to main (immediately after using those 5 liters). So consumption is in increments: use 5 L from main -> distance 50 km (5 liters *10 km/L). After that consumption, if there is at least 1 liter in additional tank, then we add 1 L to main tank (i.e., mainTank becomes mainTank -5 +1 = mainTank-4; additionalTank-1). The process repeats while there is fuel in mainTank (i.e., >0). The injection occurs only after each 5-liter chunk consumed, not partially.\n\nGoal: compute total distance traveled.\n\nConstraints small (max 100). Could simulate.\n\nSimplify: While mainTank > 0:\n\n- If mainTank >=5: we can consume a chunk of 5 liters, distance +=5*10=50, mainTank-=5. Then if additionalTank>0: mainTank+=1; additionalTank-=1.\n\n- Else (mainTank <5): we can consume all remaining mainTank (since less than 5) - no injection triggered because injection only happens after consuming exactly 5 liters? The problem says \"Whenever 5 liters of fuel get used up in the main tank, if the additional tank has at least 1 liters of fuel, 1 liters of fuel will be transferred\". So injection only triggers after consuming exactly 5 liters (or multiple of 5? Actually each time you consume 5 liters you check injection). So if less than 5 left, you just consume them and stop; no injection.\n\nThus algorithm: while mainTank >=5: process chunk. After loop, add remaining mainTank*10 distance.\n\nEdge case: after a chunk consumption, mainTank may become >=5 again due to injection; loop continues accordingly.\n\nAlternatively we can compute analytically: each 5 liters from main tank yields net consumption of 4 liters from main (since 1 liter added from additional if available) and consumes 1 liter from additional (if available). So each \"effective 5 liter chunk\" consumes 4",
+  "event_token": 512,
+  "event_turn": 0
+}

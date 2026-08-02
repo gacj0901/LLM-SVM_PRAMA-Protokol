@@ -1,0 +1,102 @@
+{
+  "schema": "LLM-SVM-CoCC-next-confirmatory-protocol-draft/1",
+  "protocol_id": "cocc-prama-next-confirmatory-generation-cap-controlled-draft-20260731",
+  "status": "DRAFT_NOT_FROZEN",
+  "predecessor_run_record": "config/cocc_nemotron3_super_512_confirmatory_record.json",
+  "scientific_target": "Anticipation of externally verified code failure independently of provider generation-cap truncation.",
+  "model_binding": {
+    "provider": "nvidia_nim",
+    "provider_endpoint": "https://integrate.api.nvidia.com/v1",
+    "requested_model": "mistralai/mistral-medium-3.5-128b",
+    "resolved_model": null,
+    "system_fingerprint": null,
+    "immutable_weight_digest": null,
+    "freeze_blocked_while_any_required_identity_is_unresolved": true
+  },
+  "generation_budget_calibration": {
+    "partition": "calibration",
+    "required_perturbation_type": "clean_control",
+    "outcome_labels_allowed": false,
+    "holdout_access_allowed": false,
+    "minimum_clean_control_sessions": 20,
+    "candidate_max_tokens": [
+      512,
+      1024,
+      2048,
+      4096
+    ],
+    "maximum_observed_length_rate": 0.05,
+    "selection_rule": "smallest_candidate_meeting_rate_threshold",
+    "candidate_order_rule": "Evaluate the frozen candidates in increasing order and stop at the first passing budget.",
+    "failure_rule": "If no candidate meets the threshold, do not freeze or run the holdout; revise the calibration protocol prospectively.",
+    "selector": "scripts/select_cocc_generation_budget.py",
+    "selected_budget_artifact": null,
+    "selected_max_tokens": null
+  },
+  "generation_parameters_to_freeze_after_budget_selection": {
+    "temperature": 0.7,
+    "top_p": 1.0,
+    "top_logprobs": 5,
+    "seed": 1337,
+    "reasoning_effort": "high"
+  },
+  "primary_early_warning_analysis": {
+    "score": "max_negative_balance",
+    "time_basis": "absolute_window_horizon_from_generation_start",
+    "allowed_absolute_window_horizons": [
+      1,
+      2,
+      4,
+      8,
+      16
+    ],
+    "primary_absolute_window_horizon": null,
+    "horizon_selection_rule": "Choose one operational latency target before freeze without inspecting the new holdout outcomes.",
+    "risk_set": "sessions_with_at_least_h_windows",
+    "short_session_policy": "censored_before_h_and_excluded_from_h_risk_set",
+    "minimum_at_risk_fail": 20,
+    "minimum_at_risk_pass": 20,
+    "minimum_at_risk_problem_clusters": 20,
+    "other_absolute_horizons": "mandatory_secondary",
+    "relative_prefix_analysis": "exploratory_only_not_eligible_for_confirmatory_claims"
+  },
+  "mandatory_generation_cap_audit": {
+    "execution_order": "before_interpreting_any_accumulative_score",
+    "tables": [
+      "finish_reason_by_outcome",
+      "finish_reason_by_perturbation_type"
+    ],
+    "continuous_summaries": [
+      "token_count_by_outcome",
+      "n_windows_by_outcome"
+    ],
+    "clean_control_maximum_length_rate": 0.05,
+    "violation_verdict": "inconclusive_generation_cap_violation",
+    "violation_effect": "Block claims that accumulated PRAMA scores anticipate external code failure independently of truncation; preserve and report the run without replacement.",
+    "no_replacement_after_holdout_start": true
+  },
+  "mandatory_coordinate_comparison": [
+    "max_delta",
+    "max_xi",
+    "max_negative_balance"
+  ],
+  "holdout_policy": {
+    "execute_all_frozen_sessions": true,
+    "replacement_allowed": false,
+    "outcome_dependent_stopping_allowed": false,
+    "same_generation_budget_for_every_session": true
+  },
+  "estimand_separation": {
+    "primary": "External code failure independent of generation-cap truncation.",
+    "secondary_exploratory": "Runaway generation or inability to close a response as a distinct viability outcome.",
+    "non_substitution_rule": "Evidence for runaway-generation viability cannot be reported as evidence for truncation-independent semantic early warning."
+  },
+  "freeze_requirements": [
+    "Resolve and bind model/provider identity.",
+    "Select max_tokens from calibration clean controls and bind the selection artifact SHA-256.",
+    "Set exactly one primary absolute window horizon.",
+    "Bind dataset, calibration, runner, verifier, projector, evaluator and PRAMA kernel hashes.",
+    "Freeze cluster-aware inference, Monte Carlo seeds/draws/fallbacks and minimum effect of interest.",
+    "Verify no holdout outcome was accessed during model, budget or horizon selection."
+  ]
+}

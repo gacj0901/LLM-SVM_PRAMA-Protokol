@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00112-126e8a04a5",
+  "problem_id": "3188",
+  "item_id": "3188:clean_control",
+  "verifier_ref": "cocc:3188:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to solve this problem: given a tournament directed complete graph (no self-loops, and for each pair exactly one direction is known). The matrix grid has grid[i][j] = 1 if i is stronger than j, else 0 (meaning j stronger than i). For i != j, grid[i][j] != grid[j][i] (so exactly one is 1, the other 0). The relationship is transitive (so it's a total order). Thus the champion is the unique team that is stronger than all others, i.e., the unique team with no incoming edges (no team stronger than it). Since it's a total order, there is exactly one such team.\n\nWe need to find the team a such that for all b != a, grid[a][b] == 1 (i.e., a stronger than b). Equivalent: find row with all ones except diagonal (which is zero). Or we can find the team with zero losses: i.e., column where all entries are zero (since if someone is stronger than a, grid[b][a] == 1). So champion's column has all zeros (except diagonal which is zero anyway). Actually for any b != a, grid[b][a] == 0 because a is not weaker than b; if b stronger than a then grid[b][a] == 1, which cannot happen. So champion's column has all zeros.\n\nThus we can iterate over columns j and check if all grid[i][j] == 0 for i != j (or just all i). Since diagonal is zero anyway, we can just check column sum == 0.\n\nGiven constraints small (n <= 100), O(n^2) fine.\n\nImplementation:\n\nclass Solution:\n    def findChampion(self, grid: List[List[int]]) -> int:\n        n = len(grid)\n        for j in range(n):\n            # check if column j has all zeros\n            if all(grid[i][j] == 0 for i in range(n)):\n                return j\n        # should never happen per problem guarantees\n        return -1\n\nAlternative: find row with all ones (except diagonal). Could also compute indegree.\n\nWe need to return only final solution inside one fenced code block.\n\nThus answer:\n\n```python\nfrom typing import List\n\nclass Solution:\n    def findChampion(self, grid: List[List[int]]) -> int:\n        n = len(grid)\n        for j in range(n):\n           ",
+  "event_token": 512,
+  "event_turn": 0
+}

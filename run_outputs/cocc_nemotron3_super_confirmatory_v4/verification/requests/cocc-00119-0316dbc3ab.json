@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00119-0316dbc3ab",
+  "problem_id": "3199",
+  "item_id": "3199:clean_control",
+  "verifier_ref": "cocc:3199:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to count number of integer solutions to x1 + x2 + x3 = n, with 0 ≤ xi ≤ limit for each i.\n\nWe can do DP: dp[i][j] = number ways using first i children to sum j. i from 0..3, j 0..n.\n\nInitialize dp[0][0] = 1. For each child i from 1..3, dp[i][j] = sum_{k=0}^{limit} dp[i-1][j-k] where j-k ≥ 0.\n\nAlternatively, use combinatorics: Number of nonnegative integer solutions to x1+x2+x3=n with xi≤limit equals coefficient of t^n in (1 + t + ... + t^limit)^3.\n\nWe can also use inclusion-exclusion: total unrestricted solutions C(n+2,2) minus those where at least one child exceeds limit.\n\nLet A_i be event xi ≥ limit+1. Then we want count of solutions with none of A_i.\n\nBy inclusion-exclusion:\n\nNumber = Σ_{S⊆{1,2,3}} (-1)^{|S|} * C(n - (limit+1)*|S| + 2, 2), where we treat C(m,2)=0 if m<0? Actually number of nonnegative solutions to sum = n - (limit+1)*|S| among 3 variables is C((n - (limit+1)*|S|) + 3 - 1, 3-1) = C(n - (limit+1)*|S| + 2, 2), provided n - (limit+1)*|S| ≥ 0; else term is 0.\n\nSince we have 3 children, we can compute for k=0,1,2,3: term = (-1)^k * C(3, k) * C(n - k*(limit+1) + 2, 2) if n - k*(limit+1) >=0 else 0.\n\nBecause choosing which k children exceed limit, each forced to have at least limit+1, subtract that from n, then count unrestricted solutions for remaining.\n\nThus answer = Σ_{k=0}^{3} (-1)^k * C(3, k) * max(0, C(n - k*(limit+1) + 2, 2))\n\nBut careful: C(m,2) defined as m*(m",
+  "event_token": 512,
+  "event_turn": 0
+}

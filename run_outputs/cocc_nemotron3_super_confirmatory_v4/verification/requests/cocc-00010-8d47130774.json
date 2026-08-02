@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00010-8d47130774",
+  "problem_id": "2868",
+  "item_id": "2868:clean_control",
+  "verifier_ref": "cocc:2868:clean_control",
+  "expected_answer": "",
+  "observed_answer": "We need to count number of subarrays where for all pairs, absolute difference ≤ 2. Equivalent: The subarray must have max - min ≤ 2.\n\nThus counting subarrays where max - min ≤ 2.\n\nWe can use sliding window with two deques (monotonic). Keep left pointer l, extend right pointer r, maintain deques for max and min. While max - min > 2, we increment l and pop from deques if they are out of window.\n\nNumber of subarrays ending at r with property is r - l + 1 (all subarrays starting from l..r). Sum up.\n\nComplexities O(n).\n\nEdge cases: large numbers.\n\nImplementation details: from collections import deque.\n\nPseudo:\n\nans = 0\nl = 0\nmaxd = deque()  # store indices decreasing values -> front is max\nmind = deque()  # store indices increasing values -> front is min\n\nfor r, val in enumerate(nums):\n    while maxd and nums[deque[-1]]] <= val: pop from right of maxd\n    maxd.append(r)\n    while mind and nums[mind[-1]] >= val: pop from right of mind\n    mind.append(r)\n    # now ensure condition\n    while nums[maxd[0]] - nums[mind[0]] > 2:\n        if maxd[0] == l: maxd.popleft()\n        if mind[0] == l: mind.popleft()\n        l += 1\n    ans += r - l + 1\n\nReturn ans.\n\nCheck: For subarray ending at r, all windows [i..r] where i>=l satisfy condition because we moved l to smallest index such that window satisfies condition. Indeed standard.\n\nEdge test: [5,4,2,4]\n\nLet's test manually:\n\nInitialize l=0 ans=0.\n\nr=0 val5: maxd=[0] mind=[0]; condition nums[0]-nums[0]=0 <=2; ans+=0-0+1=1 => ans=1.\n\nr=1 val4: while maxd back: nums[0]=5 >4? we keep decreasing? we want max deque decreasing: while maxd and nums[maxd[-1]] <= val => 5 <=4? false, so no pop. Append: maxd=[0,1]? Actually we want decreasing, so we maintain front as max; we pop",
+  "event_token": 512,
+  "event_turn": 0
+}

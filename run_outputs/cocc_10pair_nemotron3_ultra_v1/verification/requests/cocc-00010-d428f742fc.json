@@ -1,0 +1,11 @@
+{
+  "schema": "LLM-SVM-CoCC-verifier-request/1",
+  "session_id": "cocc-00010-d428f742fc",
+  "problem_id": "2848",
+  "item_id": "2848:negation_objective:36",
+  "verifier_ref": "cocc:2848:negation_objective",
+  "expected_answer": "",
+  "observed_answer": "```python\nfrom typing import List\nfrom functools import lru_cache\n\nclass Solution:\n    def specialPerm(self, nums: List[int]) -> int:\n        MOD = 10**9 + 7\n        n = len(nums)\n        # Precompute adjacency: can we place i before j?\n        ok = [[False] * n for _ in range(n)]\n        for i in range(n):\n            for j in range(n):\n                if i != j:\n                    ok[i][j] = (nums[i] % nums[j] != 0) and (nums[j] % nums[i] != 0)\n        \n        @lru_cache(maxsize=None)\n        def dp(last: int, mask: int) -> int:\n            # Number of ways to build a permutation with `mask` used numbers, ending with `last`\n            if mask == (1 << n) - 1:\n                return 1\n            total = 0\n            for nxt in range(n):\n                if not (mask & (1 << nxt)):\n                    if last == -1 or ok[last][nxt]:\n                        total += dp(nxt, mask | (1 << nxt))\n            return total % MOD\n        \n        return dp(-1, 0)\n```",
+  "event_token": 269,
+  "event_turn": 0
+}

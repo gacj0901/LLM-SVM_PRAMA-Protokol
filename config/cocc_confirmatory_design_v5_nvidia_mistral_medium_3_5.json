@@ -1,0 +1,243 @@
+{
+  "schema": "LLM-SVM-CoCC-confirmatory-design/3",
+  "design_id": "cocc-prama-confirmatory-v5-nvidia-mistral-medium-3.5-20260731",
+  "primary_score": "max_negative_balance",
+  "primary_estimand": "Externally verified FAIL discrimination by max_negative_balance within the first 8 absolute PRAMA windows (nominally 128 generated tokens), independent of generation-cap truncation.",
+  "p_threshold": 0.01,
+  "min_test_fail": 20,
+  "min_test_pass": 20,
+  "min_test_problem_clusters": 120,
+  "min_problem_clusters_with_fail": 20,
+  "min_problem_clusters_with_pass": 20,
+  "independent_unit": {
+    "unit": "problem_id",
+    "cluster_id_field": "problem_id",
+    "within_cluster_condition_field": "perturbation_type",
+    "expected_sessions_per_cluster": 2,
+    "required_conditions": [
+      "clean_control",
+      "negation_objective"
+    ],
+    "interpretation": "problem_id is the independent sampling and inferential unit; the two condition sessions are correlated repeated observations within problem."
+  },
+  "cluster_inference": {
+    "method": "problem_cluster_outcome_vector_permutation",
+    "statistic": "AUROC of max_negative_balance at absolute window horizon 8 with FAIL=1",
+    "exchangeability": "Reassign complete ordered (clean_control, negation_objective) outcome vectors among complete at-risk problem_id clusters; never permute sessions independently.",
+    "monte_carlo": {
+      "seed": 2026073101,
+      "draws": 100000,
+      "rng_algorithm": "python_3_12_random_mt19937_shuffle",
+      "plus_one_correction": true,
+      "exact_fallback_max_assignments": 100000,
+      "exact_fallback": "Enumerate unique cluster outcome-profile assignments when their multinomial count is at most exact_fallback_max_assignments.",
+      "invalid_cluster_fallback": "fail_closed_without_session_level_fallback"
+    }
+  },
+  "incremental_auc_test": {
+    "statistic": "AUROC_PRAMA_minus_AUROC_delta at absolute window horizon 8",
+    "prama_score": "max_negative_balance",
+    "baseline_score": "max_delta",
+    "null_hypothesis": "AUROC_PRAMA - AUROC_delta <= 0",
+    "alternative_hypothesis": "AUROC_PRAMA - AUROC_delta > 0",
+    "method": "paired_problem_cluster_bootstrap_centered_one_sided",
+    "alpha": 0.01,
+    "minimum_effect_of_interest": 0.05,
+    "minimum_effect_interpretation": "A gain smaller than 0.05 AUROC is not scientifically material even if statistically significant.",
+    "decision_rule": "Require observed difference >= 0.05, centered one-sided cluster-bootstrap p < 0.01, and the one-sided 99% percentile lower confidence bound > 0.",
+    "monte_carlo": {
+      "seed": 2026073102,
+      "draws": 100000,
+      "rng_algorithm": "python_3_12_random_mt19937_randrange",
+      "plus_one_correction": true,
+      "maximum_attempts": 1000000,
+      "invalid_draw_fallback": "discard_and_redraw_until_maximum_attempts_then_fail_closed"
+    }
+  },
+  "sampling_plan": {
+    "source_root": "C:\\Users\\THINKPAD\\Desktop\\Aptadynamik Cybernetics\\btc_cocc\\Chain-of-Code-Collapse_fresh",
+    "source_file": "modified_problems_negation_objective.pkl",
+    "source_file_sha256": "0e0ab6d641eb07fc030683e99637eb5818aa841a600ff6dcb9d6051143193d8b",
+    "normalized_dataset": "data/cocc_clean_negation_confirmatory_v2.jsonl",
+    "normalized_dataset_sha256": "f22083c38c8399cbbfeb72c98276568f277081bcec38b44b18d971ac617b3433",
+    "normalized_manifest": "data/cocc_clean_negation_confirmatory_v2.manifest.json",
+    "normalized_manifest_sha256": "7705de444e286632aff293e1e31cff095b084968245dd7d0e207d821536d58da",
+    "id_hash_basis": "SHA-256 of the canonical JSON array of sorted deterministic session IDs",
+    "train_ids_sha256": "98e283dfbb5b2cb44b23ce2dc9a744eb7a15841817e068d2eb96625e9cd9336d",
+    "test_ids_sha256": "93de901b947fdac7f461b6faa7f55d26bad61f02d25b3c692281a73dd070c3df",
+    "normalization_seed": 1337,
+    "calibration_fraction": 0.25,
+    "calibration_clean_control_sessions": 20,
+    "holdout_problem_groups": 120,
+    "holdout_sessions": 240,
+    "acquisition_scope": "holdout_only_from_frozen_full_dataset",
+    "holdout_sessions_by_condition": {
+      "clean_control": 120,
+      "negation_objective": 120
+    },
+    "model": "mistralai/mistral-medium-3.5-128b",
+    "model_version": {
+      "provider": "nvidia_nim",
+      "provider_endpoint": "https://integrate.api.nvidia.com/v1",
+      "requested_model": "mistralai/mistral-medium-3.5-128b",
+      "resolved_models": [
+        "mistralai/mistral-medium-3.5-128b"
+      ],
+      "system_fingerprints": [
+        ""
+      ],
+      "model_blob_sha256": null,
+      "immutable_weight_digest_status": "not_exposed_by_hosted_endpoint",
+      "python_version": "3.12.10",
+      "openai_client_version": "2.20.0",
+      "identity_limitation": "The hosted endpoint exposes neither an immutable weight digest nor a non-null system fingerprint; provider-side revision under the alias cannot be excluded."
+    },
+    "endpoint_preflight": {
+      "artifact": "config/cocc_mistral_medium_3_5_preflight_v1.json",
+      "artifact_sha256": "edaa73173c67f3f2cd56d6a71ca03e9c38f9ea88b7adabbc5f4ccf6e0a8257f6",
+      "remote_call_executed": true,
+      "resolved_model": "mistralai/mistral-medium-3.5-128b",
+      "token_logprobs_supported": true,
+      "system_fingerprint": null
+    },
+    "generation_budget_binding": {
+      "max_tokens": 16384,
+      "selection_basis": "Provider-supported high ceiling fixed externally before holdout acquisition; no additional generation-budget calibration.",
+      "max_tokens_semantics": "ceiling_not_target_length",
+      "official_allowed_minimum": 1,
+      "official_allowed_maximum": 32768,
+      "official_api_reference": "https://docs.api.nvidia.com/nim/reference/mistralai-mistral-medium-3-5-128b-infer",
+      "official_high_reasoning_example": "https://build.nvidia.com/mistralai/mistral-medium-3.5-128b",
+      "superseded_diagnostic_length_rates": {
+        "512": 1.0,
+        "1024": 1.0
+      },
+      "unacquired_intermediate_budgets": [
+        2048,
+        4096
+      ],
+      "budget_plan_canonical_sha256": "6f591fdd5ba8af1ed069de97304cd2c63fb5685c8b6230a675eb200a5ec89002"
+    },
+    "projector_calibration": {
+      "artifact": "config/cocc_mistral_medium_3_5_projector_calibration_v1.json",
+      "artifact_sha256": "6d1dbab0b9fc9653fac7247583dcadd132a30b21bd70aa204933a18a82c74f93",
+      "canonical_artifact_sha256": "92746ad20222366f5bc45f0e86c231fbbcd700348292562e3e8a32eaf558f49f",
+      "freeze": "config/cocc_mistral_medium_3_5_projector_calibration_v1.freeze.json",
+      "freeze_sha256": "4a3bc4c0bebabbe4d368314eb043529803010623972f63f1894cf2f0705c672e",
+      "source_acquisition_manifest_sha256": "4c35132e43af1c96761303683b099ec7087dcc40d8be13092661e25af6015500",
+      "source_request_set_sha256": "b5835d55510633e64e768037c3b81604bfebeef4af646b2cadfc9e7f42e036a2",
+      "session_count": 20,
+      "session_ids_sha256": "98e283dfbb5b2cb44b23ce2dc9a744eb7a15841817e068d2eb96625e9cd9336d",
+      "contains_outcome_labels": false
+    },
+    "observation_interface_version": {
+      "projector_request_schema": "LLM-SVM-CoCC-projector-request/1",
+      "runner_sha256": "ca39c6a5b80b7fee3486b4d4093c817c4bd014003dae05596c5d33a035c67e27",
+      "model_payload_sha256": "fb54ebeb74383e39c99b75a641cb34dd06feaa661092c48b2c8ca66b9d40b853",
+      "numeric_projection_only": true,
+      "model_payload_boundary": "task_prompt_and_generation_parameters_only"
+    },
+    "verification_interface_version": {
+      "verifier_sha256": "32845334b33eb4df5f227508af03fa54b002bcced13926e4ec72728b6c4680e4",
+      "isolated_worker_sha256": "b3566b0cddcb5ec0b6437eefd36886beba0bd7d743670455db00bc07bc7040a5"
+    },
+    "projection_interface_version": {
+      "projector_sha256": "e7ca321aa0343d318c00bc73370aadab4f4d69b4c8b7e08798b2d2e38a4b4a3d"
+    },
+    "analysis_interface_version": {
+      "evaluator_sha256": "a4c320a22085bd897a77e2e5247b733aec764f16c7313833ab2e9732978f5768"
+    },
+    "prama_kernel_version": {
+      "declaration_file_sha256": "10cf1f43f02f08353582a8f52d2cdd919c35fce69f64d35a1df6dc974cb4b523",
+      "package_version": "0.3.0",
+      "source_tree_sha256": "61e1063de0b5b032cd6af09eeb3b6906614f6331954697c605603afa18f641fc",
+      "recertification_sha256": "5403e4584083a5cdc59e168d66cc036870c42b93e1c4e7d99075ab8dd9756e81"
+    },
+    "parameter_set": {
+      "generation": {
+        "max_tokens": 16384,
+        "temperature": 0.7,
+        "top_p": 1.0,
+        "top_logprobs": 5,
+        "seed": 1337,
+        "reasoning_effort": "high"
+      },
+      "acquisition": {
+        "timeout_seconds": 1800,
+        "explicit_max_attempts": 1,
+        "sdk_internal_retries": 0,
+        "resume_missing_only": true
+      },
+      "kernel": {
+        "theta_scale": 0.2,
+        "tau": 16.0,
+        "h": 1.0,
+        "g_smooth": 8,
+        "delta_ref": 1.0,
+        "kappa_v3": 0.001,
+        "lambda_0": 1.0,
+        "lambda_min": 0.1,
+        "lambda_max": 1.0
+      }
+    },
+    "selection_blind_to_holdout_outcomes": true,
+    "stopping_rule": "Acquire and verify exactly the 240 frozen holdout sessions; do not reacquire the 20 calibration sessions already used to freeze the projector. No outcome-dependent early stopping, replacement or enrichment."
+  },
+  "mandatory_coordinate_comparison": [
+    "max_delta",
+    "max_xi",
+    "max_negative_balance"
+  ],
+  "temporal_censoring": {
+    "absolute_window_horizons": [
+      1,
+      2,
+      4,
+      8,
+      16
+    ],
+    "primary_absolute_window_horizon": 8,
+    "window_size_tokens": 16,
+    "primary_nominal_token_horizon": 128,
+    "short_session_policy": "cluster_complete_at_risk",
+    "relative_prefix_fractions": [
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "relative_prefix_role": "exploratory_only"
+  },
+  "mandatory_generation_cap_audit": {
+    "execution_order": "before_interpreting_any_accumulative_score",
+    "tables": [
+      "finish_reason_by_outcome",
+      "finish_reason_by_perturbation_type"
+    ],
+    "continuous_summaries": [
+      "token_count_by_outcome",
+      "n_windows_by_outcome"
+    ],
+    "clean_control_maximum_length_rate": 0.05,
+    "violation_verdict": "inconclusive_generation_cap_violation",
+    "no_replacement_after_holdout_start": true
+  },
+  "activation_tolerance": 1e-12,
+  "exact_permutation_max_assignments": 100000,
+  "analysis_order": [
+    "Verify frozen dataset, projector calibration, interface and design hashes",
+    "Acquire every frozen holdout session without interface or PRAMA metadata in the model payload",
+    "Verify final answers externally",
+    "Run finish_reason by outcome and perturbation audits before score interpretation",
+    "Construct the complete-cluster at-risk set at absolute window horizon 8",
+    "Check frozen session and problem-cluster class quotas within that risk set",
+    "Run the cluster-aware primary permutation test at horizon 8",
+    "Run the paired cluster-bootstrap test of AUROC_PRAMA - AUROC_delta at horizon 8",
+    "Report mandatory delta vs xi vs balance comparison",
+    "Report other absolute horizons as mandatory secondary and relative prefixes as exploratory"
+  ],
+  "holdout_validity_rule": "The untouched test partition must contain all 120 frozen problem_id clusters with both conditions at risk through window 8, at least 20 FAIL sessions, at least 20 PASS sessions, at least 20 problem clusters containing a FAIL, and at least 20 containing a PASS. Otherwise the result is inconclusive_insufficient_class_support.",
+  "confirmatory_rule": "After passing the generation-cap audit, require at horizon 8: cluster-aware max_negative_balance association p < 0.01; observed AUROC_PRAMA - AUROC_delta >= 0.05; paired problem-cluster bootstrap p < 0.01 and one-sided 99% lower bound > 0; and max_negative_balance AUROC strictly greater than every frozen instantaneous/logprob baseline.",
+  "kernel_change_policy": "Do not modify theta, tau, accumulated-excess, capacity, normalization or any PRAMA kernel parameter until the activation audit establishes whether accumulated_excess or capacity were reached under the frozen kernel.",
+  "hosted_model_identity_caveat": "The design is confirmatory for the named NVIDIA hosted deployment and frozen request surface, but cannot claim immutable-weight reproducibility because the provider exposes no digest or non-null system fingerprint."
+}

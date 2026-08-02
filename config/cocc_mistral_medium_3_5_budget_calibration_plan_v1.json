@@ -1,0 +1,68 @@
+{
+  "schema": "LLM-SVM-CoCC-generation-budget-calibration-plan/1",
+  "plan_id": "cocc-mistral-medium-3.5-128b-generation-budget-v1-20260731",
+  "status": "FROZEN_BEFORE_BUDGET_CALIBRATION",
+  "purpose": "Select max_tokens using only frozen calibration clean controls before freezing or acquiring the confirmatory holdout.",
+  "outcome_labels_allowed": false,
+  "holdout_access_allowed": false,
+  "provider_binding": {
+    "provider": "nvidia_nim",
+    "endpoint": "https://integrate.api.nvidia.com/v1",
+    "requested_model": "mistralai/mistral-medium-3.5-128b",
+    "resolved_model": "mistralai/mistral-medium-3.5-128b",
+    "token_logprobs_supported": true,
+    "system_fingerprint": null,
+    "immutable_weight_digest": null,
+    "official_model_page": "https://build.nvidia.com/mistralai/mistral-medium-3.5-128b",
+    "preflight_artifact": "config/cocc_mistral_medium_3_5_preflight_v1.json",
+    "preflight_artifact_sha256": "edaa73173c67f3f2cd56d6a71ca03e9c38f9ea88b7adabbc5f4ccf6e0a8257f6",
+    "preflight_finish_reason_note": "The 32-token identity/logprob probe reached its deliberately tiny cap; this does not select the experiment budget."
+  },
+  "dataset_binding": {
+    "normalized_dataset": "data/cocc_clean_calibration_only_v2.jsonl",
+    "normalized_dataset_sha256": "1f2080ae3ecd8ec0a84f9b6e9d4097b8f5673d203fbe4305ef5868ebf540a44e",
+    "normalized_manifest": "data/cocc_clean_calibration_only_v2.manifest.json",
+    "normalized_manifest_sha256": "b81bd9225143263a4cf46bd244c7743bbb6dbb15d4baf8bf10f72185ab4765a2",
+    "source_full_dataset_sha256": "f22083c38c8399cbbfeb72c98276568f277081bcec38b44b18d971ac617b3433",
+    "partition": "calibration",
+    "required_perturbation_type": "clean_control",
+    "expected_session_count": 20,
+    "calibration_item_ids_sha256": "ff22fb041bd53ead39f19f79d9831cbeccb93004353c47e82c1fb18d3fda0a57",
+    "holdout_rows_present": false,
+    "outcome_labels_present": false
+  },
+  "frozen_candidate_rule": {
+    "candidate_max_tokens": [
+      512,
+      1024,
+      2048,
+      4096
+    ],
+    "maximum_observed_length_rate": 0.05,
+    "selection_rule": "smallest_candidate_meeting_rate_threshold",
+    "stopping_rule": "Stop candidate acquisition at the first passing budget; if all fail, block confirmatory freeze.",
+    "replacement_allowed": false
+  },
+  "generation_parameter_set_except_budget": {
+    "temperature": 0.7,
+    "top_p": 1.0,
+    "top_logprobs": 5,
+    "seed": 1337,
+    "reasoning_effort": "high",
+    "max_attempts": 3,
+    "retry_sleep_seconds": 5.0,
+    "timeout_seconds": 600
+  },
+  "implementation": {
+    "runner": "scripts/run_break_the_chain_prama_eval_nvidia_mistral.py",
+    "runner_sha256": "4164795a49c469da81d2b983b2f0739608bfc23f07077f83793bd8227fe7b34c",
+    "preflight": "scripts/preflight_nvidia_mistral_medium.py",
+    "preflight_sha256": "8b09c9af74dc712528ff83d63e94089cd85218bf2065ac716946b765ef28e2e1",
+    "selector": "scripts/select_cocc_generation_budget.py",
+    "selector_sha256": "b197336be88685b5ab146e759d0fc77e801cb990787605f5535b49425a8d5da6",
+    "partition_extractor": "scripts/extract_cocc_calibration_partition.py",
+    "partition_extractor_sha256": "3928d2b75fe85e947307f9255a823f1b547fae6b6a4fbb123821e491932b2c26"
+  },
+  "preflight_gate": "Do not freeze or acquire candidate calibration runs unless the endpoint resolves the requested model and returns finite token logprobs.",
+  "model_payload_boundary": "The model receives only the coding task prompt and frozen generation parameters; no interface, PRAMA, calibration, outcome or verifier metadata is included."
+}

@@ -1,0 +1,126 @@
+{
+  "schema": "LLM-SVM-CoCC-10pair-three-model-prospective-design/1",
+  "status": "FROZEN_PROSPECTIVE",
+  "design_id": "cocc-10pair-dynamic-observer-three-model-20260801-v1",
+  "independent_unit": "problem_id",
+  "pair_count": 10,
+  "sessions_per_model": 20,
+  "required_conditions": [
+    "clean_control",
+    "negation_objective"
+  ],
+  "problem_ids": [
+    "2730",
+    "2755",
+    "2808",
+    "2827",
+    "2839",
+    "2848",
+    "2921",
+    "3032",
+    "3184",
+    "3235"
+  ],
+  "dataset": "data/cocc_10pair_prospective_v1.jsonl",
+  "dataset_sha256": "7229247be621e0faf69a74259a523d3781e1141254904fc6c3779dd0037aa753",
+  "dataset_manifest": "data/cocc_10pair_prospective_v1.manifest.json",
+  "dataset_manifest_sha256": "35a98d1f18ff1b636f3339f63e2e2cc7f188d4319dfd37faa1dd8ee7a4cbf539",
+  "selection_used_external_outcomes": false,
+  "model_order": [
+    "nvidia/nemotron-3-super-120b-a12b",
+    "mistralai/mistral-medium-3.5-128b",
+    "nvidia/nemotron-3-ultra-550b-a55b"
+  ],
+  "model_profiles": {
+    "nvidia/nemotron-3-super-120b-a12b": {
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "max_tokens": 16384,
+      "top_logprobs": 5,
+      "seed": 1337,
+      "enable_thinking": false
+    },
+    "mistralai/mistral-medium-3.5-128b": {
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "max_tokens": 16384,
+      "top_logprobs": 5,
+      "seed": 1337,
+      "reasoning_effort": "none"
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b": {
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "max_tokens": 16384,
+      "top_logprobs": 5,
+      "seed": 1337,
+      "enable_thinking": false
+    }
+  },
+  "observer_contract": "config/cocc_dynamic_observer_contract_v1.json",
+  "observer_contract_sha256": "84e8de868ba0b31bada94f928613eeb33fc5384d12ba7685364a65a7de93cfd7",
+  "observer_model_specific_parameters": false,
+  "observer_external_calibration": false,
+  "kernel": {
+    "declaration": "config/window_prama_kernel_declaration.json",
+    "declaration_sha256": "10cf1f43f02f08353582a8f52d2cdd919c35fce69f64d35a1df6dc974cb4b523",
+    "recertification": "run_outputs/window_prama_recertification_v030_20260730.json",
+    "recertification_sha256": "5403e4584083a5cdc59e168d66cc036870c42b93e1c4e7d99075ab8dd9756e81"
+  },
+  "interface_hashes": {
+    "nemotron_runner_sha256": "942e3f1b8e1e7c0165fd24f66125727f42fc3a374c9d506d4f476d1fabf8a838",
+    "mistral_runner_sha256": "4a8666ba429c8047cc271bf7f78a1ae7bf9fdb61c06f63a6a73a732459112800",
+    "model_payload_sha256": "fb54ebeb74383e39c99b75a641cb34dd06feaa661092c48b2c8ca66b9d40b853",
+    "projector_sha256": "0287137145ee0a60e47cb00819e2f013bb92506f791533da537793a611f1bcef",
+    "verifier_sha256": "32845334b33eb4df5f227508af03fa54b002bcced13926e4ec72728b6c4680e4",
+    "evaluator_sha256": "95dae49c4556b5c9cd1dfa85f6341b7f3918b684939eba19756647b21d639af7"
+  },
+  "primary_score": "max_negative_balance",
+  "baseline_score": "max_delta",
+  "mandatory_coordinate_comparison": [
+    "max_delta",
+    "max_xi",
+    "max_negative_balance"
+  ],
+  "absolute_window_horizons": [
+    1,
+    2,
+    4,
+    8,
+    16
+  ],
+  "inference": {
+    "method": "exact_one_sided_sign_test_on_outcome_discordant_problem_pairs",
+    "minimum_outcome_discordant_pairs": 7,
+    "ties": "excluded_from_effective_n_and_reported",
+    "primary_alpha": 0.01,
+    "incremental_alpha": 0.01,
+    "minimum_auroc_gain": 0.05,
+    "monte_carlo": false,
+    "fallback": "fail_closed_without_session_level_substitution"
+  },
+  "decision_rule": {
+    "insufficient": "fewer than 7 outcome-discordant pairs or fewer than 7 non-tied primary contrasts",
+    "association_confirmed": "primary exact one-sided paired sign p < 0.01",
+    "incremental_confirmed": "association confirmed; incremental exact paired sign p < 0.01; and session AUROC(PRAMA)-AUROC(delta) >= 0.05",
+    "otherwise": "prospective_not_confirmed"
+  },
+  "mandatory_audits": [
+    "finish_reason_by_outcome",
+    "token_count_and_resource_occupancy_separate_from_structural_state",
+    "threshold_crossing_and_accumulated_excess_activation",
+    "absolute_horizon_delta_vs_xi_vs_balance"
+  ],
+  "run_policy": {
+    "model_order_is_fixed": true,
+    "no_replacement_sessions": true,
+    "resume_reuses_only_identity-matching_raw_artifacts": true,
+    "maximum_attempts_per_session": 3,
+    "request_timeout_seconds": 1800,
+    "verifier_timeout_seconds": 20,
+    "response_latency_definition": "seconds from request dispatch until complete provider response is received",
+    "model_payload_boundary": "task_prompt_and_generation_parameters_only",
+    "observer_boundary": "numeric_token_observations_only"
+  },
+  "claim_boundary": "Three separate prospective paired tests on ten prespecified problems; no pooled population-wide claim and no modification of the universal PRAMA kernel."
+}

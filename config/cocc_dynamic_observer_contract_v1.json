@@ -1,0 +1,61 @@
+{
+  "schema": "LLM-SVM-CoCC-dynamic-observer-contract/1",
+  "status": "FROZEN_PROSPECTIVE",
+  "observer_id": "causal_robust_surprisal_v1",
+  "model_specific_parameters": false,
+  "requires_external_calibration": false,
+  "contains_outcome_labels": false,
+  "contains_prompt_or_answer": false,
+  "input": {
+    "channel": "numeric_token_top1_logprob_only",
+    "window_size_tokens": 16,
+    "window_statistic": "mean_surprisal",
+    "variance_stabilizer": "log1p"
+  },
+  "causal_state": {
+    "warmup_windows": 8,
+    "initial_location": "median",
+    "initial_scale": "max(1.4826*MAD, 0.1*abs(median), 0.001)",
+    "location_update_alpha": 0.015625,
+    "scale_update_alpha": 0.015625,
+    "scale_target": "abs(x-location_before_update)",
+    "scale_floor": 0.001,
+    "update_order": "emit_then_update"
+  },
+  "observation_map": {
+    "standardized_deviation": "abs(x-location)/scale",
+    "delta": "standardized_deviation/(standardized_deviation+8.0)",
+    "compression_constant": 8.0,
+    "warmup_delta": 0.0,
+    "range": "[0,1)"
+  },
+  "kernel_adapter": {
+    "omega": "delta",
+    "expected_omega": 0.0,
+    "invariant": "kernel_delta_equals_observer_delta_when_delta_ref_is_1"
+  },
+  "state_boundary": {
+    "structural_coordinates": [
+      "delta",
+      "xi",
+      "balance",
+      "trend",
+      "accumulated_excess",
+      "capacity"
+    ],
+    "operational_coordinates": [
+      "resource_occupancy",
+      "terminal_exhaustion"
+    ],
+    "operational_coordinates_modify_structural_state": false,
+    "resource_occupancy": "generated_tokens/request_max_tokens",
+    "terminal_exhaustion": "finish_reason == length"
+  },
+  "claim_boundary": [
+    "The observer adapts causally inside each trajectory; it is not refit per model, provider, task, or implementation.",
+    "Warmup windows are explicitly not scored as evidence of perturbation.",
+    "Operational resource occupancy is reported separately and never changes accumulated_excess or capacity.",
+    "Historical frozen projections and verdicts remain unchanged.",
+    "This contract is frozen for prospective runs; changing any field creates a new observer version."
+  ]
+}
