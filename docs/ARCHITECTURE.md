@@ -96,3 +96,8 @@ recognized only when both conditions hold:
 An unrelated `AttributeError` raised inside candidate code remains a candidate runtime
 exception. The verifier records both sanitized exception class and message, and the
 parent process rejects inconsistent worker classifications.
+
+This is not a strong operating-system sandbox. The current `python -I` child process,
+AST deny-list and external timeout are suitable only for controlled research inputs.
+The production isolation requirements and threat boundary are documented in
+[`VERIFIER_SECURITY.md`](VERIFIER_SECURITY.md).

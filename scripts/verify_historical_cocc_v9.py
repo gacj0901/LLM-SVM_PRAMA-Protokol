@@ -81,6 +81,67 @@ def discrimination(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     }
 
 
+_REQUIRED_DIAGNOSTIC_BUCKETS = (
+    "PASS",
+    "missing_callable",
+    "candidate_AttributeError",
+    "SyntaxError",
+    "NameError",
+    "wrong_answer",
+    "timeout",
+    "worker_error",
+)
+
+
+def verifier_diagnostic_bucket(row: Mapping[str, Any]) -> str:
+    """Return a stable audit bucket without erasing more-specific failures."""
+    if row.get("outcome") == "PASS":
+        return "PASS"
+    failure_kind = str(row.get("failure_kind") or "")
+    exception_type = str(row.get("exception_type") or "")
+    if failure_kind == "missing_callable":
+        return "missing_callable"
+    if exception_type == "AttributeError":
+        return "candidate_AttributeError"
+    if failure_kind:
+        return failure_kind
+    if exception_type:
+        return exception_type
+    return "unclassified_failure"
+
+
+def verifier_diagnostic_audit(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    observed = sorted({verifier_diagnostic_bucket(row) for row in rows})
+    buckets = list(dict.fromkeys((*_REQUIRED_DIAGNOSTIC_BUCKETS, *observed)))
+
+    def counts(members: Sequence[Mapping[str, Any]]) -> dict[str, int]:
+        return {
+            bucket: sum(verifier_diagnostic_bucket(row) == bucket for row in members)
+            for bucket in buckets
+        }
+
+    return {
+        "classification_rule": {
+            "missing_callable": (
+                "exception_type == 'AttributeError' and exception_message exactly matches "
+                "\"callable '<identifier>' not found\""
+            ),
+            "candidate_AttributeError": (
+                "exception_type == 'AttributeError' and failure_kind != 'missing_callable'"
+            ),
+            "extraction_failures_are_not_missing_callable": True,
+        },
+        "total": counts(rows),
+        "by_model": [
+            {
+                "model": model,
+                "counts": counts([row for row in rows if row["model"] == model]),
+            }
+            for model in sorted({str(row["model"]) for row in rows})
+        ],
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--backfill-report", type=Path, required=True)
@@ -153,6 +214,7 @@ def main() -> int:
             "failure_kind": result.get("failure_kind"),
             "exception_type": result.get("exception_type"),
             "exception_message": result.get("exception_message"),
+            "source_extraction": result.get("source_extraction"),
             "tests_passed": result.get("tests_passed"), "tests_total": result.get("tests_total"),
             "projection_sha256": row["projection_sha256"],
             "verification_sha256": file_sha256(cache_path),
@@ -218,6 +280,7 @@ def main() -> int:
         "contains_prompt_or_answer": False,
         "matched_problem_count": len({row["problem_id"] for row in joined}),
         "verified_response_count": len(joined),
+        "verifier_diagnostic_audit": verifier_diagnostic_audit(joined),
         "model_results": model_results, "fixed_horizons": horizons,
         "items": [{key: value for key, value in row.items() if key != "projection_path"} for row in joined],
     }

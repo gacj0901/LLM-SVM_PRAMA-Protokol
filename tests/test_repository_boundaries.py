@@ -4,6 +4,10 @@ from hashlib import sha256
 import json
 from pathlib import Path
 
+import pytest
+
+from aptadynamic_llm.window_prama import validate_window_kernel_declaration
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -45,3 +49,20 @@ def test_retained_data_and_results_manifests_respect_directory_boundary():
     )
     assert all(len(item["sha256"]) == 64 for item in retained["files"])
     assert all(len(item["sha256"]) == 64 for item in results["artifacts"])
+
+
+def test_mismatched_installed_kernel_is_rejected_before_projection():
+    lock = json.loads((ROOT / "config/kernel.lock.json").read_text(encoding="utf-8"))
+    declaration = json.loads(
+        (ROOT / lock["declaration"]["path"]).read_text(encoding="utf-8")
+    )
+    with pytest.raises(
+        ValueError, match="installed PRAMA source tree differs from frozen declaration"
+    ):
+        validate_window_kernel_declaration(
+            declaration,
+            actual_version=lock["version"],
+            actual_source_tree_sha256="0" * 64,
+            actual_commit=lock["git_commit"],
+            recertification_sha256=lock["recertification"]["sha256"],
+        )
