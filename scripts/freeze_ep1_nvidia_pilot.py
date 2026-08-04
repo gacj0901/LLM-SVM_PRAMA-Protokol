@@ -100,6 +100,9 @@ def derive_freeze(
         "prompt_suite_sha256": design["prompt_suite_sha256"],
         "pilot_manifest": str(manifest_path.resolve()),
         "pilot_manifest_sha256": file_sha256(manifest_path),
+        "pilot_collection_content_sha256": manifest.get(
+            "collection_content_sha256"
+        ),
         "pilot_n": len(sessions),
         "pilot_stop_n": len(stop_lengths),
         "pilot_length_n": len(sessions) - len(stop_lengths),
@@ -133,15 +136,26 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--model", required=True)
     parser.add_argument("--pilot-dir", required=True, type=Path)
     parser.add_argument("--out", required=True, type=Path)
+    parser.add_argument("--replace", action="store_true")
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     try:
-        if args.out.exists():
+        previous_sha256: str | None = None
+        if args.out.exists() and not args.replace:
             raise FileExistsError(f"freeze already exists: {args.out}")
+        if args.out.exists():
+            previous = json.loads(args.out.read_text(encoding="utf-8"))
+            previous_sha256 = file_sha256(args.out)
+            if previous.get("model") != args.model:
+                raise ValueError("refusing to replace a freeze for another model")
         freeze = derive_freeze(args.design, args.model, args.pilot_dir)
+        if not freeze.get("pilot_collection_content_sha256"):
+            raise ValueError("pilot manifest lacks collection_content_sha256")
+        if previous_sha256 is not None:
+            freeze["supersedes_sha256"] = previous_sha256
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(
             json.dumps(freeze, indent=2, ensure_ascii=False), encoding="utf-8"

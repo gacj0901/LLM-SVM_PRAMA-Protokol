@@ -309,6 +309,18 @@ def _write_state(
     freeze_sha256: str | None,
     expected_n: int,
 ) -> dict[str, Any]:
+    existing_created_at: str | None = None
+    existing_manifest_path = out / "manifest.json"
+    if existing_manifest_path.exists():
+        try:
+            existing_manifest = json.loads(
+                existing_manifest_path.read_text(encoding="utf-8")
+            )
+            existing_created_at = str(
+                existing_manifest.get("created_at_utc") or ""
+            ) or None
+        except (OSError, json.JSONDecodeError):
+            existing_created_at = None
     raws: list[dict[str, Any]] = []
     for path in sorted(out.glob(f"{mode}_*.json")):
         value = json.loads(path.read_text(encoding="utf-8"))
@@ -326,6 +338,7 @@ def _write_state(
             {
                 "session_id": raw["session_id"],
                 "prompt_id": raw["prompt_id"],
+                "source_session_sha256": sha256_value(raw),
                 "finish_reason": turn["finish_reason"],
                 "token_count": turn["token_count"],
                 "response_time_seconds": raw["response_time_seconds"],
@@ -354,9 +367,20 @@ def _write_state(
             }
         )
     write_jsonl_atomic(out / "generation_observation.jsonl", artifacts)
+    collection_content = {
+        "design_sha256": design_sha256,
+        "freeze_sha256": freeze_sha256,
+        "mode": mode,
+        "model": profile["model"],
+        "prompt_suite_sha256": design["prompt_suite_sha256"],
+        "max_tokens": max_tokens,
+        "expected_n": expected_n,
+        "sessions": sessions,
+    }
     manifest = {
         "schema": "LLM-SVM-E-P1-NVIDIA-collection/1",
-        "created_at_utc": datetime.now(timezone.utc).isoformat(),
+        "created_at_utc": existing_created_at
+        or datetime.now(timezone.utc).isoformat(),
         "study_id": design["study_id"],
         "mode": mode,
         "provider": design["provider"],
@@ -375,6 +399,7 @@ def _write_state(
         "n": expected_n,
         "completed_n": len(sessions),
         "complete": len(sessions) == expected_n,
+        "collection_content_sha256": sha256_value(collection_content),
         "temperature": profile["temperature"],
         "top_p": profile["top_p"],
         "top_logprobs": profile["top_logprobs"],

@@ -1,5 +1,8 @@
 param(
-    [switch]$SkipApiPrompt
+    [switch]$SkipApiPrompt,
+    [int]$TimeoutSeconds = 900,
+    [int]$MaxAttempts = 6,
+    [double]$RetrySleepSeconds = 30
 )
 
 $ErrorActionPreference = "Stop"
@@ -29,12 +32,12 @@ $runs = @(
         Slug = "nemotron3_super"
     },
     @{
-        Model = "mistralai/mistral-medium-3.5-128b"
-        Slug = "mistral_medium_3_5"
-    },
-    @{
         Model = "nvidia/nemotron-3-ultra-550b-a55b"
         Slug = "nemotron3_ultra"
+    },
+    @{
+        Model = "mistralai/mistral-medium-3.5-128b"
+        Slug = "mistral_medium_3_5"
     }
 )
 
@@ -50,9 +53,9 @@ foreach ($run in $runs) {
         "--mode", "pilot",
         "--model", $run.Model,
         "--out", $pilotDir,
-        "--timeout", "1800",
-        "--max-attempts", "3",
-        "--retry-sleep-seconds", "5"
+        "--timeout", $TimeoutSeconds.ToString(),
+        "--max-attempts", $MaxAttempts.ToString(),
+        "--retry-sleep-seconds", $RetrySleepSeconds.ToString([Globalization.CultureInfo]::InvariantCulture)
     )
     if (Test-Path -LiteralPath $pilotDir) {
         $arguments += "--resume"
@@ -64,12 +67,27 @@ foreach ($run in $runs) {
     }
 
     $modelFreeze = Join-Path $freezeDir ($run.Slug + ".json")
-    if (-not (Test-Path -LiteralPath $modelFreeze)) {
-        & py -3.12 scripts\freeze_ep1_nvidia_pilot.py `
-            --design $design `
-            --model $run.Model `
-            --pilot-dir $pilotDir `
-            --out $modelFreeze
+    $replaceFreeze = $false
+    if (Test-Path -LiteralPath $modelFreeze) {
+        $manifest = Get-Content -Raw -Encoding utf8 (Join-Path $pilotDir "manifest.json") | ConvertFrom-Json
+        $existingFreeze = Get-Content -Raw -Encoding utf8 $modelFreeze | ConvertFrom-Json
+        $replaceFreeze = (
+            -not $existingFreeze.pilot_collection_content_sha256 -or
+            $existingFreeze.pilot_collection_content_sha256 -ne $manifest.collection_content_sha256
+        )
+    }
+    if (-not (Test-Path -LiteralPath $modelFreeze) -or $replaceFreeze) {
+        $freezeArguments = @(
+            "-3.12", "scripts\freeze_ep1_nvidia_pilot.py",
+            "--design", $design,
+            "--model", $run.Model,
+            "--pilot-dir", $pilotDir,
+            "--out", $modelFreeze
+        )
+        if ($replaceFreeze) {
+            $freezeArguments += "--replace"
+        }
+        & py @freezeArguments
         if ($LASTEXITCODE -ne 0) {
             throw "No se pudo congelar el techo confirmatorio de $($run.Model)."
         }
