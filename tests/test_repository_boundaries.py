@@ -7,6 +7,10 @@ from pathlib import Path
 import pytest
 
 from aptadynamic_llm.window_prama import validate_window_kernel_declaration
+from aptadynamic_llm.repository_artifact import (
+    matches_frozen_sha256,
+    repository_artifact_sha256_candidates,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -49,6 +53,66 @@ def test_retained_data_and_results_manifests_respect_directory_boundary():
     )
     assert all(len(item["sha256"]) == 64 for item in retained["files"])
     assert all(len(item["sha256"]) == 64 for item in results["artifacts"])
+    assert all(
+        matches_frozen_sha256(ROOT / item["path"], item["sha256"])
+        for item in retained["files"]
+    )
+    assert all(
+        matches_frozen_sha256(ROOT / item["path"], item["sha256"])
+        for item in results["artifacts"]
+    )
+
+
+def test_corrected_historical_join_has_complete_provenance_chain():
+    root = ROOT / "run_outputs/historical_v9_backfill_cocc_462"
+    amendment_v1_path = root / "provenance_amendment.json"
+    amendment_v2 = json.loads(
+        (root / "provenance_amendment_v2.json").read_text(encoding="utf-8")
+    )
+    corrected_report_path = root / "verified_overlap_120_verifier_v2/report.json"
+    transition_path = root / "verifier_transition_v1_to_v2.json"
+    review_path = root / "verifier_manual_review_v1.json"
+    corrected_report = json.loads(corrected_report_path.read_text(encoding="utf-8"))
+
+    assert matches_frozen_sha256(
+        amendment_v1_path, amendment_v2["supersedes_amendment_sha256"]
+    )
+    assert matches_frozen_sha256(
+        corrected_report_path,
+        amendment_v2["bound_artifacts"]["corrected_verifier_v2_report_sha256"],
+    )
+    assert matches_frozen_sha256(
+        transition_path,
+        amendment_v2["bound_artifacts"]["verifier_transition_audit_sha256"],
+    )
+    assert matches_frozen_sha256(
+        review_path,
+        amendment_v2["bound_artifacts"]["verifier_manual_review_sha256"],
+    )
+    assert corrected_report["provenance_context_source_sha256"] == digest(
+        amendment_v1_path
+    )
+    assert corrected_report["historical_generation_context"] is not None
+    assert corrected_report["reprojection_context"] is not None
+    assert corrected_report["interpretation_boundary"]
+
+
+def test_repository_artifact_hash_accepts_only_line_endings_or_lfs_oid(tmp_path):
+    crlf = tmp_path / "artifact.json"
+    crlf.write_bytes(b'{\r\n  "value": 1\r\n}\r\n')
+    lf_digest = sha256(b'{\n  "value": 1\n}\n').hexdigest()
+    assert matches_frozen_sha256(crlf, lf_digest)
+
+    oid = "a" * 64
+    pointer = tmp_path / "artifact.jsonl"
+    pointer.write_text(
+        "version https://git-lfs.github.com/spec/v1\n"
+        f"oid sha256:{oid}\nsize 123\n",
+        encoding="ascii",
+    )
+    assert repository_artifact_sha256_candidates(pointer)["git_lfs_object_oid"] == oid
+    assert matches_frozen_sha256(pointer, oid)
+    assert not matches_frozen_sha256(pointer, "b" * 64)
 
 
 def test_mismatched_installed_kernel_is_rejected_before_projection():

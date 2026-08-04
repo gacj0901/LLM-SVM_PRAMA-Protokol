@@ -148,11 +148,17 @@ def main() -> int:
     parser.add_argument("--dataset", type=Path, required=True)
     parser.add_argument("--source-run", type=Path, action="append", required=True)
     parser.add_argument("--v9-contract", type=Path, default=Path("config/sequor_structural_coherence_observer_v9.json"))
+    parser.add_argument(
+        "--provenance-amendment",
+        type=Path,
+        help="Optional bound context used when the historical backfill predates explicit provenance fields.",
+    )
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--timeout", type=int, default=20)
     args = parser.parse_args()
 
     report = load_json(args.backfill_report)
+    provenance = load_json(args.provenance_amendment) if args.provenance_amendment else {}
     dataset = load_dataset(args.dataset)
     dataset_sha = file_sha256(args.dataset)
     verifier_path = Path(__file__).with_name("cocc_external_verifier.py")
@@ -270,9 +276,19 @@ def main() -> int:
         "schema": "LLM-SVM-historical-CoCC-v9-outcome-join/1",
         "generated_at": utc_now(), "status": "EXPLORATORY_RETROSPECTIVE",
         "backfill_report_sha256": file_sha256(args.backfill_report),
-        "historical_generation_context": report.get("historical_generation_context"),
-        "reprojection_context": report.get("reprojection_context"),
-        "interpretation_boundary": report.get("interpretation_boundary"),
+        "provenance_context_source_sha256": (
+            file_sha256(args.provenance_amendment) if args.provenance_amendment else None
+        ),
+        "historical_generation_context": (
+            report.get("historical_generation_context")
+            or provenance.get("historical_generation_context")
+        ),
+        "reprojection_context": (
+            report.get("reprojection_context") or provenance.get("reprojection_context")
+        ),
+        "interpretation_boundary": (
+            report.get("interpretation_boundary") or provenance.get("interpretation_boundary")
+        ),
         "dataset_sha256": dataset_sha,
         "v9_contract_sha256": file_sha256(args.v9_contract),
         "projection_was_blind_to_outcome": True,

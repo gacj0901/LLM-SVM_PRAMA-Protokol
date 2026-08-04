@@ -9,3 +9,8 @@ regenerated, superseded or incomplete. Local runs belong under `_local/` or `_sc
 
 The manifest records reproducibility, not confirmation. In particular, D_O v9 reports
 remain exploratory even when their bytes and provenance are reproducible.
+
+The corrected historical CoCC verifier join is accompanied by a paired v1-to-v2
+transition audit, a stratified manual review, and `provenance_amendment_v2.json`.
+The superseded join and first amendment remain retained so the correction history is
+auditable rather than overwritten.

@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from scripts._cocc_verify_worker import evaluate, exception_result
+from scripts.audit_historical_verifier_transition import build_audit
 from scripts.calibrate_cocc_projector import build
 from scripts.cocc_external_verifier import (
     audit_worker_exception,
@@ -213,6 +214,34 @@ def test_historical_audit_keeps_candidate_attribute_error_separate():
     assert audit["total"]["callable_absent"] == 1
     assert audit["total"]["missing_callable"] == 0
     assert audit["total"]["worker_error"] == 0
+
+
+def test_paired_transition_audit_explains_pass_to_ambiguous_extraction():
+    base = {"model": "model-a", "problem_id": "p1", "session_id": "s1"}
+    old_report = {"items": [{**base, "outcome": "PASS", "failure_kind": None}]}
+    new_report = {
+        "items": [
+            {
+                **base,
+                "outcome": "FAIL",
+                "failure_kind": "ambiguous_extraction",
+                "source_extraction": {
+                    "status": "ambiguous_extraction",
+                    "candidate_block_count": 4,
+                    "matching_block_count": 3,
+                    "required_callable": "solve",
+                },
+            }
+        ]
+    }
+    audit = build_audit(old_report, new_report)
+    assert audit["paired_response_count"] == 1
+    assert audit["outcome_changed_count"] == 1
+    row = audit["outcome_changes"][0]
+    assert row["old_outcome"] == "PASS"
+    assert row["new_outcome"] == "FAIL"
+    assert row["source_extraction_status"] == "ambiguous_extraction"
+    assert "3 blocks" in row["reason_for_change"]
 
 
 def test_frozen_surprisal_normalization_is_bounded():

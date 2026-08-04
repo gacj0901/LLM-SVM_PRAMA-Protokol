@@ -2,6 +2,8 @@ from hashlib import sha256
 import json
 from pathlib import Path
 
+from aptadynamic_llm.repository_artifact import matches_frozen_sha256
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -54,7 +56,7 @@ def test_mistral_budget_plan_is_frozen_and_calibration_only():
         ("normalized_manifest", "normalized_manifest_sha256"),
     ):
         path = ROOT / dataset[name]
-        assert sha256(path.read_bytes()).hexdigest() == dataset[digest_field]
+        assert matches_frozen_sha256(path, dataset[digest_field])
     provider = plan["provider_binding"]
     preflight = ROOT / provider["preflight_artifact"]
     assert sha256(preflight.read_bytes()).hexdigest() == provider[

@@ -261,7 +261,7 @@ def evaluate_split(
 
 def write_report(path: Path, metrics: dict[str, Any]) -> None:
     lines = [
-        "# E-P1 Final-State Discrimination Evaluation",
+        "# Final-State Discrimination Evaluation",
         "",
         "The preregistered latent-occupancy channel is evaluated as final-state discrimination, not as token-localized early warning.",
         "",

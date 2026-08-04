@@ -1,15 +1,14 @@
 # Parallel factorial-ablation route
 
-Status: implemented pre-kernel vertical slice. Experimental; not part of E-P1.
+Status: implemented pre-kernel vertical slice; experimental.
 
 This route realizes the arithmetic, validity, rendering contract, calibration,
 and artifact boundary of `OD_ABLATION_FACTORIAL_SPEC_v0.2.md` without replacing
 `aptadynamic_llm.omega`.
 
-It deliberately stops before `prama_protokol.project`. The factorial interface
-emits one observation per token window, whereas E-P1 declares one kernel bin per
-token. A window-scale kernel configuration and numeric recertification must be
-frozen before this route may mutate kernel state.
+It deliberately stops before `prama_protokol.project`. The factorial interface emits
+one observation per token window. A window-scale kernel configuration and numeric
+recertification must be frozen before this route may mutate kernel state.
 
 ## Implemented components
 

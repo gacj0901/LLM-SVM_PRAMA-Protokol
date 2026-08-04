@@ -13,11 +13,11 @@ flowchart LR
     M[LLM provider or local model] -->|answer + token logprobs| O[Observation Interface]
     O -->|numeric causal windows only| K[PRAMA kernel project_v3]
     K --> G[Delta / Xi / excess / capacity / balance / trend]
-    G --> E[E-P1 scoring path]
+    G --> C[Protocol-specific analysis]
     G --> V6[D_O structural observer v6]
     V6 --> V9[D_O v9 layered state classification]
     X[External verifier] -->|outcome joined after projection| A[Analysis reports]
-    E --> A
+    C --> A
     V9 --> A
     A -. no feedback .-> M
 ```
@@ -28,25 +28,12 @@ fed to the model. Response latency is metadata and is not a structural observabl
 
 ## Program boundary
 
-### E-P1
-
-E-P1 is the preregistered state-discrimination study defined by
-`PREREGISTRATION_P1.md`. Its sole authoritative verdict route is
-`scripts/analyze_ep1.py`. Exploratory observer coordinates cannot be substituted into
-that endpoint after observing outcomes.
-
-The implemented E-P1 acquisition route uses Hermes 3 8B through Ollama. No NVIDIA
-model run in this repository is an E-P1 execution: the Nemotron and Mistral artifacts
-belong to CoCC or to the separate structural-observer batteries. Sharing provider
-adapters, token observables or kernel projection machinery does not transfer an
-experiment from one program to the other.
-
 ### D_O v9
 
 D_O v9 is an exploratory Observation Interface layer. It classifies transport status
 and mobility using causal numeric windows after the PRAMA projection. It is useful for
 hypothesis generation, fixed-horizon descriptive analysis and prospective protocol
-design, but it is not part of E-P1 and carries no confirmatory claim by inheritance.
+design. Confirmatory claims require their own frozen protocol and evidence binding.
 
 Historical v9 replay has an additional boundary: historical answers may come from the
 kernel-v1 era while Delta and Xi are recomputed with the current recertified kernel.

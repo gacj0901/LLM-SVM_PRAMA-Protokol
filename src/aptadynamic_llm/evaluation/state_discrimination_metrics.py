@@ -13,7 +13,7 @@ import random
 from dataclasses import dataclass
 from typing import Any, Iterable, Sequence
 
-from aptadynamic_llm.ep1_config import MARKOVIAN_BASELINE_TAU
+MARKOVIAN_BASELINE_TAU = 64.0
 
 PRIMARY_PRAMA_SCORE = "latent_occupancy"
 REQUIRED_LABEL_FIELDS = {"session_id", "label", "event_token", "event_turn", "event_type"}

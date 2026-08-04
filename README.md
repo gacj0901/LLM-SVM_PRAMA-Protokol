@@ -2,18 +2,17 @@
 LLM Structural Viability Monitor
 
 
-**LLM domain implementation of the PRAMA Protokol (exploratory draft): structural
-viability of generation sessions from token-level observables and preregistered
-final-state discrimination of operational degradation in generative trajectories**
+**LLM-domain implementation of the PRAMA Protokol: structural observability and
+viability analysis of generation trajectories from token-level numeric observables**
 
 G.A.C.J. — ORCID: [0009-0009-5649-1359](https://orcid.org/0009-0009-5649-1359)
 Part of the **AptadynamiK** program.
 Normative specification: [AS-1](https://github.com/gacj0901/aptadynamic-cybernetics) ·
 Engine: [`prama-protokol`](https://github.com/gacj0901/prama-protokol)
 
-> **Status:** E-P1 is the preregistered confirmatory route. The structural
-> Observation Interface through D_O v9 is a separate exploratory program and does
-> not amend, extend, or retrospectively validate E-P1. See
+> **Status:** CoCC/NVIDIA protocols and the D_O v9 structural observer are separate
+> experimental programs over the same locked kernel boundary. Each claim is limited
+> to its frozen design and bound evidence. See
 > [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Reproducibility boundary
@@ -52,16 +51,15 @@ response has completed.
 
 ## The question
 
-Does a generation session sustain itself, or merely appear to? Event = token; the
-observable is surprisal. The observation interface builds a strictly causal expectation
-per position bucket over previous sessions of the same model; the **unmodified certified
-kernel** projects the stream onto Γ and flags **latent collapse** — the session still
-generates while its structural margin is being consumed.
+Does a generation trajectory sustain coherent structural motion under perturbation, or
+merely continue emitting tokens? Event = token; the observable channel is numeric
+logprob geometry. The observation interface builds strictly causal windows, the
+**unmodified certified kernel** projects perturbation and accumulated state, and
+structural observers study transport, recurrence, contraction and mobility without
+feeding those labels back to the model.
 
-First target outcome: `finish_reason = "length"` vs `"stop"` — aptadynamically, the
-failure of the **resolution** phase: the session that cannot conclude. Because this
-outcome is known only at the final token, E-P1 is post-hoc state discrimination now;
-event-localized early warning is declared future work, not a confirmatory claim.
+Provider termination metadata such as `finish_reason` is retained only as acquisition
+metadata. It is not a structural-viability coordinate.
 
 ## Architecture (AS-1 P7 — enforced by dependency and identity checks)
 
@@ -70,8 +68,8 @@ sessions (raw json)                       aptadynamic_llm.ingest
   → token stream (surprisal, pos, ...)    aptadynamic_llm.omega   ← the ONLY
   → (ω, ω̂) strictly causal                                          domain part
   → Γ = (Δ, Ξ, λ, Θ, M, G), latent        prama_protokol.project  ← certified kernel,
-  → certified window summaries            scripts/score_sessions_prama
-  → D6 gates + sole verdict                 scripts/analyze_ep1.py
+  → structural observer coordinates        D_O v9 / protocol-specific analysis
+  → external outcome joined after projection
 ```
 
 There is deliberately **no independent PRAMA kernel implementation in this
@@ -84,19 +82,14 @@ The complete component and evidence boundaries are documented in
 
 | Program | Status | Authoritative claim path |
 |---|---|---|
-| E-P1 | preregistered confirmatory study | `scripts/analyze_ep1.py` under `PREREGISTRATION_P1.md` |
 | CoCC/NVIDIA experiments | protocol-specific; confirmatory only where a frozen design says so | frozen CoCC design, runner and external verifier |
 | D_O v9 structural replay | exploratory, descriptive and offline | v6 numeric observer followed by the v9 layered state classifier |
 
-E-P1 has not been run on any NVIDIA model. Its implemented collection route is
-Hermes 3 8B through Ollama. Nemotron Super, Mistral Medium 3.5 and Nemotron Ultra
-were evaluated under CoCC and the later structural batteries; those runs must not be
-described, pooled or interpreted as E-P1 executions.
-
 D_O v9 studies transport coherence, recurrence, contraction and mobility states. It
-must not be reported as an E-P1 endpoint. Historical v9 backfills reuse numeric token
-observations; where Delta and Xi are recomputed with the current kernel they are
-counterfactual reprojections, not re-analyses of stored kernel-v1 state.
+is exploratory unless a prospective protocol explicitly freezes an endpoint. Historical
+v9 backfills reuse numeric token observations; where Delta and Xi are recomputed with
+the current kernel they are counterfactual reprojections, not re-analyses of stored
+kernel-v1 state.
 
 The corrected historical CoCC outcome join is bound to its provenance by
 `run_outputs/historical_v9_backfill_cocc_462/provenance_amendment_v2.json`. Its paired
@@ -125,9 +118,7 @@ test is deliberately a wiring invariant, not a performance or confirmatory thres
 (tau_memory = 336) is mechanically inapplicable at K = 256 token windows — memory longer
 than the trajectory means the accumulator never reaches regime. A declared sweep shows a
 robust plateau at tau ∈ [16, 64] (AUC 0.90–0.98 across g_smooth ∈ {8, 16, 24}); the study
-configuration (64/16) sits on that plateau and is declared in
-[`PREREGISTRATION_P1.md`](PREREGISTRATION_P1.md) (D3), with the validated configuration
-retained as documented sensitivity.
+configuration (64/16) sits on that plateau and is retained as documented sensitivity.
 
 The division of labor mirrors the electrical-grid finding: when degeneration is
 structural rather than volumetric, the accumulator sees what activity monitoring cannot.
@@ -145,32 +136,6 @@ python scripts/latent_llm_test.py data_s
 ```
 
 This is a wiring test, not confirmatory evidence.
-
-## E-P1 pipeline (Hermes 3 8B through Ollama)
-
-```bash
-# Uncensored redesign pilot: 40 distinct, bounded structured-analysis prompts.
-python scripts/collect_ollama.py --pilot --model hermes3:8b --n 40 \
-  --num-predict 2048 --seed-per-index \
-  --prompts examples/prompts_ep1_v2.jsonl --out data_pilot_v2
-
-# After freezing the pilot-derived num_predict cap in PREREGISTRATION_P1.md:
-python scripts/collect_ollama.py --confirmatory --model hermes3:8b --n 400 \
-  --num-predict <frozen-cap> --seed-per-index \
-  --prompts prompts_ep1.jsonl --out data_confirmatory
-
-python scripts/analyze_ep1.py \
-  --sessions-dir data_confirmatory --out outputs/ep1
-```
-
-`analyze_ep1.py` is the only authoritative verdict path. It checks the frozen collection
-identity, runs C3, applies the power gate before inspecting scores, validates inputs, and
-evaluates permutation + AUROC + TPR at the train-calibrated FPR against exactly four
-baselines. It prints `positive`, `honest_null`, `interface_failure`, or the pre-verdict
-state `underpowered`. Component scripts cannot establish the confirmatory claim.
-
-The confirmatory channel is only `latent_occupancy`; `delta`, `xi`, and `neg_M` remain
-separate exploratory/diagnostic channels.
 
 ## Conceptual foundation of the domain
 

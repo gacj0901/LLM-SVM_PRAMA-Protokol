@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pytest
 
+from aptadynamic_llm.repository_artifact import matches_frozen_sha256
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "select_cocc_generation_budget.py"
@@ -126,8 +128,8 @@ def test_frozen_512_record_hashes_and_draft_guards():
     ):
         target = ROOT / record[field]["path"]
         if target.exists():
-            assert sha256(target.read_bytes()).hexdigest() == record[field].get(
-                "raw_sha256", record[field].get("sha256")
+            assert matches_frozen_sha256(
+                target, record[field].get("raw_sha256", record[field].get("sha256"))
             )
 
     draft = json.loads(

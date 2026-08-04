@@ -37,6 +37,10 @@ from aptadynamic_llm.artifact_schema import (  # noqa: E402
     write_jsonl_atomic,
 )
 from aptadynamic_llm.model_payload import task_only_messages, task_only_prompt  # noqa: E402
+from aptadynamic_llm.ollama_observations import (  # noqa: E402
+    request_json as request_ollama_json,
+    response_tokens as ollama_response_tokens,
+)
 
 
 CANONICAL_BENCHMARK = "chain_of_code_collapse"
@@ -286,8 +290,6 @@ def _call_backend(item: CoccItem, args: argparse.Namespace) -> tuple[dict[str, A
     if args.dry_run:
         return _dry_turn(item.prompt), args.model
     if args.provider == "ollama":
-        from scripts.collect_ollama import _request, response_tokens
-
         payload = {
             "model": args.model,
             "prompt": task_only_prompt(item.prompt),
@@ -301,8 +303,10 @@ def _call_backend(item: CoccItem, args: argparse.Namespace) -> tuple[dict[str, A
                 "seed": args.seed,
             },
         }
-        response = _request(args.base_url, "/api/generate", payload, timeout=args.timeout)
-        tokens = response_tokens(response)
+        response = request_ollama_json(
+            args.base_url, "/api/generate", payload, timeout=args.timeout
+        )
+        tokens = ollama_response_tokens(response, args.top_logprobs)
         return (
             {
                 "turn_index": 0,
