@@ -8,9 +8,16 @@ from hashlib import sha256
 import json
 from collections import Counter
 from pathlib import Path
+import sys
 from typing import Any
 
 import numpy as np
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SRC_ROOT = REPO_ROOT / "src"
+for candidate in (REPO_ROOT, SRC_ROOT):
+    if str(candidate) not in sys.path:
+        sys.path.insert(0, str(candidate))
 
 from aptadynamic_llm.evaluation.state_discrimination_metrics import (
     BASELINE_SCORE_FIELDS,
@@ -52,9 +59,6 @@ from scripts.score_sessions_prama import (
     run as run_scoring,
 )
 from scripts.validate_state_discrimination_inputs import validate_inputs, write_markdown
-
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def _file_sha256(path: Path) -> str:

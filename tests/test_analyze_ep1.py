@@ -10,6 +10,19 @@ from pathlib import Path
 import scripts.analyze_ep1 as analysis
 
 
+def test_script_entrypoint_resolves_repository_imports():
+    root = Path(__file__).resolve().parents[1]
+    completed = subprocess.run(
+        [sys.executable, str(root / "scripts" / "analyze_ep1.py"), "--help"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert completed.returncode == 0, completed.stderr
+    assert "--replication-freeze" in completed.stdout
+
+
 def test_missing_collection_manifest_emits_interface_failure(tmp_path):
     source = tmp_path / "source"
     source.mkdir()
