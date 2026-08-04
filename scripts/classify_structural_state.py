@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Apply the deterministic structural-label precedence rules."""
+"""Optionally integrate D_O v9 with external channels into a structural label."""
 
 from __future__ import annotations
 
@@ -17,6 +17,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     add_common_arguments(parser)
     parser.add_argument("--calibration-reference", required=True)
+    parser.add_argument("--structural-observation-reference", required=True)
     args = parser.parse_args(argv)
     try:
         outputs = []
@@ -36,6 +37,7 @@ def main(argv: list[str] | None = None) -> int:
                     ),
                     inputs=inputs,
                     calibration_reference=args.calibration_reference,
+                    structural_observation_reference=args.structural_observation_reference,
                 )
             )
         write_jsonl_atomic(args.out, outputs)

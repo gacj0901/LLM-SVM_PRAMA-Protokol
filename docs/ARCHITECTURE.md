@@ -13,27 +13,40 @@ flowchart LR
     M[LLM provider or local model] -->|answer + token logprobs| O[Observation Interface]
     O -->|numeric causal windows only| K[PRAMA kernel project_v3]
     K --> G[Delta / Xi / excess / capacity / balance / trend]
-    G --> C[Protocol-specific analysis]
+    O -->|numeric token-window observables| V6
     G --> V6[D_O structural observer v6]
-    V6 --> V9[D_O v9 layered state classification]
+    V6 --> V9[D_O v9 primary structural observation]
+    V9 --> L[Optional structural_labels integration]
     X[External verifier] -->|outcome joined after projection| A[Analysis reports]
-    C --> A
     V9 --> A
+    L --> A
     A -. no feedback .-> M
 ```
 
 The model payload contains only the task prompt and declared generation parameters.
 PRAMA labels, interface identity, experimental condition and verifier outcomes are not
-fed to the model. Response latency is metadata and is not a structural observable.
+fed to the model. Response latency and provider termination metadata are not structural
+observables.
 
 ## Program boundary
 
 ### D_O v9
 
-D_O v9 is an exploratory Observation Interface layer. It classifies transport status
-and mobility using causal numeric windows after the PRAMA projection. It is useful for
-hypothesis generation, fixed-horizon descriptive analysis and prospective protocol
-design. Confirmatory claims require their own frozen protocol and evidence binding.
+D_O v9 is the primary structural observer of PRAMA-projected trajectories. It
+classifies transport status, recurrence, contraction and coherent mobility using
+causal numeric windows after kernel projection. It is not the Observation Interface:
+`O_D != D_O_v9`. The interface ends at the causal numeric input pair; D_O v9 begins
+after the kernel state has been projected.
+
+The canonical output is the `structural_observation` artifact. The executable entry
+point is `scripts/observe_structural_trajectory.py`. `structural_labels` is an
+optional, secondary integration layer: it combines a referenced D_O v9 observation
+with coupling, external-anchor, perturbation and historical evidence to produce a
+`monitor.*` annotation. It is not a substitute for the observer.
+
+Architectural primacy does not imply empirical confirmation. Current studies remain
+exploratory unless a prospective protocol freezes its endpoints, thresholds and
+evidence binding.
 
 Historical v9 replay has an additional boundary: historical answers may come from the
 kernel-v1 era while Delta and Xi are recomputed with the current recertified kernel.

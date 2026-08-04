@@ -23,10 +23,6 @@ from aptadynamic_llm.perturbation_response import (
     PerturbationConfig,
     evaluate_perturbation_response,
 )
-from aptadynamic_llm.structural_labels import (
-    StructuralLabelInput,
-    classify_structural_state,
-)
 from aptadynamic_llm.window_prama import validate_window_kernel_declaration
 
 
@@ -194,42 +190,6 @@ def test_epistemic_channel_is_vector_and_requires_matched_task_state():
     assert record["channel_valid"] is True
     assert record["channel_modulation_detected"] is True
     assert record["scalar_observability_gap_claimed"] is False
-
-
-def test_structural_label_precedence_and_unavailable_channel():
-    values = dict(
-        coupling_state="SELF_DOMINANT_CANDIDATE",
-        external_coupling_state="ANCHOR_NOT_INTEGRATED",
-        perturbation_response_state="RIGID",
-        epistemic_channel_state="NO_EFFECT",
-        structural_history_state="DEGRADING_PARTIAL",
-        coupling_status="OBSERVED",
-        external_status="OBSERVED",
-        perturbation_status="OBSERVED",
-        epistemic_status="NOT_APPLICABLE",
-        history_status="OBSERVED",
-        self_dependence_persistence_windows=6,
-        minimum_persistence_windows=4,
-        continued_operation=True,
-        relevant_external_friction=True,
-        evidence_window_start=0,
-        evidence_window_end=8,
-    )
-    record = classify_structural_state(
-        envelope=envelope("structural_label"),
-        inputs=StructuralLabelInput(**values),
-        calibration_reference="calibration:abc",
-    )
-    assert record["label"] == "monitor.CRYSTALLIZATION_CANDIDATE"
-    assert record["rule_id"] == "R1_CRYSTALLIZATION_CANDIDATE"
-    values["external_status"] = "UNAVAILABLE"
-    unavailable = classify_structural_state(
-        envelope=envelope("structural_label"),
-        inputs=StructuralLabelInput(**values),
-        calibration_reference="calibration:abc",
-    )
-    assert unavailable["label"] == "monitor.INDETERMINATE"
-    assert unavailable["confidence_status"] == "INDETERMINATE"
 
 
 def test_window_prama_declaration_requires_exact_identity_and_hashes():

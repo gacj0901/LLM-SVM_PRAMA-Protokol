@@ -10,9 +10,9 @@ Part of the **AptadynamiK** program.
 Normative specification: [AS-1](https://github.com/gacj0901/aptadynamic-cybernetics) ·
 Engine: [`prama-protokol`](https://github.com/gacj0901/prama-protokol)
 
-> **Status:** CoCC/NVIDIA protocols and the D_O v9 structural observer are separate
-> experimental programs over the same locked kernel boundary. Each claim is limited
-> to its frozen design and bound evidence. See
+> **Status:** D_O v9 is the primary structural observer of PRAMA-projected
+> generative trajectories. Current empirical studies remain exploratory unless
+> governed by a frozen prospective protocol. See
 > [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Reproducibility boundary
@@ -68,7 +68,8 @@ sessions (raw json)                       aptadynamic_llm.ingest
   → token stream (surprisal, pos, ...)    aptadynamic_llm.omega   ← the ONLY
   → (ω, ω̂) strictly causal                                          domain part
   → Γ = (Δ, Ξ, λ, Θ, M, G), latent        prama_protokol.project  ← certified kernel,
-  → structural observer coordinates        D_O v9 / protocol-specific analysis
+  → structural_observation                  D_O v9               ← primary observer
+  → optional monitor.* annotation           structural_labels    ← secondary integration
   → external outcome joined after projection
 ```
 
@@ -83,13 +84,18 @@ The complete component and evidence boundaries are documented in
 | Program | Status | Authoritative claim path |
 |---|---|---|
 | CoCC/NVIDIA experiments | protocol-specific; confirmatory only where a frozen design says so | frozen CoCC design, runner and external verifier |
-| D_O v9 structural replay | exploratory, descriptive and offline | v6 numeric observer followed by the v9 layered state classifier |
+| D_O v9 structural observation | primary post-kernel observer; empirical claims remain protocol-bound | `scripts/observe_structural_trajectory.py` and `structural_observation` artifacts |
+| Historical D_O v9 replay | exploratory, descriptive and offline application | retained replay declarations and provenance-bound reports |
 
-D_O v9 studies transport coherence, recurrence, contraction and mobility states. It
-is exploratory unless a prospective protocol explicitly freezes an endpoint. Historical
-v9 backfills reuse numeric token observations; where Delta and Xi are recomputed with
-the current kernel they are counterfactual reprojections, not re-analyses of stored
-kernel-v1 state.
+D_O v9 causally resolves transport coherence, disruption, recurrence, contraction
+and mobility after PRAMA projection. Historical replay is one application of the
+observer, not its architectural definition. `structural_labels` is an optional,
+secondary multichannel integrator that binds an upstream D_O v9 observation before
+emitting a `monitor.*` annotation.
+
+Historical v9 backfills reuse numeric token observations; where Delta and Xi are
+recomputed with the current kernel they are counterfactual reprojections, not
+re-analyses of stored kernel-v1 state.
 
 The corrected historical CoCC outcome join is bound to its provenance by
 `run_outputs/historical_v9_backfill_cocc_462/provenance_amendment_v2.json`. Its paired

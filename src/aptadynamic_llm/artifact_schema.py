@@ -40,6 +40,7 @@ ARTIFACT_TYPES = {
     "perturbation_response",
     "epistemic_channel",
     "prama_trajectory",
+    "structural_observation",
     "structural_label",
 }
 
@@ -126,6 +127,32 @@ TYPE_REQUIRED = {
         "kernel_identity",
         "valid",
     },
+    "structural_observation": {
+        "observer",
+        "observer_version",
+        "base_observer",
+        "turn_index",
+        "window_index",
+        "absolute_window_index",
+        "transport_status",
+        "recurrence_status",
+        "contraction_status",
+        "mobility_status",
+        "structural_state",
+        "movement",
+        "transport_coherence",
+        "recurrence_persistence",
+        "variation_contraction",
+        "diagnostics",
+        "alert_eligible",
+        "transport_deficit",
+        "cumulative_transport_deficit",
+        "evidence_window_start",
+        "evidence_window_end",
+        "causal",
+        "external_outcome_used",
+        "provider_termination_metadata_used",
+    },
     "structural_label": {
         "label",
         "label_version",
@@ -139,6 +166,8 @@ TYPE_REQUIRED = {
         "evidence_window_end",
         "confidence_status",
         "claim_boundary",
+        "annotation_role",
+        "structural_observation_reference",
     },
 }
 
@@ -306,6 +335,74 @@ def validate_artifact(record: Mapping[str, Any], expected_type: str | None = Non
         _require_hash(identity, "source_tree_sha256")
         _require_hash(identity, "config_sha256")
         _require_hash(identity, "recertification_sha256")
+    elif artifact_type == "structural_observation":
+        if record["observer"] != "D_O_v9" or record["observer_version"] != "D_O_v9":
+            raise ArtifactValidationError("structural observer must be D_O_v9")
+        if record["base_observer"] != "D_O_v6":
+            raise ArtifactValidationError("D_O_v9 requires the D_O_v6 numeric base observer")
+        allowed = {
+            "transport_status": {
+                "UNRESOLVED", "INACTIVE", "COHERENT", "PROVISIONAL", "DISRUPTED"
+            },
+            "recurrence_status": {
+                "UNRESOLVED", "INACTIVE", "NON_RECURRENT", "RECURRENT"
+            },
+            "contraction_status": {
+                "UNRESOLVED", "NOT_CONTRACTING", "CONTRACTING"
+            },
+            "mobility_status": {
+                None, "VIABLE", "STAGNANT", "RECURRENT", "CRYSTALLIZING", "CRYSTALLIZED"
+            },
+            "structural_state": {
+                "VIABLE", "STAGNANT", "RECURRENT", "CRYSTALLIZING", "CRYSTALLIZED",
+                "TRANSPORT_DISRUPTED", "TRANSPORT_UNRESOLVED",
+            },
+        }
+        for field, values in allowed.items():
+            if record[field] not in values:
+                raise ArtifactValidationError(f"invalid {field}")
+        for field in ("turn_index", "window_index", "absolute_window_index"):
+            if not isinstance(record[field], int) or isinstance(record[field], bool) or record[field] < 0:
+                raise ArtifactValidationError(f"{field} must be a nonnegative integer")
+        if float(record["movement"]) < 0:
+            raise ArtifactValidationError("movement cannot be negative")
+        for field in (
+            "transport_coherence",
+            "recurrence_persistence",
+            "variation_contraction",
+        ):
+            if record[field] is not None:
+                _require_unit_interval(record, field)
+        for field in ("transport_deficit", "cumulative_transport_deficit"):
+            if record[field] is not None and float(record[field]) < 0:
+                raise ArtifactValidationError(f"{field} cannot be negative")
+        if int(record["evidence_window_start"]) < 0 or int(record["evidence_window_end"]) < int(record["evidence_window_start"]):
+            raise ArtifactValidationError("structural evidence window is invalid")
+        if record["causal"] is not True or record["external_outcome_used"] is not False:
+            raise ArtifactValidationError("D_O_v9 must be causal and outcome-blind")
+        if record["provider_termination_metadata_used"] is not False:
+            raise ArtifactValidationError(
+                "provider termination metadata is not structural evidence"
+            )
+        forbidden = {"finish_reason", "response_time_seconds", "outcome", "label"}
+        leaked = sorted(forbidden & record.keys())
+        if leaked:
+            raise ArtifactValidationError(
+                f"structural observation contains forbidden fields: {leaked}"
+            )
+        diagnostics = record["diagnostics"]
+        if (
+            not isinstance(diagnostics, list)
+            or not all(isinstance(value, str) and value for value in diagnostics)
+            or len(diagnostics) != len(set(diagnostics))
+        ):
+            raise ArtifactValidationError("diagnostics must be unique nonempty strings")
+    elif artifact_type == "structural_label":
+        if record["annotation_role"] != "SECONDARY_INTERPRETIVE":
+            raise ArtifactValidationError(
+                "structural_label must be a secondary interpretive annotation"
+            )
+        _require_hash(record, "structural_observation_reference")
 
 
 def make_envelope(

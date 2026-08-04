@@ -69,8 +69,9 @@ def classify_structural_state(
     envelope: Mapping[str, Any],
     inputs: StructuralLabelInput,
     calibration_reference: str,
+    structural_observation_reference: str,
 ) -> dict[str, Any]:
-    """Emit exactly one annotation under frozen precedence rules."""
+    """Emit one secondary annotation under frozen precedence rules."""
 
     status = {
         "coupling": inputs.coupling_status,
@@ -216,6 +217,8 @@ def classify_structural_state(
         "evidence_window_start": inputs.evidence_window_start,
         "evidence_window_end": inputs.evidence_window_end,
         "confidence_status": confidence.value,
+        "annotation_role": "SECONDARY_INTERPRETIVE",
+        "structural_observation_reference": structural_observation_reference,
         "claim_boundary": {
             "complete_viability_regime_claimed": False,
             "consciousness_claimed": False,

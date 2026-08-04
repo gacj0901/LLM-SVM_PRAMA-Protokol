@@ -7,8 +7,10 @@ Only artifacts listed in `reproducible_results_manifest_v1.json` are declared st
 byte-bound reproducible results. Other output remains useful evidence but may be
 regenerated, superseded or incomplete. Local runs belong under `_local/` or `_scratch/`.
 
-The manifest records reproducibility, not confirmation. In particular, D_O v9 reports
-remain exploratory even when their bytes and provenance are reproducible.
+The manifest records reproducibility, not confirmation. Historical D_O v9 replay
+reports remain exploratory even when their bytes and provenance are reproducible.
+Replay is an application of the primary structural observer, not its architectural
+definition.
 
 The corrected historical CoCC verifier join is accompanied by a paired v1-to-v2
 transition audit, a stratified manual review, and `provenance_amendment_v2.json`.

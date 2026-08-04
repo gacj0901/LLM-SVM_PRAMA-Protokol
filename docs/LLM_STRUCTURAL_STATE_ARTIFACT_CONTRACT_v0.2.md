@@ -14,7 +14,8 @@ This contract defines auditable artifacts for:
 3. response to relevant perturbation;
 4. paired epistemic-channel modulation;
 5. historical accumulation through a pinned, window-recertified PRAMA kernel;
-6. deterministic monitor annotations.
+6. causal post-kernel structural observation through D_O v9;
+7. optional deterministic multichannel annotations.
 
 The factorial channel does **not** directly observe model internals and does not
 establish a general causal property of free generation. It estimates the relative
@@ -40,8 +41,8 @@ regime, or ground truth about an interpretive annotation.
 ## 3. Immutable source artifact
 
 `generation_observation` is the source-of-record for one provider response. It MUST
-contain hashes of prompt and response, exact model identity when available, finish
-reason, token count, and:
+contain hashes of prompt and response, exact model identity when available, provider
+termination metadata, token count, and:
 
 ```json
 {
@@ -49,10 +50,10 @@ reason, token count, and:
 }
 ```
 
-`response_time_seconds` is elapsed monotonic wall time from immediately before the
-provider request is sent until its complete response is received. It is execution
-metadata only. It MUST NOT be used as structural evidence unless a separate study
-preregisters that use.
+`finish_reason` and `response_time_seconds` are service-execution metadata only.
+Neither is a structural-viability coordinate and neither may enter D_O v9. The latter
+is elapsed monotonic wall time from immediately before the provider request is sent
+until its complete response is received.
 
 Raw task and response text MAY be retained in access-controlled source files, but
 the interoperable artifact SHOULD use hashes to avoid accidental prompt leakage.
@@ -100,7 +101,8 @@ The normative schemas are in `schemas/`.
 | `perturbation_response` | `perturbation_response.jsonl` | preregistered pre/post response |
 | `epistemic_channel` | `epistemic_channel.jsonl` | matched-pair report modulation |
 | `prama_trajectory` | `prama_trajectory.jsonl` | recertified historical accumulation |
-| `structural_label` | `structural_labels.jsonl` | deterministic monitor annotation |
+| `structural_observation` | `structural_observation.jsonl` | primary D_O v9 post-kernel observation |
+| `structural_label` | `structural_labels.jsonl` | optional secondary interpretive annotation |
 
 ### 5.1 Coupling
 
@@ -271,6 +273,55 @@ coordinate_origin = DERIVED_KERNEL_STATE
 the declared affine transform. `xi`, `accumulated_excess`, `capacity`, `theta`,
 `balance`, and `trend` are derived kernel states.
 
+### 5.6 D_O v9 structural observation
+
+D_O v9 is the primary structural observer of PRAMA-projected generative
+trajectories. It is post-kernel and therefore is not the Observation Interface:
+
+```text
+O_D != D_O_v9
+```
+
+The canonical boundary is:
+
+```text
+numeric Observation Interface
+  -> recertified PRAMA trajectory
+numeric token windows + PRAMA trajectory
+  -> D_O_v6 numeric structural channels
+  -> structural_observation (D_O_v9)
+  -> optional structural_label integration
+```
+
+A conforming `structural_observation` MUST declare transport, recurrence,
+contraction and coherent-mobility status; the resolved structural state; its causal
+evidence-window bounds; observer identity; and the numeric coordinates supporting
+the classification. It MUST declare:
+
+```json
+{
+  "artifact_type": "structural_observation",
+  "observer": "D_O_v9",
+  "observer_version": "D_O_v9",
+  "transport_status": "COHERENT",
+  "recurrence_status": "RECURRENT",
+  "contraction_status": "NOT_CONTRACTING",
+  "mobility_status": "RECURRENT",
+  "structural_state": "RECURRENT",
+  "evidence_window_start": 0,
+  "evidence_window_end": 63,
+  "causal": true,
+  "external_outcome_used": false,
+  "provider_termination_metadata_used": false
+}
+```
+
+The observer MUST read only causal numeric windows. It MUST NOT read
+`finish_reason`, response latency, verifier outcomes, semantic labels, prompts or
+answers. Historical replay is one application of D_O v9, not its architectural
+definition. The retained historical replay declaration and its hashes remain
+separate from the prospective primary-observer declaration.
+
 ## 6. Model-payload isolation
 
 The evaluated LLM may receive only:
@@ -299,9 +350,12 @@ implementation is `aptadynamic_llm.model_payload`; provider serialization occurs
 only after this check. Experimental condition assignment is stored in backend
 artifacts after the response.
 
-## 7. Deterministic annotation contract
+## 7. Optional deterministic annotation contract
 
-Exactly one primary monitor annotation is emitted. Precedence is:
+When the optional multichannel integrator is invoked, exactly one secondary
+`monitor.*` annotation is emitted. It MUST bind the SHA-256 of its upstream
+`structural_observation` and declare
+`annotation_role="SECONDARY_INTERPRETIVE"`. Precedence is:
 
 1. `monitor.CRYSTALLIZATION_CANDIDATE`;
 2. `monitor.RECURSIVE_IMITATIVE_ITERATION`;
@@ -359,9 +413,10 @@ conditions, calibration reference, evidence window, and categorical confidence.
 
 ## 8. Namespace separation
 
-Monitor annotations use `monitor.*`. Independent outcomes use `outcome.*`.
-The label engine never reads outcomes. Empirical validation joins the two
-namespaces only after monitor artifacts are frozen.
+Primary structural observations use `structural_observation`. Secondary
+interpretive annotations use `monitor.*`. Independent outcomes use `outcome.*`.
+The observer and label engine never read outcomes. Empirical validation joins the
+namespaces only after structural artifacts are frozen.
 
 ## 9. Threshold artifacts
 
@@ -388,13 +443,26 @@ scripts/evaluate_external_anchor_uptake.py
 scripts/evaluate_perturbation_response.py
 scripts/evaluate_epistemic_channel.py
 scripts/project_window_prama.py
-scripts/classify_structural_state.py
+scripts/observe_structural_trajectory.py
+scripts/classify_structural_state.py  # optional, secondary
 scripts/validate_structural_artifacts.py
 scripts/validate_structural_labels.py
 ```
 
 All artifact writers validate before atomic replacement. A failed validation
 returns nonzero and leaves no partially accepted artifact.
+
+The canonical post-kernel sequence is:
+
+```bash
+python scripts/project_window_prama.py ...
+python scripts/observe_structural_trajectory.py \
+  --input do_v6_sessions.jsonl \
+  --contract config/sequor_structural_observer_v9.json \
+  --out structural_observation.jsonl ...
+python scripts/classify_structural_state.py \
+  --structural-observation-reference <sha256> ...  # optional
+```
 
 ## 11. Validation hierarchy
 
@@ -417,7 +485,10 @@ A build is mechanically conformant when:
 - every emitted JSONL row passes `validate_structural_artifacts.py`;
 - payload-isolation tests pass;
 - canonical and legacy coupling names agree;
+- D_O v9 observations are causal and reject provider termination metadata;
 - label classification is deterministic;
+- each structural label binds an upstream structural observation and declares its
+  secondary interpretive role;
 - monitor/outcome namespaces do not mix;
 - PRAMA projection refuses an unpinned or non-recertified kernel.
 
