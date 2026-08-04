@@ -35,6 +35,12 @@ E-P1 is the preregistered state-discrimination study defined by
 `scripts/analyze_ep1.py`. Exploratory observer coordinates cannot be substituted into
 that endpoint after observing outcomes.
 
+The implemented E-P1 acquisition route uses Hermes 3 8B through Ollama. No NVIDIA
+model run in this repository is an E-P1 execution: the Nemotron and Mistral artifacts
+belong to CoCC or to the separate structural-observer batteries. Sharing provider
+adapters, token observables or kernel projection machinery does not transfer an
+experiment from one program to the other.
+
 ### D_O v9
 
 D_O v9 is an exploratory Observation Interface layer. It classifies transport status

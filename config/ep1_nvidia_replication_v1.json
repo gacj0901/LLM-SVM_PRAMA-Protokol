@@ -1,0 +1,86 @@
+{
+  "schema": "LLM-SVM-E-P1-NVIDIA-replication-design/1",
+  "status": "PILOT_PREREGISTERED",
+  "study_id": "E-P1-NVIDIA-R1",
+  "relationship_to_ep1": "prospective_cross-model_replication_preserving_D1_through_D6_with_model_specific_D7",
+  "claim_boundary": "Three separate model-level E-P1 replications. Results are not pooled and do not retrospectively amend the Hermes/Ollama E-P1 study.",
+  "prompt_suite": "examples/prompts_ep1_v2.jsonl",
+  "prompt_suite_sha256": "65080c2e2c641dce0b9eb0f1fdbb096c7a5a61881da882ea326345f7727e9b90",
+  "provider": "nvidia_nim",
+  "provider_endpoint": "https://integrate.api.nvidia.com/v1",
+  "api_key_environment_variable": "NVIDIA_API_KEY",
+  "models": [
+    {
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "slug": "nemotron3_super",
+      "temperature": 0.7,
+      "top_p": 0.9,
+      "top_logprobs": 5,
+      "enable_thinking": false,
+      "reasoning_effort": null,
+      "stream": false
+    },
+    {
+      "model": "mistralai/mistral-medium-3.5-128b",
+      "slug": "mistral_medium_3_5",
+      "temperature": 0.7,
+      "top_p": 0.9,
+      "top_logprobs": 5,
+      "enable_thinking": null,
+      "reasoning_effort": "none",
+      "stream": true
+    },
+    {
+      "model": "nvidia/nemotron-3-ultra-550b-a55b",
+      "slug": "nemotron3_ultra",
+      "temperature": 0.7,
+      "top_p": 0.9,
+      "top_logprobs": 5,
+      "enable_thinking": false,
+      "reasoning_effort": null,
+      "stream": false
+    }
+  ],
+  "sampling": {
+    "base_seed": 1337,
+    "seed_per_index": true
+  },
+  "pilot": {
+    "n": 40,
+    "max_tokens": 4096,
+    "discard_from_confirmatory": true,
+    "permitted_use": "generation_budget_selection_only",
+    "quantile": 0.95,
+    "quantile_method": "linear",
+    "selection_rule": "ceil((stop_token_p95 + 1) / 64) * 64",
+    "minimum_selected_max_tokens": 256,
+    "maximum_selected_max_tokens": 4096,
+    "fail_closed_if_no_stop_sessions": true,
+    "fail_closed_if_selected_cap_exceeds_pilot_ceiling": true
+  },
+  "confirmatory": {
+    "initial_n": 400,
+    "extension_block": 100,
+    "maximum_total_n": 1000,
+    "minimum_test_positives": 15,
+    "test_fraction": 0.25,
+    "split_seed": 1337,
+    "permutations": 1000,
+    "permutation_seed": 0,
+    "alpha": 0.01,
+    "target_fpr": 0.1,
+    "evaluation_tokens": 256,
+    "minimum_valid_tokens": 32
+  },
+  "model_payload_boundary": "one user task prompt plus frozen generation parameters only",
+  "observation_boundary": "token logprobs and completion metadata are stored after generation; no PRAMA or experiment labels enter the model payload",
+  "latency_role": "execution_metadata_only_not_an_observable",
+  "kernel_policy": "Use the repository-pinned certified kernel without parameter changes.",
+  "freeze_order": [
+    "commit this pilot design and its SHA",
+    "run each 40-session pilot",
+    "derive and commit one immutable model freeze from the declared rule",
+    "run the corresponding confirmatory collection without replacements",
+    "run the unchanged D6 analysis separately for each model"
+  ]
+}

@@ -88,10 +88,21 @@ The complete component and evidence boundaries are documented in
 | CoCC/NVIDIA experiments | protocol-specific; confirmatory only where a frozen design says so | frozen CoCC design, runner and external verifier |
 | D_O v9 structural replay | exploratory, descriptive and offline | v6 numeric observer followed by the v9 layered state classifier |
 
+E-P1 has not been run on any NVIDIA model. Its implemented collection route is
+Hermes 3 8B through Ollama. Nemotron Super, Mistral Medium 3.5 and Nemotron Ultra
+were evaluated under CoCC and the later structural batteries; those runs must not be
+described, pooled or interpreted as E-P1 executions.
+
 D_O v9 studies transport coherence, recurrence, contraction and mobility states. It
 must not be reported as an E-P1 endpoint. Historical v9 backfills reuse numeric token
 observations; where Delta and Xi are recomputed with the current kernel they are
 counterfactual reprojections, not re-analyses of stored kernel-v1 state.
+
+The corrected historical CoCC outcome join is bound to its provenance by
+`run_outputs/historical_v9_backfill_cocc_462/provenance_amendment_v2.json`. Its paired
+v1-to-v2 transition audit and stratified manual verifier review are retained beside the
+report; the superseded join is preserved explicitly and must not be used as current
+outcome truth.
 
 The CoCC verifier executes generated code and is therefore restricted to controlled
 research use. See [`docs/VERIFIER_SECURITY.md`](docs/VERIFIER_SECURITY.md) for the
