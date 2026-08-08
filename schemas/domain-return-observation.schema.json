@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aptadynamik.org/schemas/llm-structural/domain-return-observation.schema.json",
+  "title": "Causally available domain return observation",
+  "allOf": [{"$ref": "common-definitions.schema.json#/$defs/envelope"}],
+  "type": "object",
+  "required": [
+    "event_index", "available_at_index", "event_window", "available_at_window",
+    "benefit_vector", "component_status", "verifier_reference_sha256",
+    "retrospective_backfill", "causal_availability_declared",
+    "provider_termination_metadata_used"
+  ],
+  "properties": {
+    "artifact_type": {"const": "domain_return_observation"},
+    "event_index": {"type": "integer", "minimum": 0},
+    "available_at_index": {"type": "integer", "minimum": 0},
+    "event_window": {"$ref": "#/$defs/windowIdentity"},
+    "available_at_window": {"$ref": "#/$defs/windowIdentity"},
+    "benefit_vector": {"$ref": "#/$defs/benefitVector"},
+    "component_status": {"$ref": "#/$defs/benefitStatus"},
+    "verifier_reference_sha256": {
+      "anyOf": [
+        {"$ref": "common-definitions.schema.json#/$defs/sha256"},
+        {"type": "null"}
+      ]
+    },
+    "retrospective_backfill": {"type": "boolean"},
+    "causal_availability_declared": {"const": true},
+    "provider_termination_metadata_used": {"const": false}
+  },
+  "$defs": {
+    "windowIdentity": {
+      "type": "object",
+      "required": ["turn_index", "window_index"],
+      "properties": {
+        "turn_index": {"type": "integer", "minimum": 0},
+        "window_index": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "nullableNumber": {"type": ["number", "null"]},
+    "benefitVector": {
+      "type": "object",
+      "required": ["functional_gain", "external_integration", "verified_outcome"],
+      "properties": {
+        "functional_gain": {"$ref": "#/$defs/nullableNumber"},
+        "external_integration": {"$ref": "#/$defs/nullableNumber"},
+        "verified_outcome": {"$ref": "#/$defs/nullableNumber"}
+      },
+      "additionalProperties": false
+    },
+    "benefitStatus": {
+      "type": "object",
+      "required": ["functional_gain", "external_integration", "verified_outcome"],
+      "properties": {
+        "functional_gain": {"$ref": "common-definitions.schema.json#/$defs/channelStatus"},
+        "external_integration": {"$ref": "common-definitions.schema.json#/$defs/channelStatus"},
+        "verified_outcome": {"$ref": "common-definitions.schema.json#/$defs/channelStatus"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

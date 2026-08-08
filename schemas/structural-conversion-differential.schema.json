@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aptadynamik.org/schemas/llm-structural/structural-conversion-differential.schema.json",
+  "title": "ODCE-v0 causal structural conversion differential",
+  "allOf": [
+    {"$ref": "common-definitions.schema.json#/$defs/envelope"},
+    {
+      "if": {"properties": {"partition": {"const": "confirmatory"}}},
+      "then": {
+        "properties": {
+          "contract_freeze_sha256": {
+            "$ref": "common-definitions.schema.json#/$defs/sha256"
+          }
+        }
+      },
+      "else": {
+        "properties": {"contract_freeze_sha256": {"type": "null"}}
+      }
+    }
+  ],
+  "type": "object",
+  "required": [
+    "operator", "operator_version", "time_index", "window_start", "window_end",
+    "causal", "kernel_state_reference_sha256",
+    "structural_observation_reference_sha256", "domain_outcome_reference_sha256",
+    "cost_vector", "benefit_vector", "normalized_cost_vector",
+    "normalized_benefit_vector", "differential_vector",
+    "component_status", "differential_dynamics", "temporal_scope",
+    "normalization_contract_sha256", "correspondence_contract_sha256",
+    "contract_freeze_sha256",
+    "predictive_model_used", "future_outcome_used",
+    "causal_availability_enforced",
+    "provider_termination_metadata_used"
+  ],
+  "properties": {
+    "artifact_type": {"const": "structural_conversion_differential"},
+    "operator": {"const": "ODCE_v0"},
+    "operator_version": {"const": "ODCE-v0.1.0"},
+    "numeric_epsilon": {"type": "number", "exclusiveMinimum": 0},
+    "differential_threshold": {"type": "number", "minimum": 0},
+    "time_index": {"type": "integer", "minimum": 0},
+    "window_start": {"type": "integer", "minimum": 0},
+    "window_end": {"type": "integer", "minimum": 0},
+    "causal": {"const": true},
+    "kernel_state_reference_sha256": {"$ref": "common-definitions.schema.json#/$defs/sha256"},
+    "structural_observation_reference_sha256": {
+      "anyOf": [{"$ref": "common-definitions.schema.json#/$defs/sha256"}, {"type": "null"}]
+    },
+    "domain_outcome_reference_sha256": {
+      "anyOf": [{"$ref": "common-definitions.schema.json#/$defs/sha256"}, {"type": "null"}]
+    },
+    "cost_vector": {"$ref": "#/$defs/costVector"},
+    "benefit_vector": {"$ref": "#/$defs/benefitVector"},
+    "normalized_cost_vector": {"$ref": "#/$defs/costVector"},
+    "normalized_benefit_vector": {"$ref": "#/$defs/benefitVector"},
+    "differential_vector": {"$ref": "#/$defs/openNumericVector"},
+    "component_status": {
+      "type": "object",
+      "required": ["cost", "benefit", "differential"],
+      "properties": {
+        "cost": {"$ref": "#/$defs/costStatus"},
+        "benefit": {"$ref": "#/$defs/benefitStatus"},
+        "differential": {"$ref": "#/$defs/openStatusVector"}
+      },
+      "additionalProperties": false
+    },
+    "differential_dynamics": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["trend", "cumulative_conversion_deficit_exposure", "positive_persistence"],
+        "properties": {
+          "trend": {"type": ["number", "null"]},
+          "cumulative_conversion_deficit_exposure": {"type": "number", "minimum": 0},
+          "positive_persistence": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+        },
+        "additionalProperties": false
+      }
+    },
+    "temporal_scope": {
+      "type": "object",
+      "required": ["cost", "benefit", "differential", "dynamics"],
+      "properties": {
+        "cost": {"$ref": "#/$defs/costTemporalScope"},
+        "benefit": {"$ref": "#/$defs/benefitTemporalScope"},
+        "differential": {"$ref": "#/$defs/differentialTemporalScope"},
+        "dynamics": {"$ref": "#/$defs/dynamicsTemporalScope"}
+      },
+      "additionalProperties": false
+    },
+    "normalization_contract_sha256": {"$ref": "common-definitions.schema.json#/$defs/sha256"},
+    "correspondence_contract_sha256": {"$ref": "common-definitions.schema.json#/$defs/sha256"},
+    "contract_freeze_sha256": {
+      "anyOf": [
+        {"$ref": "common-definitions.schema.json#/$defs/sha256"},
+        {"type": "null"}
+      ]
+    },
+    "predictive_model_used": {"const": false},
+    "future_outcome_used": {"const": false},
+    "causal_availability_enforced": {"const": true},
+    "provider_termination_metadata_used": {"const": false}
+  },
+  "$defs": {
+    "nullableNumber": {"type": ["number", "null"]},
+    "costVector": {
+      "type": "object",
+      "required": ["retained_friction", "accumulated_debt", "capacity_consumption", "excess_persistence", "adverse_trend"],
+      "properties": {
+        "retained_friction": {"$ref": "#/$defs/nullableNumber"},
+        "accumulated_debt": {"$ref": "#/$defs/nullableNumber"},
+        "capacity_consumption": {"$ref": "#/$defs/nullableNumber"},
+        "excess_persistence": {"$ref": "#/$defs/nullableNumber"},
+        "adverse_trend": {"$ref": "#/$defs/nullableNumber"}
+      },
+      "additionalProperties": false
+    },
+    "benefitVector": {
+      "type": "object",
+      "required": ["structural_recovery", "adaptive_organization_level", "functional_gain", "external_integration", "verified_outcome"],
+      "properties": {
+        "structural_recovery": {"$ref": "#/$defs/nullableNumber"},
+        "adaptive_organization_level": {"$ref": "#/$defs/nullableNumber"},
+        "functional_gain": {"$ref": "#/$defs/nullableNumber"},
+        "external_integration": {"$ref": "#/$defs/nullableNumber"},
+        "verified_outcome": {"$ref": "#/$defs/nullableNumber"}
+      },
+      "additionalProperties": false
+    },
+    "openNumericVector": {
+      "type": "object", "minProperties": 1,
+      "additionalProperties": {"$ref": "#/$defs/nullableNumber"}
+    },
+    "costStatus": {
+      "type": "object",
+      "required": ["retained_friction", "accumulated_debt", "capacity_consumption", "excess_persistence", "adverse_trend"],
+      "additionalProperties": {"$ref": "common-definitions.schema.json#/$defs/channelStatus"}
+    },
+    "benefitStatus": {
+      "type": "object",
+      "required": ["structural_recovery", "adaptive_organization_level", "functional_gain", "external_integration", "verified_outcome"],
+      "additionalProperties": {"$ref": "common-definitions.schema.json#/$defs/channelStatus"}
+    },
+    "costTemporalScope": {
+      "type": "object",
+      "required": ["retained_friction", "accumulated_debt", "capacity_consumption", "excess_persistence", "adverse_trend"],
+      "properties": {
+        "retained_friction": {"const": "ROLLING_WINDOW"},
+        "accumulated_debt": {"const": "ROLLING_WINDOW"},
+        "capacity_consumption": {"const": "SESSION_TO_DATE"},
+        "excess_persistence": {"const": "ROLLING_WINDOW"},
+        "adverse_trend": {"const": "ROLLING_WINDOW"}
+      },
+      "additionalProperties": false
+    },
+    "benefitTemporalScope": {
+      "type": "object",
+      "required": ["structural_recovery", "adaptive_organization_level", "functional_gain", "external_integration", "verified_outcome"],
+      "properties": {
+        "structural_recovery": {"const": "ROLLING_WINDOW"},
+        "adaptive_organization_level": {"const": "ROLLING_WINDOW"},
+        "functional_gain": {"const": "LATEST_CAUSALLY_AVAILABLE_SESSION_TO_DATE"},
+        "external_integration": {"const": "LATEST_CAUSALLY_AVAILABLE_SESSION_TO_DATE"},
+        "verified_outcome": {"const": "LATEST_CAUSALLY_AVAILABLE_SESSION_TO_DATE"}
+      },
+      "additionalProperties": false
+    },
+    "differentialTemporalScope": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"const": "CURRENT_INDEX"}
+    },
+    "dynamicsTemporalScope": {
+      "type": "object",
+      "required": ["trend", "cumulative_conversion_deficit_exposure", "positive_persistence"],
+      "properties": {
+        "trend": {"const": "CURRENT_VS_PREVIOUS_OBSERVED_INDEX"},
+        "cumulative_conversion_deficit_exposure": {"const": "SESSION_TO_DATE"},
+        "positive_persistence": {"const": "ROLLING_WINDOW"}
+      },
+      "additionalProperties": false
+    },
+    "openStatusVector": {
+      "type": "object", "minProperties": 1,
+      "additionalProperties": {"$ref": "common-definitions.schema.json#/$defs/channelStatus"}
+    }
+  }
+}

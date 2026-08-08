@@ -19,18 +19,24 @@ from scripts.run_break_the_chain_prama_eval_nvidia import (
     NVIDIA_API_KEY_ENV,
     NVIDIA_BASE_URL,
     NVIDIA_MODEL,
+    NVIDIA_MODELS,
     NVIDIA_PROVIDER,
     _call_backend,
 )
 
 
-def run_preflight(execute: bool, timeout: int, top_logprobs: int) -> dict[str, object]:
+def run_preflight(
+    execute: bool,
+    timeout: int,
+    top_logprobs: int,
+    model: str = NVIDIA_MODEL,
+) -> dict[str, object]:
     key_present = bool(os.environ.get(NVIDIA_API_KEY_ENV, "").strip())
     result: dict[str, object] = {
         "schema": "LLM-SVM-NVIDIA-preflight/1",
         "provider": NVIDIA_PROVIDER,
         "endpoint": NVIDIA_BASE_URL,
-        "requested_model": NVIDIA_MODEL,
+        "requested_model": model,
         "api_key_environment_variable": NVIDIA_API_KEY_ENV,
         "api_key_present": key_present,
         "remote_call_executed": False,
@@ -54,7 +60,7 @@ def run_preflight(execute: bool, timeout: int, top_logprobs: int) -> dict[str, o
     args = SimpleNamespace(
         dry_run=False,
         provider=NVIDIA_PROVIDER,
-        model=NVIDIA_MODEL,
+        model=model,
         base_url=NVIDIA_BASE_URL,
         timeout=timeout,
         temperature=1.0,
@@ -86,13 +92,19 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Perform one remote request that may consume a small number of credits.",
     )
+    parser.add_argument("--model", choices=NVIDIA_MODELS, default=NVIDIA_MODEL)
     parser.add_argument("--timeout", type=int, default=120)
     parser.add_argument("--top-logprobs", type=int, default=5)
     args = parser.parse_args(argv)
     if args.timeout <= 0 or not 2 <= args.top_logprobs <= 20:
         parser.error("timeout must be positive and top-logprobs must be 2..20")
     try:
-        report = run_preflight(args.execute, args.timeout, args.top_logprobs)
+        report = run_preflight(
+            args.execute,
+            args.timeout,
+            args.top_logprobs,
+            model=args.model,
+        )
     except Exception as exc:
         status_code = getattr(exc, "status_code", None)
         if status_code == 401:

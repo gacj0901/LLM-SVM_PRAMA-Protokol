@@ -107,6 +107,14 @@ def test_preflight_is_local_only_without_execute(monkeypatch):
     assert "nvapi-test-not-real" not in json.dumps(report)
 
 
+def test_preflight_can_target_nemotron_ultra_without_remote_call(monkeypatch):
+    monkeypatch.setenv("NVIDIA_API_KEY", "nvapi-test-not-real")
+    model = "nvidia/nemotron-3-ultra-550b-a55b"
+    report = run_preflight(False, timeout=1, top_logprobs=5, model=model)
+    assert report["requested_model"] == model
+    assert report["remote_call_executed"] is False
+
+
 def test_nvidia_backend_uses_explicit_key_endpoint_and_logprobs(monkeypatch):
     captured = {}
 

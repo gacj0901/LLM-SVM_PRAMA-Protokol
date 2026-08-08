@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aptadynamik.org/schemas/llm-structural/dseb-benchmark-turn.schema.json",
+  "title": "One generated DSEB-v0 benchmark turn",
+  "type": "object",
+  "required": [
+    "schema", "benchmark_id", "benchmark_version", "session_id", "turn_index",
+    "phase", "targets", "controls", "active_constraints", "temporary_constraints",
+    "oracle_order", "new_constraint_ids", "re_presented_constraint_ids",
+    "ordinary_removed_constraint_ids", "ordinary_replacements",
+    "checkpoint_retired_constraint_ids", "simulated_closed_window_count",
+    "terminal_window", "terminal_event_index"
+  ],
+  "properties": {
+    "schema": {"const": "LLM-SVM-DSEB-benchmark-turn/1"},
+    "benchmark_id": {"const": "DSEB_v0"},
+    "benchmark_version": {"const": "DSEB-v0"},
+    "session_id": {"type": "string", "minLength": 1},
+    "turn_index": {"type": "integer", "minimum": 0, "maximum": 35},
+    "phase": {"type": "string", "minLength": 1},
+    "targets": {"type": "object"},
+    "controls": {
+      "type": "object",
+      "required": [
+        "constraint_load", "context_span", "revision_pressure",
+        "perturbation_pressure", "checkpoint_transition", "retired_constraint_count"
+      ],
+      "properties": {
+        "constraint_load": {"type": "integer", "minimum": 1},
+        "context_span": {"type": "integer", "minimum": 0},
+        "revision_pressure": {"type": "integer", "minimum": 0},
+        "perturbation_pressure": {"type": "integer", "minimum": 0},
+        "checkpoint_transition": {"type": "boolean"},
+        "retired_constraint_count": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "active_constraints": {"type": "array", "items": {"$ref": "#/$defs/constraint"}},
+    "temporary_constraints": {"type": "array", "items": {"$ref": "#/$defs/constraint"}},
+    "oracle_order": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "new_constraint_ids": {"$ref": "#/$defs/idArray"},
+    "re_presented_constraint_ids": {"$ref": "#/$defs/idArray"},
+    "ordinary_removed_constraint_ids": {"$ref": "#/$defs/idArray"},
+    "ordinary_replacements": {"type": "array", "items": {"type": "object"}},
+    "checkpoint_retired_constraint_ids": {"$ref": "#/$defs/idArray"},
+    "simulated_closed_window_count": {"type": "integer", "minimum": 1},
+    "terminal_window": {"$ref": "#/$defs/windowIdentity"},
+    "terminal_event_index": {"type": "integer", "minimum": 0}
+  },
+  "$defs": {
+    "idArray": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "windowIdentity": {
+      "type": "object",
+      "required": ["turn_index", "window_index"],
+      "properties": {
+        "turn_index": {"type": "integer", "minimum": 0},
+        "window_index": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "constraint": {
+      "type": "object",
+      "required": [
+        "constraint_id", "kind", "symbols", "parameter", "introduced_at",
+        "last_presented_at", "revision_of", "text"
+      ],
+      "properties": {
+        "constraint_id": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["before", "adjacent", "distance", "bounded_before", "conditional_before"]},
+        "symbols": {"type": "array", "minItems": 2, "maxItems": 4, "items": {"type": "string"}},
+        "parameter": {"type": ["integer", "null"], "minimum": 0},
+        "introduced_at": {"type": "integer", "minimum": 0},
+        "last_presented_at": {"type": "integer", "minimum": 0},
+        "revision_of": {"type": ["string", "null"]},
+        "text": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

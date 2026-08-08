@@ -15,6 +15,11 @@ Engine: [`prama-protokol`](https://github.com/gacj0901/prama-protokol)
 > governed by a frozen prospective protocol. See
 > [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
+ODCE-v0 is the next causal post-observer layer. It preserves, as separate
+vectors, the structural cost paid by a trajectory, the causally available return
+obtained, and the declared channel-wise differential between them. ODCE is not a
+predictor: probabilistic inference is a later, separately validated layer.
+
 ## Reproducibility boundary
 
 The repository separates three classes of material:
@@ -69,6 +74,8 @@ sessions (raw json)                       aptadynamic_llm.ingest
   → (ω, ω̂) strictly causal                                          domain part
   → Γ = (Δ, Ξ, λ, Θ, M, G), latent        prama_protokol.project  ← certified kernel,
   → structural_observation                  D_O v9               ← primary observer
+  → structural_conversion_differential      ODCE v0              ← causal conversion object
+  → optional probabilistic inference         separate protocol    ← not part of ODCE/kernel
   → optional monitor.* annotation           structural_labels    ← secondary integration
   → external outcome joined after projection
 ```
@@ -85,6 +92,7 @@ The complete component and evidence boundaries are documented in
 |---|---|---|
 | CoCC/NVIDIA experiments | protocol-specific; confirmatory only where a frozen design says so | frozen CoCC design, runner and external verifier |
 | D_O v9 structural observation | primary post-kernel observer; empirical claims remain protocol-bound | `scripts/observe_structural_trajectory.py` and `structural_observation` artifacts |
+| ODCE-v0 structural conversion | executable exploratory post-observer layer; no predictive claim | `scripts/derive_structural_conversion.py` and `structural_conversion_differential` artifacts |
 | Historical D_O v9 replay | exploratory, descriptive and offline application | retained replay declarations and provenance-bound reports |
 
 D_O v9 causally resolves transport coherence, disruption, recurrence, contraction
@@ -92,6 +100,47 @@ and mobility after PRAMA projection. Historical replay is one application of the
 observer, not its architectural definition. `structural_labels` is an optional,
 secondary multichannel integrator that binds an upstream D_O v9 observation before
 emitting a `monitor.*` annotation.
+
+ODCE-v0 consumes causal PRAMA and D_O v9 windows and independently measured domain
+return only when its `available_at_index` has been reached. Event and availability
+indices are cross-checked against canonical `(turn_index, window_index)` identities;
+integer position alone is never a join key. Missing return
+channels remain `UNAVAILABLE`; they are never converted to zero. The exploratory
+contract retains its current normalization and binds material-positive persistence
+to a separately provenanced empirical noise floor. It is
+[`config/odce_v0_1_exploratory.json`](config/odce_v0_1_exploratory.json) and is
+explicitly barred from confirmatory use. A domain-calibrated prospective contract
+and a hash-binding freeze manifest must replace it before testing incremental
+predictive value; flipping the status field is rejected. The exact construction
+and causal outcome-input format are documented in [`docs/ODCE_v0.md`](docs/ODCE_v0.md).
+
+```bash
+python scripts/derive_structural_conversion.py \
+  --prama prama_trajectory.jsonl \
+  --structural-observations structural_observation.jsonl \
+  --out structural_conversion_differential.jsonl \
+  --study-id study-1 --producer local --partition exploratory
+```
+
+Exploratory normalization can then be fitted from those ODCE artifacts with
+`scripts/calibrate_odce_exploratory.py`. The calibrator reports insufficient and
+degenerate channels, keeps `confirmatory_use_allowed=false`, and never creates a
+freeze manifest.
+
+The deterministic instrumental battery connects canonical D_O v9 observations,
+real capacity recovery and delayed functional, external-integration and verified
+outcomes, then checks monotonicity, causal availability, persistence, numerical
+zero cleanup and irreversible exposure:
+
+```bash
+python scripts/run_odce_instrumental_validation.py
+```
+
+To re-estimate only the persistence noise floor from an explicitly declared stable
+dataset, without changing normalization, use
+`scripts/calibrate_odce_differential_threshold.py`.
+The battery intentionally uses identity normalization; it validates operator logic,
+not empirical normalization, and remains unfrozen exploratory evidence.
 
 Historical v9 backfills reuse numeric token observations; where Delta and Xi are
 recomputed with the current kernel they are counterfactual reprojections, not

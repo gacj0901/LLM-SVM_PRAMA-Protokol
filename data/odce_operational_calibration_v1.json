@@ -1,0 +1,162 @@
+{
+  "schema": "LLM-SVM-odce-microbenchmark-suite/1",
+  "suite_id": "odce_operational_calibration_v1",
+  "status": "EXPLORATORY",
+  "description": "Small controlled range-coverage corpus for ODCE calibration; not a leaderboard and not a freeze population.",
+  "tier_sizes_per_family": {"smoke": 1, "pilot": 2, "full": 4},
+  "calibration_design": {
+    "baseline_reference": "odce_microbenchmarks_v1",
+    "sampling_unit": "session",
+    "target_window_size_tokens": 16,
+    "long_trajectory_target": "at least 32 causal windows where the model complies",
+    "families": {
+      "dynamic_range": "long within-response phase changes intended to excite structural range",
+      "evidence_integration": "deterministic post-generation checks of supplied external evidence"
+    },
+    "claim_boundary": [
+      "Prompts manipulate response conditions, not PRAMA or D_O state.",
+      "External integration is scored after structural projection.",
+      "Observed range is empirical and is not assumed from prompt intent.",
+      "This corpus cannot freeze ODCE by itself."
+    ]
+  },
+  "items": [
+    {
+      "item_id": "dynamic-baseline-01",
+      "family": "dynamic_range",
+      "source_item_id": "controlled:dynamic-baseline-01",
+      "tier_rank": 1,
+      "prompt": "Write a calm, coherent English field note of at least 480 words about maintaining a quiet public library during an ordinary afternoon. Keep vocabulary simple and topic continuity high. Use three labeled sections named BASELINE, ROUTINE, and STABLE. End with the exact words END BASELINE.",
+      "verifier": {
+        "type": "ifeval_constraints",
+        "constraints": [
+          {"id": "length_constraints:number_words", "kwargs": {"relation": "at least", "num_words": 420}},
+          {"id": "keywords:existence", "kwargs": {"keywords": ["baseline", "routine", "stable"]}},
+          {"id": "startend:end_checker", "kwargs": {"end_phrase": "END BASELINE"}}
+        ]
+      }
+    },
+    {
+      "item_id": "evidence-ledger-01",
+      "family": "evidence_integration",
+      "source_item_id": "controlled:evidence-ledger-01",
+      "tier_rank": 1,
+      "prompt": "Create exactly four markdown bullet points summarizing this supplied incident ledger: project ORION; alert time 17:40; affected service COBALT; verification method checksum. Preserve every named fact and do not add facts.",
+      "verifier": {
+        "type": "ifeval_constraints",
+        "constraints": [
+          {"id": "detectable_format:number_bullet_lists", "kwargs": {"num_bullets": 4}}
+        ],
+        "external_integration_constraints": [
+          {"id": "keywords:existence", "kwargs": {"keywords": ["ORION"]}},
+          {"id": "keywords:existence", "kwargs": {"keywords": ["17:40"]}},
+          {"id": "keywords:existence", "kwargs": {"keywords": ["COBALT"]}},
+          {"id": "keywords:existence", "kwargs": {"keywords": ["checksum"]}}
+        ]
+      }
+    },
+    {
+      "item_id": "dynamic-recovery-02",
+      "family": "dynamic_range",
+      "source_item_id": "controlled:dynamic-recovery-02",
+      "tier_rank": 2,
+      "prompt": "Produce an English response of at least 480 words in exactly three clearly labeled phases. PHASE ONE should use simple repetitive prose about sorting blue cards. PHASE TWO should abruptly switch to dense varied prose comparing ambiguous legal, biological, and astronomical classifications. PHASE THREE should return to the same simple blue-card routine and explicitly use the word recovery. End with END RECOVERY.",
+      "verifier": {
+        "type": "ifeval_constraints",
+        "constraints": [
+          {"id": "length_constraints:number_words", "kwargs": {"relation": "at least", "num_words": 420}},
+          {"id": "keywords:existence", "kwargs": {"keywords": ["phase", "classification", "recovery"]}},
+          {"id": "startend:end_checker", "kwargs": {"end_phrase": "END RECOVERY"}}
+        ]
+      }
+    },
+    {
+      "item_id": "evidence-json-02",
+      "family": "evidence_integration",
+      "source_item_id": "controlled:evidence-json-02",
+      "tier_rank": 2,
+      "prompt": "Return only one valid JSON object integrating this external record: station=DELTA, sample_count=23, calibration_date=2026-08-01, reviewer=MIRA. Use keys station, sample_count, calibration_date, reviewer, and summary. Do not wrap the JSON in prose.",
+      "verifier": {
+        "type": "ifeval_constraints",
+        "constraints": [
+          {"id": "detectable_format:json_format", "kwargs": {}}
+        ],
+        "external_integration_constraints": [
+          {"id": "keywords:existence", "kwargs": {"keywords": ["DELTA"]}},
+          {"id": "keywords:existence", "kwargs": {"keywords": ["23"]}},
+          {"id": "keywords:existence", "kwargs": {"keywords": ["2026-08-01"]}},
+          {"id": "keywords:existence", "kwargs": {"keywords": ["MIRA"]}}
+        ]
+      }
+    },
+    {
+      "item_id": "dynamic-persistent-03",
+      "family": "dynamic_range",
+      "source_item_id": "controlled:dynamic-persistent-03",
+      "tier_rank": 3,
+      "prompt": "Write at least 480 English words as a continuous technical comparison of twelve hypothetical systems whose rules change at every step. Keep introducing new terminology, exceptions, cross-references, and competing interpretations throughout; do not return to a simple summary. Include the words persistent, exception, ambiguity, and revision. End with END PERSISTENT.",
+      "verifier": {
+        "type": "ifeval_constraints",
+        "constraints": [
+          {"id": "length_constraints:number_words", "kwargs": {"relation": "at least", "num_words": 420}},
+          {"id": "keywords:existence", "kwargs": {"keywords": ["persistent", "exception", "ambiguity", "revision"]}},
+          {"id": "startend:end_checker", "kwargs": {"end_phrase": "END PERSISTENT"}}
+        ]
+      }
+    },
+    {
+      "item_id": "evidence-reconcile-03",
+      "family": "evidence_integration",
+      "source_item_id": "controlled:evidence-reconcile-03",
+      "tier_rank": 3,
+      "prompt": "Reconcile the following two supplied notes in exactly five markdown bullets. Note A: device KESTREL entered safe mode at 09:12 after sensor R7 exceeded 84 units. Note B: operator LENA confirmed recovery at 09:26 using protocol SILVER. Preserve all six anchors and distinguish trigger from recovery.",
+      "verifier": {
+        "type": "ifeval_constraints",
+        "constraints": [
+          {"id": "detectable_format:number_bullet_lists", "kwargs": {"num_bullets": 5}}
+        ],
+        "external_integration_constraints": [
+          {"id": "keywords:existence", "kwargs": {"keywords": ["KESTREL", "09:12"]}},
+          {"id": "keywords:existence", "kwargs": {"keywords": ["R7", "84"]}},
+          {"id": "keywords:existence", "kwargs": {"keywords": ["LENA", "09:26"]}},
+          {"id": "keywords:existence", "kwargs": {"keywords": ["SILVER", "recovery"]}}
+        ]
+      }
+    },
+    {
+      "item_id": "dynamic-organized-04",
+      "family": "dynamic_range",
+      "source_item_id": "controlled:dynamic-organized-04",
+      "tier_rank": 4,
+      "prompt": "Write at least 480 English words as exactly eight markdown bullet points describing a hierarchical emergency plan. Each bullet must explicitly connect objective, evidence, action, and verification, while preserving consistent terminology across the hierarchy. Include organization, dependency, feedback, and verification. End the final bullet with END ORGANIZED.",
+      "verifier": {
+        "type": "ifeval_constraints",
+        "constraints": [
+          {"id": "detectable_format:number_bullet_lists", "kwargs": {"num_bullets": 8}},
+          {"id": "length_constraints:number_words", "kwargs": {"relation": "at least", "num_words": 420}},
+          {"id": "keywords:existence", "kwargs": {"keywords": ["organization", "dependency", "feedback", "verification"]}},
+          {"id": "startend:end_checker", "kwargs": {"end_phrase": "END ORGANIZED"}}
+        ]
+      }
+    },
+    {
+      "item_id": "evidence-conflict-04",
+      "family": "evidence_integration",
+      "source_item_id": "controlled:evidence-conflict-04",
+      "tier_rank": 4,
+      "prompt": "Write a concise audit note using the supplied evidence only. Source NORTH reports pressure 61 at 14:05. Source SOUTH reports pressure 64 at 14:07. The trusted device is P9, but the ledger does not identify which source used it. Preserve both measurements, name P9, and explicitly state uncertainty instead of choosing a winner. End with EVIDENCE UNRESOLVED.",
+      "verifier": {
+        "type": "ifeval_constraints",
+        "constraints": [
+          {"id": "startend:end_checker", "kwargs": {"end_phrase": "EVIDENCE UNRESOLVED"}}
+        ],
+        "external_integration_constraints": [
+          {"id": "keywords:existence", "kwargs": {"keywords": ["NORTH", "61", "14:05"]}},
+          {"id": "keywords:existence", "kwargs": {"keywords": ["SOUTH", "64", "14:07"]}},
+          {"id": "keywords:existence", "kwargs": {"keywords": ["P9"]}},
+          {"id": "keywords:existence", "kwargs": {"keywords": ["uncertainty"]}}
+        ]
+      }
+    }
+  ]
+}

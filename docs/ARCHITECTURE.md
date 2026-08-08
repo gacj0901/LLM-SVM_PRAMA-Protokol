@@ -17,10 +17,16 @@ flowchart LR
     G --> V6[D_O structural observer v6]
     V6 --> V9[D_O v9 primary structural observation]
     V9 --> L[Optional structural_labels integration]
+    G --> E[ODCE v0 structural conversion]
+    V9 --> E
+    Y[Causally available external return] --> E
+    E --> I[Optional probabilistic inference]
+    I --> C[External controller]
     X[External verifier] -->|outcome joined after projection| A[Analysis reports]
     V9 --> A
     L --> A
     A -. no feedback .-> M
+    C -. no evaluation feedback .-> M
 ```
 
 The model payload contains only the task prompt and declared generation parameters.
@@ -47,6 +53,56 @@ with coupling, external-anchor, perturbation and historical evidence to produce 
 Architectural primacy does not imply empirical confirmation. Current studies remain
 exploratory unless a prospective protocol freezes its endpoints, thresholds and
 evidence binding.
+
+### ODCE-v0 and the inferential boundary
+
+The Structural Conversion Differential is downstream of both the kernel and the
+primary structural observer:
+
+```text
+Gamma[1:t] + Q[1:t] + causally available Y[1:t]
+  -> ODCE-v0
+  -> normalized cost vector + normalized return vector + differential vector
+  -> optional probabilistic inference
+  -> external controller
+```
+
+ODCE neither modifies PRAMA nor reclassifies D_O v9. It is a causal descriptive
+object that asks what verified structure or function was obtained for the historical
+structural cost paid. It may consume an external measurement only after that
+measurement exists; a session-final outcome cannot appear in earlier ODCE windows.
+Missing channels are explicit statuses, never zeros.
+
+Domain returns carry distinct event and availability indices, each bound to a
+canonical `(turn_index, window_index)` identity. ODCE joins by that identity and
+admits a return only at `available_at_index`, even when the event occurred earlier.
+Rolling-window coordinates, session-to-date coordinates, latest-available returns,
+current-index differentials, one-step trend, rolling persistence, and session-to-date
+exposure are declared separately.
+The cumulative conversion-deficit exposure is irreversible: missing or negative
+differentials never decrement it.
+
+The probabilistic inferential layer is not implemented by ODCE. It becomes justified
+only under a separately frozen prospective protocol showing incremental performance
+over Delta, Xi, capacity, trend, D_O v9 channels and domain baselines. Predictions and
+controller actions remain outside the evaluated model and cannot feed back during an
+outcome-blind evaluation.
+
+The canonical implementation is `aptadynamic_llm.structural_conversion`, its entry
+point is `scripts/derive_structural_conversion.py`, its schema is
+`schemas/structural-conversion-differential.schema.json`, and the initial development
+contract is `config/odce_v0_1_exploratory.json`. That contract uses identity
+normalization only and therefore rejects `--partition confirmatory`.
+A future confirmatory contract must bind domain-calibration and correspondence
+provenance and be accompanied by a separate prospective freeze manifest. The
+derivation CLI verifies all canonical hashes and records the freeze hash in every
+confirmatory ODCE artifact; a status-only promotion fails closed.
+
+Before that stage, exploratory calibration is a separate, non-freezing operation.
+It fits robust coordinate-wise normalization only where observed coverage and scale
+are sufficient, preserves missingness elsewhere, and emits a blocker report. Its
+index-level estimates are development diagnostics rather than a substitute for
+domain-representative, cluster-aware calibration.
 
 Historical v9 replay has an additional boundary: historical answers may come from the
 kernel-v1 era while Delta and Xi are recomputed with the current recertified kernel.

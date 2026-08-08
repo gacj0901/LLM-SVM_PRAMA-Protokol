@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aptadynamik.org/schemas/llm-structural/dseb-verifier-outcome.schema.json",
+  "title": "Causally available DSEB-v0 verifier outcome",
+  "type": "object",
+  "required": [
+    "schema", "benchmark_id", "benchmark_version", "partition", "session_id",
+    "benchmark_turn_index", "event_window", "event_index", "available_at_window",
+    "available_at_index", "causal", "retrospective_backfill",
+    "pipeline_execution_mode", "causal_stage_order_validated", "causal_stage_order",
+    "verifier_reference_sha256",
+    "syntax_valid", "active_constraint_count", "satisfied_constraint_count",
+    "functional_gain", "new_constraint_count", "new_constraint_satisfied_count",
+    "external_integration", "external_integration_status", "verified_outcome",
+    "constraint_checks"
+  ],
+  "properties": {
+    "schema": {"const": "LLM-SVM-DSEB-verifier-outcome/1"},
+    "benchmark_id": {"const": "DSEB_v0"},
+    "benchmark_version": {"const": "DSEB-v0"},
+    "partition": {"const": "exploratory"},
+    "session_id": {"type": "string", "minLength": 1},
+    "benchmark_turn_index": {"type": "integer", "minimum": 0},
+    "event_window": {"$ref": "#/$defs/windowIdentity"},
+    "event_index": {"type": "integer", "minimum": 0},
+    "available_at_window": {"$ref": "#/$defs/windowIdentity"},
+    "available_at_index": {"type": "integer", "minimum": 0},
+    "causal": {"const": true},
+    "retrospective_backfill": {"const": false},
+    "pipeline_execution_mode": {"const": "SIMULATED_OFFLINE"},
+    "causal_stage_order_validated": {"const": true},
+    "causal_stage_order": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"type": "string"}},
+    "verifier_reference_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "syntax_valid": {"type": "boolean"},
+    "active_constraint_count": {"type": "integer", "minimum": 0},
+    "satisfied_constraint_count": {"type": "integer", "minimum": 0},
+    "functional_gain": {"type": "number", "minimum": 0, "maximum": 1},
+    "new_constraint_count": {"type": "integer", "minimum": 0},
+    "new_constraint_satisfied_count": {"type": ["integer", "null"], "minimum": 0},
+    "external_integration": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "external_integration_status": {"enum": ["OBSERVED", "UNAVAILABLE", "NOT_APPLICABLE"]},
+    "verified_outcome": {"enum": [0, 1]},
+    "constraint_checks": {"type": "array", "items": {"type": "object"}}
+  },
+  "$defs": {
+    "windowIdentity": {
+      "type": "object",
+      "required": ["turn_index", "window_index"],
+      "properties": {
+        "turn_index": {"type": "integer", "minimum": 0},
+        "window_index": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

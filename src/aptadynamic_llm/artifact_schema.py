@@ -41,6 +41,8 @@ ARTIFACT_TYPES = {
     "epistemic_channel",
     "prama_trajectory",
     "structural_observation",
+    "domain_return_observation",
+    "structural_conversion_differential",
     "structural_label",
 }
 
@@ -151,6 +153,44 @@ TYPE_REQUIRED = {
         "evidence_window_end",
         "causal",
         "external_outcome_used",
+        "provider_termination_metadata_used",
+    },
+    "domain_return_observation": {
+        "event_index",
+        "available_at_index",
+        "event_window",
+        "available_at_window",
+        "benefit_vector",
+        "component_status",
+        "verifier_reference_sha256",
+        "retrospective_backfill",
+        "causal_availability_declared",
+        "provider_termination_metadata_used",
+    },
+    "structural_conversion_differential": {
+        "operator",
+        "operator_version",
+        "time_index",
+        "window_start",
+        "window_end",
+        "causal",
+        "kernel_state_reference_sha256",
+        "structural_observation_reference_sha256",
+        "domain_outcome_reference_sha256",
+        "cost_vector",
+        "benefit_vector",
+        "normalized_cost_vector",
+        "normalized_benefit_vector",
+        "differential_vector",
+        "component_status",
+        "differential_dynamics",
+        "temporal_scope",
+        "normalization_contract_sha256",
+        "correspondence_contract_sha256",
+        "contract_freeze_sha256",
+        "predictive_model_used",
+        "future_outcome_used",
+        "causal_availability_enforced",
         "provider_termination_metadata_used",
     },
     "structural_label": {
@@ -397,6 +437,252 @@ def validate_artifact(record: Mapping[str, Any], expected_type: str | None = Non
             or len(diagnostics) != len(set(diagnostics))
         ):
             raise ArtifactValidationError("diagnostics must be unique nonempty strings")
+    elif artifact_type == "domain_return_observation":
+        for field in ("event_index", "available_at_index"):
+            if not isinstance(record[field], int) or isinstance(record[field], bool) or record[field] < 0:
+                raise ArtifactValidationError(f"{field} must be a nonnegative integer")
+        if record["available_at_index"] < record["event_index"]:
+            raise ArtifactValidationError("domain return cannot be available before its event")
+        for field in ("event_window", "available_at_window"):
+            identity = record[field]
+            if not isinstance(identity, Mapping) or set(identity) != {"turn_index", "window_index"}:
+                raise ArtifactValidationError(f"{field} must contain the canonical window identity")
+            if any(
+                not isinstance(identity[name], int)
+                or isinstance(identity[name], bool)
+                or identity[name] < 0
+                for name in ("turn_index", "window_index")
+            ):
+                raise ArtifactValidationError(f"{field} indices must be nonnegative integers")
+        benefit_channels = {"functional_gain", "external_integration", "verified_outcome"}
+        vector = record["benefit_vector"]
+        statuses = record["component_status"]
+        if not isinstance(vector, Mapping) or set(vector) != benefit_channels:
+            raise ArtifactValidationError("domain return benefit_vector is noncanonical")
+        if not isinstance(statuses, Mapping) or set(statuses) != benefit_channels:
+            raise ArtifactValidationError("domain return component_status is noncanonical")
+        for name, status in statuses.items():
+            try:
+                ChannelStatus(str(status))
+            except ValueError as exc:
+                raise ArtifactValidationError(f"invalid domain return status for {name}") from exc
+            if (status == ChannelStatus.OBSERVED.value) != (vector[name] is not None):
+                raise ArtifactValidationError(f"domain return {name} value/status mismatch")
+        verifier = record["verifier_reference_sha256"]
+        if verifier is not None:
+            _require_hash(record, "verifier_reference_sha256")
+        if statuses["verified_outcome"] == ChannelStatus.OBSERVED.value and verifier is None:
+            raise ArtifactValidationError("observed verified_outcome requires verifier provenance")
+        if not isinstance(record["retrospective_backfill"], bool):
+            raise ArtifactValidationError("retrospective_backfill must be boolean")
+        if record["retrospective_backfill"] != (
+            record["available_at_index"] > record["event_index"]
+        ):
+            raise ArtifactValidationError(
+                "retrospective_backfill must match delayed causal availability"
+            )
+        if record["causal_availability_declared"] is not True:
+            raise ArtifactValidationError("domain return must declare causal availability")
+        if record["provider_termination_metadata_used"] is not False:
+            raise ArtifactValidationError("provider termination metadata is not domain return evidence")
+        forbidden = {"finish_reason", "response_time_seconds", "future_outcome", "outcome_label"}
+        leaked = sorted(forbidden & record.keys())
+        if leaked:
+            raise ArtifactValidationError(f"domain return contains forbidden fields: {leaked}")
+    elif artifact_type == "structural_conversion_differential":
+        if record["operator"] != "ODCE_v0" or record["operator_version"] != "ODCE-v0.1.0":
+            raise ArtifactValidationError("structural conversion operator must be ODCE-v0.1.0")
+        threshold = record.get("differential_threshold")
+        if threshold is not None and (
+            not isinstance(threshold, (int, float))
+            or isinstance(threshold, bool)
+            or float(threshold) < 0
+        ):
+            raise ArtifactValidationError(
+                "differential_threshold must be a nonnegative number"
+            )
+        numeric_epsilon = record.get("numeric_epsilon")
+        if numeric_epsilon is not None and (
+            not isinstance(numeric_epsilon, (int, float))
+            or isinstance(numeric_epsilon, bool)
+            or float(numeric_epsilon) <= 0
+        ):
+            raise ArtifactValidationError(
+                "numeric_epsilon must be a positive number"
+            )
+        for field in ("time_index", "window_start", "window_end"):
+            if not isinstance(record[field], int) or isinstance(record[field], bool) or record[field] < 0:
+                raise ArtifactValidationError(f"{field} must be a nonnegative integer")
+        if record["window_start"] > record["time_index"] or record["window_end"] != record["time_index"]:
+            raise ArtifactValidationError("ODCE causal window bounds are invalid")
+        for field in (
+            "kernel_state_reference_sha256",
+            "normalization_contract_sha256",
+            "correspondence_contract_sha256",
+        ):
+            _require_hash(record, field)
+        for field in (
+            "structural_observation_reference_sha256",
+            "domain_outcome_reference_sha256",
+        ):
+            if record[field] is not None:
+                _require_hash(record, field)
+        freeze_reference = record["contract_freeze_sha256"]
+        if record["partition"] == "confirmatory":
+            _require_hash(record, "contract_freeze_sha256")
+        elif freeze_reference is not None:
+            raise ArtifactValidationError(
+                "non-confirmatory ODCE must not claim a contract freeze"
+            )
+        if record["causal"] is not True or record["future_outcome_used"] is not False:
+            raise ArtifactValidationError("ODCE must be causal and future-outcome blind")
+        if record["causal_availability_enforced"] is not True:
+            raise ArtifactValidationError("ODCE must enforce outcome availability")
+        if record["predictive_model_used"] is not False:
+            raise ArtifactValidationError("ODCE is not a predictive model")
+        if record["provider_termination_metadata_used"] is not False:
+            raise ArtifactValidationError("provider termination metadata is not ODCE evidence")
+        if "efficiency_vector" in record:
+            raise ArtifactValidationError("efficiency_vector is not part of ODCE-v0.1.0")
+        cost_channels = {
+            "retained_friction", "accumulated_debt", "capacity_consumption",
+            "excess_persistence", "adverse_trend",
+        }
+        benefit_channels = {
+            "structural_recovery", "adaptive_organization_level", "functional_gain",
+            "external_integration", "verified_outcome",
+        }
+        vectors = {
+            "cost_vector": cost_channels,
+            "normalized_cost_vector": cost_channels,
+            "benefit_vector": benefit_channels,
+            "normalized_benefit_vector": benefit_channels,
+        }
+        for field, expected_keys in vectors.items():
+            vector = record[field]
+            if not isinstance(vector, Mapping) or set(vector) != expected_keys:
+                raise ArtifactValidationError(f"{field} has noncanonical coordinates")
+        statuses = record["component_status"]
+        if not isinstance(statuses, Mapping) or set(statuses) != {"cost", "benefit", "differential"}:
+            raise ArtifactValidationError("component_status is incomplete")
+        for group, expected_keys in (("cost", cost_channels), ("benefit", benefit_channels)):
+            group_status = statuses[group]
+            if not isinstance(group_status, Mapping) or set(group_status) != expected_keys:
+                raise ArtifactValidationError(f"component_status.{group} is noncanonical")
+            for name, status in group_status.items():
+                try:
+                    ChannelStatus(str(status))
+                except ValueError as exc:
+                    raise ArtifactValidationError(f"invalid status for {group}.{name}") from exc
+                raw = record[f"{group}_vector"][name]
+                normalized = record[f"normalized_{group}_vector"][name]
+                if (status == ChannelStatus.OBSERVED.value) != (raw is not None and normalized is not None):
+                    raise ArtifactValidationError(
+                        f"{group}.{name} value/status mismatch"
+                    )
+        differential = record["differential_vector"]
+        dynamics = record["differential_dynamics"]
+        differential_status = statuses["differential"]
+        if (
+            not isinstance(differential, Mapping)
+            or not differential
+            or not isinstance(dynamics, Mapping)
+            or not isinstance(differential_status, Mapping)
+        ):
+            raise ArtifactValidationError("ODCE differential coordinates are inconsistent")
+        if set(differential) != set(differential_status) or set(differential) != set(dynamics):
+            raise ArtifactValidationError("ODCE differential status/dynamics keys differ")
+        for name, status in differential_status.items():
+            try:
+                ChannelStatus(str(status))
+            except ValueError as exc:
+                raise ArtifactValidationError(f"invalid differential status for {name}") from exc
+            if (status == ChannelStatus.OBSERVED.value) != (differential[name] is not None):
+                raise ArtifactValidationError(f"differential {name} value/status mismatch")
+            item = dynamics[name]
+            if not isinstance(item, Mapping) or set(item) != {
+                "trend", "cumulative_conversion_deficit_exposure", "positive_persistence"
+            }:
+                raise ArtifactValidationError(f"differential dynamics for {name} are invalid")
+            exposure = item["cumulative_conversion_deficit_exposure"]
+            if (
+                not isinstance(exposure, (int, float))
+                or isinstance(exposure, bool)
+                or float(exposure) < 0
+            ):
+                raise ArtifactValidationError(
+                    f"differential dynamics for {name} require nonnegative cumulative exposure"
+                )
+            trend = item["trend"]
+            if trend is not None and (
+                not isinstance(trend, (int, float)) or isinstance(trend, bool)
+            ):
+                raise ArtifactValidationError(
+                    f"differential dynamics for {name} have invalid trend"
+                )
+            persistence = item["positive_persistence"]
+            if persistence is not None and (
+                not isinstance(persistence, (int, float))
+                or isinstance(persistence, bool)
+                or not 0.0 <= float(persistence) <= 1.0
+            ):
+                raise ArtifactValidationError(
+                    f"differential dynamics for {name} have invalid persistence"
+                )
+        temporal_scope = record["temporal_scope"]
+        if not isinstance(temporal_scope, Mapping) or set(temporal_scope) != {
+            "cost", "benefit", "differential", "dynamics"
+        }:
+            raise ArtifactValidationError("ODCE temporal_scope is incomplete")
+        for group, expected_keys in (("cost", cost_channels), ("benefit", benefit_channels)):
+            scopes = temporal_scope[group]
+            if not isinstance(scopes, Mapping) or set(scopes) != expected_keys:
+                raise ArtifactValidationError(f"ODCE temporal_scope.{group} is noncanonical")
+            if not all(isinstance(value, str) and value for value in scopes.values()):
+                raise ArtifactValidationError(
+                    f"ODCE temporal_scope.{group} values must be named scales"
+                )
+        expected_scopes = {
+            "cost": {
+                "retained_friction": "ROLLING_WINDOW",
+                "accumulated_debt": "ROLLING_WINDOW",
+                "capacity_consumption": "SESSION_TO_DATE",
+                "excess_persistence": "ROLLING_WINDOW",
+                "adverse_trend": "ROLLING_WINDOW",
+            },
+            "benefit": {
+                "structural_recovery": "ROLLING_WINDOW",
+                "adaptive_organization_level": "ROLLING_WINDOW",
+                "functional_gain": "LATEST_CAUSALLY_AVAILABLE_SESSION_TO_DATE",
+                "external_integration": "LATEST_CAUSALLY_AVAILABLE_SESSION_TO_DATE",
+                "verified_outcome": "LATEST_CAUSALLY_AVAILABLE_SESSION_TO_DATE",
+            },
+        }
+        if temporal_scope["cost"] != expected_scopes["cost"]:
+            raise ArtifactValidationError("ODCE cost temporal scales are invalid")
+        if temporal_scope["benefit"] != expected_scopes["benefit"]:
+            raise ArtifactValidationError("ODCE benefit temporal scales are invalid")
+        if not isinstance(temporal_scope["differential"], Mapping) or set(temporal_scope["differential"]) != set(differential):
+            raise ArtifactValidationError("ODCE differential temporal scopes differ")
+        if not all(
+            value == "CURRENT_INDEX"
+            for value in temporal_scope["differential"].values()
+        ):
+            raise ArtifactValidationError(
+                "ODCE differentials must declare CURRENT_INDEX scope"
+            )
+        if temporal_scope["dynamics"] != {
+            "trend": "CURRENT_VS_PREVIOUS_OBSERVED_INDEX",
+            "cumulative_conversion_deficit_exposure": "SESSION_TO_DATE",
+            "positive_persistence": "ROLLING_WINDOW",
+        }:
+            raise ArtifactValidationError(
+                "ODCE differential dynamics temporal scales are invalid"
+            )
+        forbidden = {"finish_reason", "response_time_seconds", "future_outcome", "outcome_label"}
+        leaked = sorted(forbidden & record.keys())
+        if leaked:
+            raise ArtifactValidationError(f"ODCE contains forbidden fields: {leaked}")
     elif artifact_type == "structural_label":
         if record["annotation_role"] != "SECONDARY_INTERPRETIVE":
             raise ArtifactValidationError(

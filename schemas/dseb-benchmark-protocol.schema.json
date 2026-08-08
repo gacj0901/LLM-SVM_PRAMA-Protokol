@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aptadynamik.org/schemas/llm-structural/dseb-benchmark-protocol.schema.json",
+  "title": "DSEB-v0 deterministic benchmark protocol artifact",
+  "type": "object",
+  "required": [
+    "schema", "benchmark_id", "benchmark_version", "partition", "session_id",
+    "seed", "symbol_count", "symbols", "initial_witness", "turn_count",
+    "canonical_window_count", "protocol_source_sha256",
+    "generated_protocol_sha256", "causal_stage_order", "claim_boundary"
+  ],
+  "properties": {
+    "schema": {"const": "LLM-SVM-DSEB-benchmark-protocol/1"},
+    "benchmark_id": {"const": "DSEB_v0"},
+    "benchmark_version": {"const": "DSEB-v0"},
+    "partition": {"const": "exploratory"},
+    "session_id": {"type": "string", "minLength": 1},
+    "seed": {"type": "integer", "minimum": 0},
+    "symbol_count": {"type": "integer", "minimum": 4},
+    "symbols": {"type": "array", "minItems": 4, "items": {"type": "string"}, "uniqueItems": true},
+    "initial_witness": {"type": "array", "minItems": 4, "items": {"type": "string"}, "uniqueItems": true},
+    "turn_count": {"const": 36},
+    "canonical_window_count": {"type": "integer", "minimum": 36},
+    "protocol_source": {"type": "string"},
+    "protocol_source_sha256": {"$ref": "#/$defs/sha256"},
+    "generated_protocol_sha256": {"$ref": "#/$defs/sha256"},
+    "causal_stage_order": {"$ref": "#/$defs/causalStageOrder"},
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "causalStageOrder": {
+      "const": [
+        "terminal_window_closed", "O_D_observed", "PRAMA_projected",
+        "D_O_v9_observed", "outcome_verified", "outcome_registered",
+        "ODCE_executed"
+      ]
+    }
+  },
+  "additionalProperties": false
+}
